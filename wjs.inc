@@ -17,6 +17,8 @@ class wjs {
 
   function __construct($path_wjs) {
     $this->path_wjs = $path_wjs;
+    // Use server side library path as the default client core path.
+    $this->js_setting('path_core', PATH_ROOT . 'products/wjs');
     // Make js core files relative to wjs path.
     foreach ($this->js_core_files as $key => $path) {
       $this->js_core_files[$key] = $this->path_wjs . '/' . $path;
@@ -47,8 +49,6 @@ class wjs {
       $this->collections_loaders[$name]->wjs = $this;
       // Add javascript into core files.
       $this->js_core_files[] = $files_pattern . '.js';
-      // Load js file as a javascript file.
-//      $this->collection_item_register('javascript', 'loader.' . $name, $files_pattern . '.js');
     }
   }
 
@@ -134,10 +134,14 @@ class wjs {
     foreach ($this->js_core_files as $file) {
       $output .= '<script type="text/javascript" src="' . $file . '"></script>';
     }
-    return $output . $this->js_init();
+    return $output;
   }
 
-  function js_init() {
+  /**
+   * Footer should be at the end of page to let other scripts
+   * adds some action into w.ready().
+   */
+  function js_footer() {
     // Get javascript unpacker.
     $js = $this->js_unpacker();
     // Wrap into scripts tags to insert into html page.

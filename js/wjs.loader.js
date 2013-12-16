@@ -83,7 +83,6 @@ window.wjs_loader = $.inherit({
    * Load all scripts defined into object.
    */
   loading_process_launch_multiple: function (options) {
-
     // Create a new loading process.
     return new window.wjs_process(w.extend_options(options));
   },
@@ -148,7 +147,7 @@ window.wjs_loader = $.inherit({
     }
     // Parse content with specific functions.
     for (i in data) {
-      if (data.hasOwnProperty(i) && this.hasOwnProperty('parse_' + i)) {
+      if (data.hasOwnProperty(i) && $.isFunction(this['parse_' + i])) {
         this['parse_' + i](name, data[i]);
       }
     }
