@@ -4,7 +4,6 @@
  * Defining different objects type to request need to
  * use specific core loader. This is the base object
  * constructor.
- *
  */
 
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, jquery:true, nomen:false */
@@ -86,13 +85,11 @@ window.wjs_loader = $.inherit({
   loading_process_launch_multiple: function (options) {
 
     // Create a new loading process.
-    return new document.wjs_process(w.extend_options(options));
+    return new window.wjs_process(w.extend_options(options));
   },
 
   load_ajax: function (name, options) {
-
     var item;
-
     // Adjust options and complete callback.
     options = w.extend_options(options);
     // Search into not parsed content in result is already loaded.
@@ -130,7 +127,6 @@ window.wjs_loader = $.inherit({
    * Defines what to do with loaded script data.
    */
   parse: function (name, data) {
-
     var i, j;
     // If data is string, script
     // is a path of cached file.
@@ -160,5 +156,4 @@ window.wjs_loader = $.inherit({
     // In all case it should remove data from parse queue.
     w.process_parse_queue_remove(this.type, name);
   }
-
 });

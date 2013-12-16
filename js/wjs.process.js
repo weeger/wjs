@@ -12,7 +12,7 @@
 /*global w*/
 
 "use strict";
-document.wjs_process = $.inherit({
+window.wjs_process = $.inherit({
 
   __constructor: function (options) {
     var i;
@@ -39,7 +39,6 @@ document.wjs_process = $.inherit({
    * and create a callback function to parse data.
    */
   get_script_ajax: function (script_type, script_name) {
-
     // Load remote scripts.
     var loading_queue_id = this.loading_queue_append(),
     // Get url.
@@ -68,7 +67,6 @@ document.wjs_process = $.inherit({
    * Parse JSON response.
    */
   parse: function (data) {
-
     var i, collection, name;
     // Append script to loading process.
     w.process_parse_queue_add(data, this);
@@ -96,7 +94,6 @@ document.wjs_process = $.inherit({
   },
 
   parse_item: function (collection, name, data) {
-
     // Parse using matching loader.
     if (!w.collection(collection, name)) {
       w.loader(collection).parse(name, data);
@@ -130,7 +127,6 @@ document.wjs_process = $.inherit({
    * Mark step as completed, and close process if last one.
    */
   loading_queue_complete: function (id, complete_arguments) {
-
     var i;
     delete this.loading_queue[id];
     // Don't close queue until all loadings are not finished.
@@ -143,7 +139,6 @@ document.wjs_process = $.inherit({
   },
 
   loading_complete: function (complete_arguments) {
-
     // Execute complete callback.
     if ($.isFunction(this.complete)) {
       // Pass complete arguments.
