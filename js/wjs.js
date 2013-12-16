@@ -19,6 +19,7 @@ var wjs = function () {
 
 wjs.prototype = {
   defaults: {
+    client_only: true,
     version: '[$version]',
     core_loaders: [],
     ready_functions: [],
@@ -47,9 +48,11 @@ wjs.prototype = {
     $.extend(true, this, options);
     // Keep reference to document body.
     this.$_body = $('body:first');
-    // Execute base javascript loader.
-    eval('(' + this.default_package.javascript['loader.javascript'].javascript + ')();');
-    // Load all other scripts the run ready functions.
+    if (this.client_only !== true) {
+      // Extract base javascript loader from the default package.
+      eval('(' + this.default_package.javascript['loader.javascript'].javascript + ')();');
+    }
+    // Load all other scripts then run ready functions.
     this.unpack(this.default_package, $.proxy(function () {
       // Execute startup functions.
       this.ready_complete();
@@ -74,7 +77,7 @@ wjs.prototype = {
    * Because w must execute loading request on startup,
    * he needs his own ready function.
    * We may merge this function with the jQuery ready function if we
-   * found a way to contruct the $we object before.
+   * found a way to construct the w object before it.
    */
   ready: function (callback) {
     "use strict";
@@ -120,6 +123,10 @@ wjs.prototype = {
     "use strict";
     if (!this.loaders.hasOwnProperty(name) && this.core_loaders.indexOf(name) !== -1) {
       this.loader('javascript').parse('loader.' + name, this.default_package.javascript['loader.' + name]);
+    }
+
+    if (!this.loaders.hasOwnProperty(name)) {
+      throw new Error('wjs : Try to get undefined loader "' + name + '"');
     }
 
     return this.loaders[name];
@@ -289,6 +296,23 @@ wjs.prototype = {
       }
     }
     return size;
+  },
+
+  object_find: function (path, object) {
+    var path = path.split('.');
+    var base = object;
+
+    for (var i in path) {
+      if (path[i] in base) {
+        base = base[path[i]];
+      }
+    }
+
+    return base;
+  },
+
+  replace_all: function (find, replace, string) {
+    return string.replace(new RegExp(find, 'g'), replace);
   }
 };
 

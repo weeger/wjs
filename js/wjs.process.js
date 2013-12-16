@@ -15,7 +15,6 @@
 document.wjs_process = $.inherit({
 
   __constructor: function (options) {
-
     var i;
     // Default values
     this.async = false;

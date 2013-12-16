@@ -1,7 +1,5 @@
 w.loader_add('javascript', {
-  __constructor: function (options) {
-    this.__base(options);
-  },
+
   /**
    * Javascript are loaded via AJAX.
    */
