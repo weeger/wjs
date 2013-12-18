@@ -1,12 +1,14 @@
 /**
- * @file
+ * wJs
  *
- * wJs | Core of wJs.
  * Romain WEEGER 2010 / 2014
+ * Licensed under the MIT and GPL licenses :
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
  */
 
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, jquery:true, nomen:false */
-/*global w*/
+/*global w,jQuery*/
 
 /**
  * Only one instance of this object is created per page.
@@ -17,7 +19,7 @@
 
   var wjs = function () {
     // On construction, extends default values to object.
-    $.extend(true, this, this.defaults);
+    jQuery.extend(true, this, this.defaults);
   };
 
   wjs.prototype = {
@@ -50,17 +52,19 @@
      */
     init: function (options) {
       // Apply default vars.
-      $.extend(true, this, this.defaults);
-      $.extend(true, this, options);
+      jQuery.extend(true, this, this.defaults);
+      jQuery.extend(true, this, options);
       var loader_name;
       // Keep reference to document body.
-      this.$_body = $('body:first');
+      this.$_body = jQuery('body:first');
       // Create loaders prototypes.
       for (loader_name in this.loaders_prototypes) {
-        this.loaders[loader_name] = new this.loaders_prototypes[loader_name]({type: loader_name});
+        if (this.loaders_prototypes.hasOwnProperty(loader_name)) {
+          this.loaders[loader_name] = new this.loaders_prototypes[loader_name]({type: loader_name});
+        }
       }
       // Load all other scripts then run ready functions.
-      this.unpack(this.default_package, $.proxy(function () {
+      this.unpack(this.default_package, jQuery.proxy(function () {
         // Execute startup functions.
         this.ready_complete();
       }, this));
@@ -140,7 +144,7 @@
         // If base exists, use base prototype.
         var base = (loader_object.hasOwnProperty('base')) ? this.loaders_prototypes[loader_object.base] : window.wjs_loader;
         // Save internally.
-        this.loaders_prototypes[name] = $.inherit(base, loader_object);
+        this.loaders_prototypes[name] = jQuery.inherit(base, loader_object);
         // Create instance if w is already started.
         if (this.started === true) {
           this.loaders[name] = new this.loaders_prototypes[name]({type: name});
@@ -225,20 +229,20 @@
      */
     extend_options: function (options, extra) {
       // If options is a function, this is the "complete" callback.
-      if ($.isFunction(options)) {
+      if (jQuery.isFunction(options)) {
         options = {
           complete: options
         };
       }
 
       // If extra is a function turn it to an object.
-      if ($.isFunction(extra)) {
+      if (jQuery.isFunction(extra)) {
         extra = {
           complete: extra
         };
       }
 
-      return $.extend(options, extra);
+      return jQuery.extend(options, extra);
     },
 
     /**

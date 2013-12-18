@@ -19,7 +19,7 @@
     this.async = false;
     this.loading_queue = {};
     this.started = false;
-    $.extend(this, options);
+    jQuery.extend(this, options);
     // Save it into w.
     w.processes.push(this);
     // Process.
@@ -45,17 +45,17 @@
         query = {},
         url;
       // Set default query settings.
-      $.extend(query, w.settings.path_response_query, {
+      jQuery.extend(query, w.settings.path_response_query, {
         t: script_type,
         s: script_name
       });
 
       url = w.url(w.settings.path_response, {query: query});
       // Launch AJAX call.
-      $.ajax({
+      jQuery.ajax({
         url: url,
         async: this.async,
-        success: $.proxy(function (data) {
+        success: jQuery.proxy(function (data) {
           if (data) {
             // Returned content is always json wrapped.
             data = jQuery.parseJSON(data);
@@ -65,7 +65,7 @@
           // loading_queue_complete is the last one.
           this.loading_queue_complete(loading_queue_id, [data]);
         }, this),
-        error: $.proxy(function (data) {
+        error: jQuery.proxy(function (data) {
           if (data.responseText !== 'false_negative') {
             throw new Error('Failed to retrieve w data from server : ' + data.responseText);
           }
@@ -152,7 +152,7 @@
 
     loading_complete: function (complete_arguments) {
       // Execute complete callback.
-      if ($.isFunction(this.complete)) {
+      if (jQuery.isFunction(this.complete)) {
         // Pass complete arguments.
         this.complete.apply(this.complete, complete_arguments);
       }
