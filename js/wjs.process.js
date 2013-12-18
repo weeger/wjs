@@ -34,22 +34,31 @@ window.wjs_process = $.inherit({
   },
 
   /**
-   * Helper function for general behavior of scripts loaded
-   * via AJAX. This call w, add loading queue management,
-   * and create a callback function to parse data.
+   * Call w, add loading queue management,
+   * and create a callback function
+   * to parse JSON response.
    */
   get_script_ajax: function (script_type, script_name) {
     // Load remote scripts.
     var loading_queue_id = this.loading_queue_append(),
     // Get url.
-      url = w.url(script_type + '/' + script_name);
+      query = {},
+      url;
+    // Set default query settings.
+    $.extend(query, w.settings.path_response_query, {
+      t: script_type,
+      s: script_name
+    });
+
+    url = w.url(w.settings.path_response, {query: query});
     // Launch AJAX call.
     $.ajax({
       url: url,
       async: this.async,
       success: $.proxy(function (data) {
         if (data) {
-          data = eval("(" + data + ")");
+          // Returned content is always json wrapped.
+          data = jQuery.parseJSON(data);
           this.parse(data);
         }
         // loading_complete will be called if
@@ -57,6 +66,9 @@ window.wjs_process = $.inherit({
         this.loading_queue_complete(loading_queue_id, [data]);
       }, this),
       error: $.proxy(function (data) {
+        if (data.responseText !== 'false_negative') {
+          throw new Error('Failed to retrieve w data from server : ' + data.responseText);
+        }
         // Close process even error happen.
         this.loading_queue_complete(loading_queue_id, [data]);
       }, this)

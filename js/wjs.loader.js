@@ -106,7 +106,6 @@ window.wjs_loader = $.inherit({
    * Load .js script file.
    */
   get_script: function (url) {
-
     // Get script file asynchronously.
     $.ajax({
       url: url,
@@ -130,7 +129,7 @@ window.wjs_loader = $.inherit({
     // If data is string, script
     // is a path of cached file.
     if (typeof data === 'string' && data.indexOf('cache://') === 0) {
-      this.get_script(data.replace('cache://', w.settings.path_root));
+      this.get_script(data.replace('cache://', w.settings.path_cache));
       return;
     }
     // Load required elements first.

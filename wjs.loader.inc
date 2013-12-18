@@ -6,9 +6,19 @@
  */
 class loader {
   // Contain list of registered items.
-  var $items = array(),
+  var $type = 'undefined',
+    $items = array(),
     $output = array(),
     $wjs = null;
+
+  function __construct($type, $wjs) {
+    $this->type = $type;
+    $this->wjs = $wjs;
+  }
+
+  function item_register($name, $path) {
+    $this->items[$name] = $path;
+  }
 
   /**
    * Append object to the output array.

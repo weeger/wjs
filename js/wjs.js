@@ -32,10 +32,14 @@
       loaders: {},
       loaders_prototypes: {},
       loaded: {},
-      loader_path: '',
       settings: {
-        path_core: '',
-        path_root: ''
+        path_cache: '',
+        // Response path should be customized,
+        // to define some security parameters
+        // when receiving queries and retrieving
+        // data, depending of site configuration.
+        path_response: 'path_to_response.php',
+        path_response_query: {}
       },
       loading_process_parse_queue: {}
     },
@@ -48,8 +52,13 @@
       // Apply default vars.
       $.extend(true, this, this.defaults);
       $.extend(true, this, options);
+      var loader_name;
       // Keep reference to document body.
       this.$_body = $('body:first');
+      // Create loaders prototypes.
+      for (loader_name in this.loaders_prototypes) {
+        this.loaders[loader_name] = new this.loaders_prototypes[loader_name]({type: loader_name});
+      }
       // Load all other scripts then run ready functions.
       this.unpack(this.default_package, $.proxy(function () {
         // Execute startup functions.
@@ -129,13 +138,14 @@
         loader_object.name = name;
         // Create prototype from object.
         // If base exists, use base prototype.
-        var base = (loader_object.hasOwnProperty('base')) ? this.loaders_prototypes[loader_object.base] : window.wjs_loader,
+        var base = (loader_object.hasOwnProperty('base')) ? this.loaders_prototypes[loader_object.base] : window.wjs_loader;
         // Save internally.
-          prototype = $.inherit(base, loader_object);
-        this.loaders_prototypes[name] = prototype;
-        this.loaders[name] = new prototype({type: name});
+        this.loaders_prototypes[name] = $.inherit(base, loader_object);
+        // Create instance if w is already started.
+        if (this.started === true) {
+          this.loaders[name] = new this.loaders_prototypes[name]({type: name});
+        }
       }
-
       return this.loaders[name];
     },
 
@@ -178,7 +188,6 @@
 
     process_parse_queue_is_empty: function (process) {
       var i, j;
-
       for (i in this.loading_process_parse_queue) {
         if (this.loading_process_parse_queue.hasOwnProperty(i)) {
           for (j in this.loading_process_parse_queue[i]) {
@@ -235,17 +244,17 @@
     /**
      * Create url needed for scripts loading.
      */
-    url: function (script_path, settings) {
-      var url = script_path;
-
-      if (settings === undefined || !(settings.hasOwnProperty('file')) || settings.file !== true) {
-        url = this.loader_path + url;
+    url: function (path, settings) {
+      // By default, return url from wjs PHP collection manager path.
+      /*f (settings === undefined || !(settings.hasOwnProperty('file')) || settings.file !== true) {
+       path = this.settings.path_response + path;
+       }*/
+      // If file or absolute url specified.
+      if (settings !== undefined && (settings.hasOwnProperty('absolute') && settings.absolute === true)) {
+        path = window.location.origin + '/' + path;
       }
-
-      if (settings !== undefined && settings.hasOwnProperty('absolute') && settings.absolute) {
-        return window.location.origin + '/' + url;
-      }
-      return url;
+      // Return non absolute url for a file.
+      return path + '?' + jQuery.param(settings.query);
     },
 
     /**

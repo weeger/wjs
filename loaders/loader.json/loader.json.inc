@@ -1,17 +1,9 @@
 <?php
 
-class loader_json extends loader {
-
-  function output_append($name) {
-    we_javascript_output_array('json', $name);
-  }
-
-  function item_pack($type, $name, $script) {
-    switch ($type) {
-      // Default file is javascript.
-      case 'json':
-        return $script;
-        break;
-    }
+class loader_json extends loader_javascript {
+  function output_wrap($script) {
+    // Decode content to merge it with output json.
+    // In other case, content will be transmitted as a string.
+    return json_decode($script);
   }
 }

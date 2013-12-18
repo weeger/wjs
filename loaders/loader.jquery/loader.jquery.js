@@ -1,4 +1,5 @@
 w.loader_add('jquery', {
+  base: 'javascript',
   __constructor: function (options) {
     this.__base(options);
     // Init jQuery.xxx() functions.
@@ -18,7 +19,6 @@ w.loader_add('jquery', {
   },
 
   parse_jquery: function (name, value) {
-    value();
-    w.collection(this.type, name, jQuery[name]);
+    this.parse_javascript(name, value);
   }
 });
