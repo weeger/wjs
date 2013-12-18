@@ -138,7 +138,7 @@ class wjs {
    * Return packed JS data to execute on page startup.
    */
   function js_package() {
-    return ($this->output) ? json_encode($this->output) : 'No collection or item found';
+    return ($this->output) ? json_encode($this->output) : '{}';
   }
 
   function js_unpacker() {

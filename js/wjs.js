@@ -1,12 +1,13 @@
 /**
  * wJs
  *
- * Romain WEEGER 2010 / 2014
+ * Copyright Romain WEEGER (weeger) 2010 / 2014
+ * http://www.wexample.com
+ * 
  * Licensed under the MIT and GPL licenses :
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
+ *  - http://www.opensource.org/licenses/mit-license.php
+ *  - http://www.gnu.org/licenses/gpl.html
  */
-
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, jquery:true, nomen:false */
 /*global w,jQuery*/
 
@@ -25,7 +26,7 @@
   wjs.prototype = {
     defaults: {
       client_only: true,
-      version: '[$version]',
+      version: '2.5.22',
       core_loaders: [],
       ready_functions: [],
       started: false,
@@ -258,7 +259,7 @@
         path = window.location.origin + '/' + path;
       }
       // Return non absolute url for a file.
-      return path + '?' + jQuery.param(settings.query);
+      return path + ((settings !== undefined && settings.hasOwnProperty('query')) ? '?' + jQuery.param(settings.query) : '');
     },
 
     /**
