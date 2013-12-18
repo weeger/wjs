@@ -1,3 +1,5 @@
+wJs
+================================
 wJs is an AJAX Javascript / PHP loader. It provides dynamic transfert of custom scripts packages between web clients and server. It contain an API to create custom packages (collections) on server side and prepare it to be transferred to Javascript, and to receive it on clients side (parsing it to use result in your own applications).
 
 w.load("packageType", "packageName", complete);
