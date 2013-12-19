@@ -1,4 +1,4 @@
-wjs - v2.5.24
+wjs - v2.5.25
 =============
 
 Copyright
@@ -48,7 +48,6 @@ To use wJs correctly, you need to have some base element to transfert data from
 PHP to Javascript.
 
 
-
 ### Install wJs
 
 - Download and unpack wJs, place it into your library folder.
@@ -56,38 +55,30 @@ PHP to Javascript.
 ### Configure Javascript
 
 - Make a html script link to the jQuery library
-
     `<script type="text/javascript"
 src="http://code.jquery.com/jquery-1.10.2.min.js"></script>`
 
 	
-	
 ### Configure PHP
 
 - Require PHP wjs internal classes
-
-     require_once "library/wjs/wjs.inc";
+    `require_once "library/wjs/wjs.inc";`
 	 
 - Create a new wJs global instance (default loaders are automatically
 registered)
-
-    $w = new wjs('library/wjs');
+    `$w = new wjs('library/wjs');`
 	
 - Configure response file path from client side (see section below).
-
-    $w->js_setting('path_response', 'response.php');
+    `$w->js_setting('path_response', 'response.php');`
 	
 - Print wJs header in the head of your page (before `</head>`). This will load
 required wJs core files.
-
-    print $w->js_header();
+    `print $w->js_header();`
 	
 - Print wJs footer at the bottom of your page (before `</body>`). This will
 print startup package for wJs containing default loaders and preloaded page
 contents.
-
-    print $w->js_footer();
-
+    `print $w->js_footer();`    
 	
 	
 ### Configure PHP response file
@@ -95,39 +86,33 @@ contents.
 - In order to work correctly you need to specify a PHP response file who handle
 request from wJs. Let's call it "response.php", and place it at our site's root,
 then call wJs again.
-
-    // Load wjs.
-    require_once "library/wjs/wjs.inc";
-    $w = new wjs('library/wjs', TRUE);
+    `// Load wjs.    
+    require_once "library/wjs/wjs.inc";    
+    $w = new wjs('library/wjs', TRUE);`    
   
 - Now we need to register our available scripts, use TRUE as last argument to
 append it to output package (see next step). This let you de filter if you want
 to load all available scripts or not.
-
-    // Register your scripts.
+    `// Register your scripts.    
     $w->collection_item_register('javascript', 'my_script',
-'library/scripts/my_script.js');
+'library/scripts/my_script.js');`    
   
 - We need to know which script is requested by client. This example do not
 include security management to filter variables. WJs use two queries variables t
 = script_type, s=script_name.
-
-    // Using this simple script is not secure.
-    // You may filter data to ensure that values
-    // are safe, according your own security policy.
-    $script_type = (isset($_GET['t'])) ? $_GET['t'] : FALSE;
-    $script_name = (isset($_GET['s'])) ? $_GET['s'] : FALSE;
+    `// Using this simple script is not secure.    
+    // You may filter data to ensure that values    
+    // are safe, according your own security policy.    
+    $script_type = (isset($_GET['t'])) ? $_GET['t'] : FALSE;    
+    $script_name = (isset($_GET['s'])) ? $_GET['s'] : FALSE;`    
 	
 - With theses variables, we ask wJs to add script to response.
-
-    // Append requested scripts.
-    $w->output_append($script_type, $script_name);
+    `// Append requested scripts.    
+    $w->output_append($script_type, $script_name);`    
 	
 - Finally, we print result.
-
-    // Render.
-    print $w->js_package();
-
+    `// Render.    
+    print $w->js_package();`    
 	
 	
 ### Check result
@@ -135,7 +120,8 @@ include security management to filter variables. WJs use two queries variables t
 - wJs is now configured and ready to work. In order to test result, we create an
 alert into our 'library/scripts/my_script.js' file, and a button in our page
 containing a request to wJs.
-    w.load('javascript','my_script');
+    `w.load('javascript','my_script');`    
+	
 - This is the whole button code.
     `<input type="button" onclick="w.load('javascript','my_script');"
 value="Click me"/>`
