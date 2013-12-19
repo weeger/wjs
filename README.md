@@ -63,10 +63,10 @@ registered)
   `$w = new wjs('library/wjs');`
 - Configure response file path from client side (see section below).
   `$w->js_setting('path_response', 'response.php');`
-- Print wJs header in the head of your page (before </head>). This will load
+- Print wJs header in the head of your page (before `</head>`). This will load
 required wJs core files.
   `print $w->js_header();`
-- Print wJs footer at the bottom of your page (before </body>). This will print
+- Print wJs footer at the bottom of your page (before `</body>`). This will print
 startup package for wJs containing default loaders and preloaded page contents.
   `print $w->js_footer();`
 
