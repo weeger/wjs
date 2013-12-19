@@ -1,8 +1,7 @@
 <?php
 
 class wjs {
-  var $ajax_request = FALSE,
-    $collections_loaders = array(),
+  var $collections_loaders = array(),
     $path_wjs = '',
     $path_cache = FALSE,
     $cache = TRUE,
@@ -22,9 +21,8 @@ class wjs {
     'path_cache' => '',
   );
 
-  function __construct($path_wjs, $ajax_request = FALSE) {
+  function __construct($path_wjs) {
     $this->path_wjs = $path_wjs;
-    $this->ajax_request = $ajax_request;
     // Use server side library path as the default client core path.
     $this->js_setting('path_core', $this->path_wjs);
     $this->js_setting('path_response', $this->path_wjs . '/response.php');
