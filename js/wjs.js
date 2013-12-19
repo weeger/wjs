@@ -26,7 +26,7 @@
   wjs.prototype = {
     defaults: {
       client_only: true,
-      version: '2.5.22',
+      version: '2.5.24',
       core_loaders: [],
       ready_functions: [],
       started: false,
@@ -124,17 +124,12 @@
     },
 
     /**
-     * Return true if element is loaded.
+     * Return loader.
      */
     loader: function (name) {
-      if (!this.loaders.hasOwnProperty(name) && this.core_loaders.indexOf(name) !== -1) {
-        this.loader('javascript').parse('loader.' + name, this.default_package.javascript['loader.' + name]);
-      }
-
       if (!this.loaders.hasOwnProperty(name)) {
         throw new Error('wjs : Try to get undefined loader "' + name + '"');
       }
-
       return this.loaders[name];
     },
 
