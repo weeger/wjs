@@ -26,7 +26,7 @@
   wjs.prototype = {
     defaults: {
       client_only: true,
-      version: '2.5.26',
+      version: '2.5.29',
       core_loaders: [],
       ready_functions: [],
       started: false,
