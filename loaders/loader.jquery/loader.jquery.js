@@ -2,9 +2,8 @@
 /*global w,jQuery*/
 w.loader_add('jquery', {
   base: 'javascript',
-  __constructor: function (options) {
+  init: function () {
     "use strict";
-    this.__base(options);
     var i, name;
     // Init jQuery.xxx() functions.
     for (i in w.settings.jquery_plugins) {

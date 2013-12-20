@@ -8,7 +8,7 @@
  *  - http://www.opensource.org/licenses/mit-license.php
  *  - http://www.gnu.org/licenses/gpl.html
  */
-/*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, jquery:true, nomen:false */
+/*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, nomen:false */
 /*global w,jQuery*/
 
 /**
@@ -26,7 +26,7 @@
   wjs.prototype = {
     defaults: {
       client_only: true,
-      version: '2.5.29',
+      version: '2.5.30',
       core_loaders: [],
       ready_functions: [],
       started: false,
@@ -61,7 +61,7 @@
       // Create loaders prototypes.
       for (loader_name in this.loaders_prototypes) {
         if (this.loaders_prototypes.hasOwnProperty(loader_name)) {
-          this.loaders[loader_name] = new this.loaders_prototypes[loader_name]({type: loader_name});
+          this.loader_instance(loader_name);
         }
       }
       // Load all other scripts then run ready functions.
@@ -138,15 +138,27 @@
         loader_object.name = name;
         // Create prototype from object.
         // If base exists, use base prototype.
-        var base = (loader_object.hasOwnProperty('base')) ? this.loaders_prototypes[loader_object.base] : window.wjs_loader;
+        var base = {};
+        if (loader_object.hasOwnProperty('base')) {
+          $.extend(base, this.loaders_prototypes[loader_object.base]);
+        }
         // Save internally.
-        this.loaders_prototypes[name] = jQuery.inherit(base, loader_object);
+        this.loaders_prototypes[name] = $.extend(base, loader_object);
         // Create instance if w is already started.
         if (this.started === true) {
-          this.loaders[name] = new this.loaders_prototypes[name]({type: name});
+          this.loader_instance(name);
         }
       }
       return this.loaders[name];
+    },
+
+    loader_instance: function (type) {
+      var loader = new window.wjs_loader(type);
+      $.extend(loader, this.loaders_prototypes[type]);
+      this.loaders[type] = loader;
+      if (this.loaders[type].hasOwnProperty('init')) {
+        this.loaders[type].init();
+      }
     },
 
     /**

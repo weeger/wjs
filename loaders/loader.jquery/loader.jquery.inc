@@ -1,6 +1,7 @@
 <?php
 
 class loader_jquery extends loader_javascript {
+  var $dir = __FILE__;
   function __construct($name, $wjs) {
     parent::__construct($name, $wjs);
     $this->wjs->js_setting('jquery_plugins', array());

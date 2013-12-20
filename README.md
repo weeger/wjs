@@ -1,4 +1,4 @@
-wjs - 2.5.29
+wjs - 2.5.30
 ============
 
 Copyright
@@ -37,10 +37,9 @@ witch is composed by not only one kind of data, ex : HTML + images urls + CSS +
 some Javascript. In this way, wJs encourages to create independent libraries for
 your scripts, then allow access them in one simple line of code.
 
-wJs need to be used with the last version of jQuery and include a copy of the
-dfilatov's jQuery's inherit plugin. It is free and open source, available for
-forking and contribution on GitHub. If you want to post reviews, comments or
-issues, please post on the project page.
+wJs need to be used with the last version of jQuery. It is free and open source,
+available for forking and contribution on GitHub. If you want to post reviews,
+comments or issues, please post on the project page.
 
 Usage
 -----

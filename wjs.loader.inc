@@ -9,11 +9,14 @@ class loader {
   var $type = 'undefined',
     $items = array(),
     $output = array(),
-    $wjs = null;
+    $wjs = null,
+    $dir = null,
+    $js_file = '';
 
   function __construct($type, $wjs) {
     $this->type = $type;
     $this->wjs = $wjs;
+    $this->js_file = substr(dirname($this->dir), strlen(getcwd()) + 1) . '/loader.' . $this->type . '.js';
   }
 
   function item_register($name, $path) {

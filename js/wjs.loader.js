@@ -6,22 +6,25 @@
  * constructor.
  */
 
-/*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, jquery:true, nomen:false */
-/*global w*/
+/*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, nomen:false */
+/*global w,jQuery*/
 (function () {
   "use strict";
-  window.wjs_loader = jQuery.inherit({
-    __constructor: function (options) {
-      var defaults = {
-        type: 'undefined'
-      };
-      jQuery.extend(defaults, options);
-      jQuery.extend(this, defaults);
-      // Add an entry into we_javascript to save loaded scripts.
-      if (!w.loaded.hasOwnProperty(this.type)) {
-        w.loaded[this.type] = {};
-      }
-      w.loaders[this.type] = this;
+
+  window.wjs_loader = function (type) {
+    this.type = type;
+    // Add an entry into wjs to save loaded scripts.
+    if (!w.loaded.hasOwnProperty(this.type)) {
+      w.loaded[this.type] = {};
+    }
+    w.loaders[this.type] = this;
+  };
+
+  window.wjs_loader.prototype = {
+
+    init: function (options) {
+      // To override...
+      // Called after instance create and extension.
     },
 
     /**
@@ -152,5 +155,5 @@
       // In all case it should remove data from parse queue.
       w.process_parse_queue_remove(this.type, name);
     }
-  });
+  };
 }());

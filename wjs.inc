@@ -10,7 +10,6 @@ class wjs {
     // Loaders JS are appended into
     // core js files via collection_loader_register().
     $js_core_files = array(
-    'js/jquery.inherit.js',
     'js/wjs.loader.js',
     'js/wjs.process.js',
     'js/wjs.js',
@@ -21,18 +20,13 @@ class wjs {
     'path_cache' => '',
   );
 
-  function __construct($path_wjs) {
-    $this->path_wjs = $path_wjs;
+  function __construct() {
     // Use server side library path as the default client core path.
-    $this->js_setting('path_core', $this->path_wjs);
     $this->js_setting('path_response', $this->path_wjs . '/response.php');
-    // Make js core files relative to wjs path.
-    foreach ($this->js_core_files as $key => $path) {
-      $this->js_core_files[$key] = $this->path_wjs . '/' . $path;
-    }
-    require_once $this->path_wjs . '/wjs.loader.inc';
+    $this->js_setting('path_core', substr(dirname(__FILE__), strlen(getcwd()) + 1) . '/');
+    require_once dirname(__FILE__) . '/wjs.loader.inc';
     // Add default loaders.
-    $path_loaders = $this->path_wjs . '/loaders';
+    $path_loaders = dirname(__FILE__) . '/loaders';
     $this->collection_loader_register('javascript', $path_loaders);
     $this->collection_loader_register('jquery', $path_loaders);
     $this->collection_loader_register('json', $path_loaders);
@@ -90,14 +84,14 @@ class wjs {
     else {
       return $script;
     }
-
   }
 
   // ............................................... COLLECTION
 
   function collection_loader_register($name, $path) {
     // Directory must be named loader.[name].
-    $files_pattern = $path . '/loader.' . $name . '/loader.' . $name;
+    $files_name = 'loader.' . $name;
+    $files_pattern = $path . '/' . $files_name . '/' . $files_name;
     // Directory must contain two files :
     //   - loader.[name].inc : Containing PHP class
     //   - loader.[name].js : Containing Js class
@@ -107,7 +101,7 @@ class wjs {
       $class_name = 'loader_' . $name;
       $this->collections_loaders[$name] = new $class_name($name, $this);
       // Add javascript into core files.
-      $this->js_core_files[] = $files_pattern . '.js';
+      //$this->js_core_files[] = substr($files_pattern, strlen(getcwd()) + 1) . '.js';
     }
   }
 
@@ -160,7 +154,10 @@ class wjs {
   function js_header() {
     $output = '';
     foreach ($this->js_core_files as $file) {
-      $output .= '<script type="text/javascript" src="' . $file . '"></script>';
+      $output .= '<script type="text/javascript" src="' . $this->js_setting('path_core') . $file . '"></script>';
+    }
+    foreach ($this->collections_loaders as $loader) {
+      $output .= '<script type="text/javascript" src="' . $loader->js_file . '"></script>';
     }
     return $output;
   }

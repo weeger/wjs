@@ -1,6 +1,10 @@
 <?php
 
 class loader_javascript extends loader {
+  var $dir = __FILE__;
+  function __construct($type, $wjs) {
+    parent::__construct($type,$wjs);
+  }
   function output_append($name) {
     if (!is_file($this->items[$name])) {
       return 'Not found : ' . $this->items[$name];
