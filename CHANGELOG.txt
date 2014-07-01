@@ -1,0 +1,72 @@
+WJS - 2.6.6 - 2014-07-01
+------------------------
+- Created an xhr shortcut
+- Code style
+- AJAX send post parameters
+
+WJS - 2.6.5 - 2014-06-23
+------------------------
+- Split javascript_file_pack()
+- Rename "get_*" like functions
+- object_find rewrite
+- Add call_base / use it internally
+- Remove jquery loader
+- Remove useless transcoded variables
+- Code style / Comment cleanup
+
+WJS - 2.6.4 - 2014-05-13
+------------------------
+- Split js_header functions
+- jQuery loader debug
+- Add factory release support
+
+WJS - 2.6.3 - 2014-05-08
+------------------------
+- Add code comments
+
+WJS - 2.6.2 - 2014-05-05
+------------------------
+- Add object_cleanup methods
+- Add inherit_package methods
+- Add dom node tests methods
+- Add path_subtract method
+- Do not deep extend transcode methods anymore
+- Do not append output default groups automatically anymore, use output_group_append_default()
+- Invert query strings order for better debug
+- Wrap aggregated js
+- Select good subversion files
+- Transcode data js object debug
+- Code cleanup
+
+WJS - 2.6.1 - 2014-04-27
+------------------------
+- Dissolve transcoder into wjs
+- Move get_constructor to get
+- Wrap errors
+- Add libraries default groups
+- Add libraries cache for missing loaders
+
+WJS - 2.6.0 - 2014-04-26
+------------------------
+- Centralize options into w on js
+- Add packed version
+- New libraries management
+
+WJS - 2.5.48 - 2014-04-08
+-------------------------
+- Save global version / subversion 
+- names in server side.
+- Improve transcode managment and init process.
+- Remove jQuery dependency
+- Keep internal w reference into loader / processes
+- Import function inheritance management
+
+WJS - 2.5.47 - 2014-03-03
+-------------------------
+- Allow custom JS loading for loaders
+- Improve JS files declaration for external implementations
+- Creation and usage of transcodes
+- Creation of libraries
+- Stratup init optimisation
+- Code style
+

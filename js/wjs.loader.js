@@ -5,22 +5,22 @@
  * use specific core loader. This is the base object
  * constructor.
  */
-
-/*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, nomen:false */
-/*global w,jQuery*/
 (function () {
   "use strict";
+  // <--]
+  window.w.extend_class('wjs\\loader', {
+    type: 'undefined',
+    w: null,
 
-  window.wjs_loader = function (type) {
-    this.type = type;
-    // Add an entry into wjs to save loaded scripts.
-    if (!w.loaded.hasOwnProperty(this.type)) {
-      w.loaded[this.type] = {};
-    }
-    w.loaders[this.type] = this;
-  };
-
-  window.wjs_loader.prototype = {
+    __construct: function (type) {
+      window.w.call_base(this, '__construct', arguments);
+      this.type = type;
+      // Add an entry into wjs to save loaded scripts.
+      if (!this.w.loaded.hasOwnProperty(this.type)) {
+        this.w.loaded[this.type] = {};
+      }
+      this.w.loaders[this.type] = this;
+    },
 
     init: function (options) {
       // To override...
@@ -33,7 +33,7 @@
      */
     load: function (name, complete) {
       // Adjust options and complete callback.
-      var options = w.extend_options(complete);
+      var options = this.w.extend_options(complete);
       // Execute complete.
       if (options.hasOwnProperty('complete')) {
         options.complete();
@@ -42,9 +42,9 @@
 
     unload: function (name, complete) {
       // Adjust options and complete callback.
-      var options = w.extend_options(complete);
+      var options = this.w.extend_options(complete);
       // Delete internal reference.
-      delete w.loaded[this.type][name];
+      delete this.w.loaded[this.type][name];
       // Unload is always synchronous (no AJAX).
       if (options.hasOwnProperty('complete')) {
         options.complete();
@@ -75,7 +75,6 @@
         }
       }
       complete.scripts = [script];
-
       // Uses one function for all processes.
       return this.loading_process_launch_multiple(complete);
     },
@@ -85,15 +84,15 @@
      */
     loading_process_launch_multiple: function (options) {
       // Create a new loading process.
-      return new window.wjs_process(w.extend_options(options));
+      return new window.wjs_process(this.w.extend_options(options), this.w);
     },
 
     load_ajax: function (name, options) {
       var item;
       // Adjust options and complete callback.
-      options = w.extend_options(options);
+      options = this.w.extend_options(options);
       // Search into not parsed content in result is already loaded.
-      item = w.process_parse_queue_get(this.type, name);
+      item = this.w.process_parse_queue_get(this.type, name);
       if (item !== false) {
         item.process.parse_item(this.type, name, item.value);
       }
@@ -130,7 +129,7 @@
       // If data is string, script
       // is a path of cached file.
       if (typeof data === 'string' && data.indexOf('cache://') === 0) {
-        this.get_script(data.replace('cache://', w.settings.path_cache));
+        this.get_script(data.replace('cache://', this.w.path('client', 'cache')));
         return;
       }
       // Load required elements first.
@@ -139,7 +138,7 @@
           if (data['#require'].hasOwnProperty(i)) {
             for (j in data['#require'][i]) {
               if (data['#require'][i].hasOwnProperty(j)) {
-                w.load(i, data['#require'][i][j]);
+                this.w.load(i, data['#require'][i][j]);
               }
             }
           }
@@ -147,13 +146,14 @@
       }
       // Parse content with specific functions.
       for (i in data) {
-        if (data.hasOwnProperty(i) && jQuery.isFunction(this['parse_' + i])) {
+        if (data.hasOwnProperty(i) && typeof this['parse_' + i] === 'function') {
           this['parse_' + i](name, data[i]);
         }
       }
       // This function may be extended.
       // In all case it should remove data from parse queue.
-      w.process_parse_queue_remove(this.type, name);
+      this.w.process_parse_queue_remove(this.type, name);
     }
-  };
+  });
+  // [-->
 }());

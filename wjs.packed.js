@@ -958,5 +958,580 @@
   };
   // Create global instance.
   window.w = new wjs_class();
+  
+  /**
+   * Class transcode are used as base
+   * constructor to allow object to be
+   * converted into other languages,
+   * basically from PHP to Javascript.
+   * It also manage several paths to define
+   * client / server roots and other custom
+   * locations. This way, it maintain stability
+   * of the same program between different environments.
+   */
+  window.w.constructors['wjs\\transcode'] = function () {
+
+  };
+
+  window.w.constructors['wjs\\transcode'].prototype = {
+    // List of required paths by constructor.
+    paths_required: [],
+    transcode_class_name: undefined,
+    // Store data able to be converted in this variable.
+    transcoded_data: {
+      server: {
+        paths: {
+          root: ''
+        }
+      },
+      client: {
+        paths: {
+          root: ''
+        }
+      }
+    },
+    w: null,
+
+    /**
+     * Construct object with predefined paths,
+     * paths_required allow to specify which path
+     * is expected on construction.
+     * @param {object} paths
+     */
+    __construct: function (transcode_id, paths) {
+      // If no transcode id, maybe we have only one instance
+      // for this object, so we use name as an id.
+      transcode_id = (transcode_id !== undefined) ? transcode_id : this.transcode_class_name;
+      this.transcoded_data = this.w.extend(true, {}, this.transcoded_data);
+      // Search for saved data.
+      if (this.w.transcoded_data.hasOwnProperty(this.transcode_class_name) && this.w.transcoded_data[this.transcode_class_name].hasOwnProperty(transcode_id)) {
+        // Add transcoded data.
+        this.w.extend(true, this.transcoded_data, this.w.transcoded_data[this.transcode_class_name][transcode_id]);
+      }
+      // Add paths.
+      if (paths !== undefined) {
+        var side, i;
+        // Search for unfilled paths.
+        for (side in this.paths_required) {
+          if (this.paths_required.hasOwnProperty(side)) {
+            if (paths.hasOwnProperty(side)) {
+              this.w.error('Missing paths side : ' + side);
+            }
+            else {
+              for (i in this.paths_required[side]) {
+                if (this.paths_required[side].hasOwnProperty(i) && !paths.hasOwnProperty(i)) {
+                  this.w.error('Missing constructor paths arguments : ' + side + ' > ' + i);
+                }
+              }
+            }
+          }
+        }
+        // Use common method to save multiple paths.
+        this.paths(paths);
+      }
+    },
+
+    /**
+     * Set / Get a variable into the exportable
+     * data for other languages.
+     * @param {string} side
+     * @param {string} name
+     * @param {*=} [value]
+     * @return mixed
+     */
+    transcoded_variable: function (side, name, value) {
+      if (value !== undefined) {
+        this.transcoded_data[side][name] = value;
+      }
+      // We not support to access to undefined side.
+      if (!this.transcoded_data.hasOwnProperty(side)) {
+        this.w.error('Trying to access to undefined transcoded data side : ' + side);
+        return false;
+      }
+      return this.transcoded_data[side].hasOwnProperty(name) ? this.transcoded_data[side][name] : false;
+    },
+
+    /**
+     * Return value of a path without
+     * prepend value of root path.
+     * @param {string} side
+     * @param {string} name
+     * @returns string
+     */
+    path_raw: function (side, name) {
+      var paths = this.transcoded_variable(side, 'paths');
+      return paths.hasOwnProperty(name) ? paths[name] : false;
+    },
+
+    /**
+     * Set value of a path.
+     * Return value of a path with root path prepended.
+     * @param {string} side
+     * @param {string} name
+     * @param {string=} [value]
+     * @returns {*}
+     */
+    path: function (side, name, value) {
+      // Save as a transcoded variable.
+      var paths = this.transcoded_variable(side, 'paths'),
+        path_raw;
+      if (value !== undefined) {
+        paths[name] = value;
+        this.transcoded_variable(side, 'paths', paths);
+      }
+      // Return requested path if exists.
+      path_raw = this.path_raw(side, name);
+      if (path_raw !== false) {
+        // Append root path.
+        return (name !== 'root' ? paths.root : '') + this.path_raw(side, name);
+      }
+      return false;
+    },
+
+    /**
+     * Save multiple paths in one time.
+     * @param {string|object} side
+     * @param {object=} [paths]
+     * @returns {*}
+     */
+    paths: function (side, paths) {
+      var name, output = [], paths_saved;
+      if (side instanceof Array) {
+        for (name in paths) {
+          if (paths.hasOwnProperty(name)) {
+            this.paths(name, paths);
+          }
+        }
+        return null;
+      }
+      // Set paths.
+      if (paths !== undefined) {
+        for (name in paths) {
+          if (paths.hasOwnProperty(name)) {
+            this.path(side, name, paths[name]);
+          }
+        }
+      }
+      // Get paths.
+      else {
+        paths_saved = this.transcoded_variable(side, 'paths');
+        for (name in paths_saved) {
+          if (paths_saved.hasOwnProperty(name) && paths.hasOwnProperty(name)) {
+            output[name] = this.path(side, name);
+          }
+        }
+        return output;
+      }
+    },
+
+    /**
+     * Convert exportable data into expected format.
+     * Use internal named function for specific conversions.
+     * @returns {*}
+     */
+    convert: function () {
+      var format = arguments.shift(),
+        method = 'convert_to_' + format;
+      if (this.hasOwnProperty(method)) {
+        return this[method].apply(this, arguments);
+      }
+      // Errors are not allowed.
+      this.w.error('Trying to export unsupported format ' + format);
+    },
+
+    /**
+     * Return data as an array.
+     * This may be used to convert data by
+     * others scripts.
+     * @returns {*}
+     */
+    convert_to_array: function () {
+      return this.transcoded_data;
+    }
+  };
+  
+  window.w.extend_class('wjs\\loader', {
+    type: 'undefined',
+    w: null,
+
+    __construct: function (type) {
+      window.w.call_base(this, '__construct', arguments);
+      this.type = type;
+      // Add an entry into wjs to save loaded scripts.
+      if (!this.w.loaded.hasOwnProperty(this.type)) {
+        this.w.loaded[this.type] = {};
+      }
+      this.w.loaders[this.type] = this;
+    },
+
+    init: function (options) {
+      // To override...
+      // Called after instance create and extension.
+    },
+
+    /**
+     * By default, load just execute complete callback,
+     * it should be override by subclasses.
+     */
+    load: function (name, complete) {
+      // Adjust options and complete callback.
+      var options = this.w.extend_options(complete);
+      // Execute complete.
+      if (options.hasOwnProperty('complete')) {
+        options.complete();
+      }
+    },
+
+    unload: function (name, complete) {
+      // Adjust options and complete callback.
+      var options = this.w.extend_options(complete);
+      // Delete internal reference.
+      delete this.w.loaded[this.type][name];
+      // Unload is always synchronous (no AJAX).
+      if (options.hasOwnProperty('complete')) {
+        options.complete();
+      }
+    },
+
+    /**
+     * Load a specified script type.
+     */
+    loading_process_launch: function (script_type, script_name, complete) {
+      var i,
+        script;
+      // Reorganize options to get "complete" function at the root object,
+      // and separate other data into "scripts" object.
+      script = {
+        type: script_type,
+        name: script_name
+      };
+
+      for (i in complete) {
+        if (complete.hasOwnProperty(i)) {
+          // At this point, complete object should
+          // always have "complete" key if function exists.
+          if (i !== 'complete') {
+            script[i] = complete[i];
+            delete complete[i];
+          }
+        }
+      }
+      complete.scripts = [script];
+      // Uses one function for all processes.
+      return this.loading_process_launch_multiple(complete);
+    },
+
+    /**
+     * Load all scripts defined into object.
+     */
+    loading_process_launch_multiple: function (options) {
+      // Create a new loading process.
+      return new window.wjs_process(this.w.extend_options(options), this.w);
+    },
+
+    load_ajax: function (name, options) {
+      var item;
+      // Adjust options and complete callback.
+      options = this.w.extend_options(options);
+      // Search into not parsed content in result is already loaded.
+      item = this.w.process_parse_queue_get(this.type, name);
+      if (item !== false) {
+        item.process.parse_item(this.type, name, item.value);
+      }
+      // Launch request process.
+      else {
+        this.loading_process_launch(this.type, name, options);
+      }
+    },
+
+    /**
+     * Load .js script file.
+     */
+    get_script: function (url) {
+      // Get script file asynchronously.
+      jQuery.ajax({
+        url: url,
+        dataType: "script",
+        async: false
+      });
+    },
+
+    /**
+     * Defines what to do when processing each script.
+     */
+    process: function (name, options) {
+      // This function should be extended.
+    },
+
+    /**
+     * Defines what to do with loaded script data.
+     */
+    parse: function (name, data) {
+      var i, j;
+      // If data is string, script
+      // is a path of cached file.
+      if (typeof data === 'string' && data.indexOf('cache://') === 0) {
+        this.get_script(data.replace('cache://', this.w.path('client', 'cache')));
+        return;
+      }
+      // Load required elements first.
+      if (data.hasOwnProperty('#require')) {
+        for (i in data['#require']) {
+          if (data['#require'].hasOwnProperty(i)) {
+            for (j in data['#require'][i]) {
+              if (data['#require'][i].hasOwnProperty(j)) {
+                this.w.load(i, data['#require'][i][j]);
+              }
+            }
+          }
+        }
+      }
+      // Parse content with specific functions.
+      for (i in data) {
+        if (data.hasOwnProperty(i) && typeof this['parse_' + i] === 'function') {
+          this['parse_' + i](name, data[i]);
+        }
+      }
+      // This function may be extended.
+      // In all case it should remove data from parse queue.
+      this.w.process_parse_queue_remove(this.type, name);
+    }
+  });
+  
+  window.wjs_process = function (options, w) {
+    var i;
+    // Default values
+    this.async = false;
+    this.loading_queue = {};
+    this.started = false;
+    this.w = w;
+    this.w.extend(this, options);
+    // Save it into w.
+    w.processes.push(this);
+    // Process.
+    for (i in this.scripts) {
+      // Check if loader exists.
+      if (this.scripts.hasOwnProperty(i) && w.loaders.hasOwnProperty(this.scripts[i].type)) {
+        // Run process hook into core loader object of this type of script.
+        w.loader(this.scripts[i].type).process(this, this.scripts[i]);
+      }
+    }
+  };
+
+  window.wjs_process.prototype = {
+    scripts: [],
+    /**
+     * Call w, add loading queue management,
+     * and create a callback function
+     * to parse JSON response.
+     */
+    script_ajax: function (script_type, script_name) {
+      // Load remote scripts.
+      var loading_queue_id = this.loading_queue_append(),
+        query = {
+          t: script_type,
+          s: script_name
+        },
+        url;
+      // If extra query strings are defined into w settings,
+      // append it to url.
+      if (this.w.transcode.transcoded_variable('client', 'load_url_queries')) {
+        this.w.extend(query, this.w.transcode.transcoded_variable('client', 'load_url_queries'));
+      }
+      // Create url.
+      url = this.w.url(this.w.transcode.path('client', 'wjs_response'), {query: query});
+      // Launch AJAX call.
+      this.w.ajax({
+        url: url,
+        method: 'GET',
+        async: this.async,
+        success: function (data) {
+          // Do not use hasOwnProperty for ie11 support.
+          if (data.responseText) {
+            // Returned content is always json wrapped.
+            this.parse(JSON.parse(data.responseText));
+          }
+          // loading_complete will be called if
+          // loading_queue_complete is the last one.
+          this.loading_queue_complete(loading_queue_id, [data]);
+        }.bind(this),
+        error: function (data) {
+          // We may need to tests connection using this value.
+          if (data.responseText !== 'false_positive') {
+            this.w.error('Failed to retrieve w data from server : ' + data.responseText);
+          }
+          // Close process even error happen.
+          this.loading_queue_complete(loading_queue_id, [data]);
+        }.bind(this)
+      });
+    },
+
+    /**
+     * Parse JSON response.
+     */
+    parse: function (data) {
+      var i, collection, name;
+      // Append script to loading process.
+      this.w.process_parse_queue_add(data, this);
+      // Pass trough each kind of data.
+      // Returned package contain different types
+      // of data grouped by loader type.
+      for (i in this.w.core_loaders) {
+        if (this.w.core_loaders.hasOwnProperty(i)) {
+          collection = this.w.core_loaders[i];
+          if (data.hasOwnProperty(collection)) {
+            for (name in data[collection]) {
+              if (data[collection].hasOwnProperty(name)) {
+                this.parse_item(collection, name, data[collection][name]);
+              }
+            }
+          }
+        }
+      }
+      // At the end of loading, queue must be empty.
+      // If not, may be an unknown script is present in
+      // the returned package.
+      if (!this.w.process_parse_queue_is_empty(this)) {
+        this.w.error('Loading process queue not empty after parsing data.');
+      }
+    },
+
+    parse_item: function (collection, name, data) {
+      // Parse using matching loader.
+      if (!this.w.collection(collection, name)) {
+        this.w.loader(collection).parse(name, data);
+      }
+      // If already loaded, remove to queue.
+      else {
+        this.w.process_parse_queue_remove(collection, name);
+      }
+    },
+
+    /**
+     * Add step to complete by this loading process.
+     */
+    loading_queue_append: function () {
+      if (this.started === false) {
+        // Trigger event only on first start.
+        this.w.event('wjs_process_start', document);
+      }
+      this.started = true;
+      // Create a unique ID.
+      var id = this.w.object_size(this.loading_queue) + 1;
+      // Save
+      this.loading_queue[id] = true;
+      return id;
+    },
+
+    /**
+     * Mark step as completed, and close process if last one.
+     */
+    loading_queue_complete: function (id, complete_arguments) {
+      var i;
+      delete this.loading_queue[id];
+      // Don't close queue until all loadings are not finished.
+      for (i in this.loading_queue) {
+        if (this.loading_queue.hasOwnProperty(i)) {
+          return;
+        }
+      }
+      this.loading_complete(complete_arguments);
+    },
+
+    loading_complete: function (complete_arguments) {
+      // Execute complete callback.
+      if (typeof this.complete === 'function') {
+        // Pass complete arguments.
+        this.complete.apply(this.complete, complete_arguments);
+      }
+      this.started = false;
+      // Remove this element from processes.
+      this.w.array_delete(this.w.processes, this);
+      // Event.
+      this.w.event('wjs_process_complete', document);
+    }
+  };
+  
+  window.w.loader_add('javascript', {
+    /**
+     * Javascript are loaded via AJAX.
+     */
+    load: function (name, options) {
+      // Override base function,
+      // handle callback function in render process.
+      this.load_ajax(name, options);
+    },
+
+    /**
+     * Run AJAX call.
+     */
+    process: function (process, script) {
+      process.script_ajax(this.type, script.name);
+    },
+
+    parse_javascript: function (name, value) {
+      // If value is not a function, it came from
+      // the not cached json response, so
+      // we are forced to evaluate it.
+      var is_function = typeof value === 'function',
+      // We use eval callback to keep strict mode.
+        eval_callback = eval;
+      if (!is_function) {
+        value = eval_callback('(' + value + ')');
+        // We test it again, now it may be a function.
+        is_function = typeof value === 'function';
+      }
+      if (is_function) {
+        // Mark as loaded before execute script.
+        // Script may override saved data.
+        this.w.collection(this.type, name, value);
+        value();
+      }
+    }
+  });
+  
+  window.w.loader_add('json', {
+
+    load: function (name, options) {
+      // We can use load_json with no name. In this case
+      // options is never undefined due to extend_options,
+      // but it can be empty.
+      if (typeof name === 'object') {
+        // Adjust options and complete callback.
+        options = this.w.extend_options(options);
+        options.data = name;
+        name = 'json_anonymous';
+        // Create loading process.
+        this.loading_process_launch(this.type, name, options);
+      }
+      else {
+        this.load_ajax(name, options);
+      }
+    },
+
+    /**
+     * Parse json content only,
+     * like an AJAX package.
+     */
+    process: function (process, script) {
+      if (script.name === 'json_anonymous') {
+        // Start process.
+        var loading_queue_id = process.loading_queue_append();
+        // Parse.
+        if (script.hasOwnProperty('data')) {
+          process.parse(script.data);
+        }
+        // Stop process.
+        process.loading_queue_complete(loading_queue_id, [script.data]);
+      }
+      else {
+        process.script_ajax(this.type, script.name);
+      }
+    },
+
+    parse_json: function (name, value) {
+      this.w.collection(this.type, name, value);
+    }
+  });
   // [-->
 }());

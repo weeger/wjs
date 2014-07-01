@@ -7,19 +7,17 @@
  * This is useful when loading is asynchronous and allows
  * to launch several processes separately.
  */
-
-/*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, noarg:true, noempty:true, nonew:true, undef:true, strict:true, browser:true, jquery:true, nomen:false */
-/*global w,jQuery*/
-
 (function () {
   "use strict";
-  window.wjs_process = function(options) {
+  // <--]
+  window.wjs_process = function (options, w) {
     var i;
     // Default values
     this.async = false;
     this.loading_queue = {};
     this.started = false;
-    jQuery.extend(this, options);
+    this.w = w;
+    this.w.extend(this, options);
     // Save it into w.
     w.processes.push(this);
     // Process.
@@ -33,45 +31,50 @@
   };
 
   window.wjs_process.prototype = {
+    scripts: [],
     /**
      * Call w, add loading queue management,
      * and create a callback function
      * to parse JSON response.
      */
-    get_script_ajax: function (script_type, script_name) {
+    script_ajax: function (script_type, script_name) {
       // Load remote scripts.
       var loading_queue_id = this.loading_queue_append(),
-      // Get url.
-        query = {},
+        query = {
+          t: script_type,
+          s: script_name
+        },
         url;
-      // Set default query settings.
-      jQuery.extend(query, w.settings.path_response_query, {
-        t: script_type,
-        s: script_name
-      });
-
-      url = w.url(w.settings.path_response, {query: query});
+      // If extra query strings are defined into w settings,
+      // append it to url.
+      if (this.w.transcode.transcoded_variable('client', 'load_url_queries')) {
+        this.w.extend(query, this.w.transcode.transcoded_variable('client', 'load_url_queries'));
+      }
+      // Create url.
+      url = this.w.url(this.w.transcode.path('client', 'wjs_response'), {query: query});
       // Launch AJAX call.
-      jQuery.ajax({
+      this.w.ajax({
         url: url,
+        method: 'GET',
         async: this.async,
-        success: jQuery.proxy(function (data) {
-          if (data) {
+        success: function (data) {
+          // Do not use hasOwnProperty for ie11 support.
+          if (data.responseText) {
             // Returned content is always json wrapped.
-            data = jQuery.parseJSON(data);
-            this.parse(data);
+            this.parse(JSON.parse(data.responseText));
           }
           // loading_complete will be called if
           // loading_queue_complete is the last one.
           this.loading_queue_complete(loading_queue_id, [data]);
-        }, this),
-        error: jQuery.proxy(function (data) {
-          if (data.responseText !== 'false_negative') {
-            throw new Error('Failed to retrieve w data from server : ' + data.responseText);
+        }.bind(this),
+        error: function (data) {
+          // We may need to tests connection using this value.
+          if (data.responseText !== 'false_positive') {
+            this.w.error('Failed to retrieve w data from server : ' + data.responseText);
           }
           // Close process even error happen.
           this.loading_queue_complete(loading_queue_id, [data]);
-        }, this)
+        }.bind(this)
       });
     },
 
@@ -81,13 +84,13 @@
     parse: function (data) {
       var i, collection, name;
       // Append script to loading process.
-      w.process_parse_queue_add(data, this);
+      this.w.process_parse_queue_add(data, this);
       // Pass trough each kind of data.
       // Returned package contain different types
       // of data grouped by loader type.
-      for (i in w.core_loaders) {
-        if (w.core_loaders.hasOwnProperty(i)) {
-          collection = w.core_loaders[i];
+      for (i in this.w.core_loaders) {
+        if (this.w.core_loaders.hasOwnProperty(i)) {
+          collection = this.w.core_loaders[i];
           if (data.hasOwnProperty(collection)) {
             for (name in data[collection]) {
               if (data[collection].hasOwnProperty(name)) {
@@ -100,19 +103,19 @@
       // At the end of loading, queue must be empty.
       // If not, may be an unknown script is present in
       // the returned package.
-      if (!w.process_parse_queue_is_empty(this)) {
-        throw new Error('Loading process queue not empty after parsing data.');
+      if (!this.w.process_parse_queue_is_empty(this)) {
+        this.w.error('Loading process queue not empty after parsing data.');
       }
     },
 
     parse_item: function (collection, name, data) {
       // Parse using matching loader.
-      if (!w.collection(collection, name)) {
-        w.loader(collection).parse(name, data);
+      if (!this.w.collection(collection, name)) {
+        this.w.loader(collection).parse(name, data);
       }
       // If already loaded, remove to queue.
       else {
-        w.process_parse_queue_remove(collection, name);
+        this.w.process_parse_queue_remove(collection, name);
       }
     },
 
@@ -120,19 +123,16 @@
      * Add step to complete by this loading process.
      */
     loading_queue_append: function () {
-
       if (this.started === false) {
         // Trigger event only on first start.
-        w.$_body.trigger('we_javascript_loading_process_start', [this]);
+        this.w.event('wjs_process_start', document);
       }
       this.started = true;
       // Create a unique ID.
-      var id = w.object_size(this.loading_queue) + 1;
+      var id = this.w.object_size(this.loading_queue) + 1;
       // Save
       this.loading_queue[id] = true;
-
       return id;
-
     },
 
     /**
@@ -152,16 +152,16 @@
 
     loading_complete: function (complete_arguments) {
       // Execute complete callback.
-      if (jQuery.isFunction(this.complete)) {
+      if (typeof this.complete === 'function') {
         // Pass complete arguments.
         this.complete.apply(this.complete, complete_arguments);
       }
-
       this.started = false;
       // Remove this element from processes.
-      w.array_delete(w.processes, this);
+      this.w.array_delete(this.w.processes, this);
       // Event.
-      w.$_body.trigger('we_javascript_loading_process_complete', [this]);
+      this.w.event('wjs_process_complete', document);
     }
   };
+  // [-->
 }());
