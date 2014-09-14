@@ -1,8 +1,28 @@
+WJS - 2.6.9 - 2014-09-13
+------------------------
+- Output test... to override
+
+WJS - 2.6.8 - 2014-09-13
+------------------------
+- Two new loaders
+- Improve global wrappers
+- Point to internal objects only
+- Use unique internal xhr
+- call_base can now loop
+- Minor improvments
+- Refractoring
+- Code style
+
+WJS - 2.6.7 - 2014-08-06
+------------------------
+- New source format
+
 WJS - 2.6.6 - 2014-07-01
 ------------------------
 - Created an xhr shortcut
 - Code style
 - AJAX send post parameters
+- Include subversion into master
 
 WJS - 2.6.5 - 2014-06-23
 ------------------------

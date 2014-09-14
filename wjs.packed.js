@@ -1,5 +1,5 @@
 /**
- * wJs v2.6.6
+ * wJs v2.6.9
  *
  * Copyright Romain WEEGER 2010 / 2014
  * http://www.wexample.com
@@ -9,18 +9,20 @@
  *  - http://www.opensource.org/licenses/mit-license.php
  *  - http://www.gnu.org/licenses/gpl.html
  */
-(function () {
+(function (win) {
   'use strict';
   // <--]
-  
+
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
-  if (window.w !== undefined) {
+  if (win.wjs !== undefined) {
     return;
   }
 
   var wjs_class = function () {
+    this.window = win;
+    this.document = win.document;
     // Create default vars.
     this.extend(true, this, this.defaults);
   };
@@ -28,7 +30,7 @@
   wjs_class.prototype = {
     defaults: {
       client_only: true,
-      version: '2.6.6',
+      version: '2.6.9',
       core_loaders: [],
       ready_functions: [],
       is_ready: false,
@@ -53,9 +55,7 @@
       this.document_ready(function () {
         // Apply options.
         this.extend(true, this, options);
-        this.xhr = new window.XMLHttpRequest();
-        // A transcode has been created for wjs, incorporate it.
-        this.transcode = new (this.proto('wjs'))();
+        this.xhr = new this.window.XMLHttpRequest();
         var loader_name;
         // Create loaders prototypes.
         for (loader_name in this.loader_add_default) {
@@ -63,10 +63,13 @@
             this.loader_add(loader_name, this.loader_add_default[loader_name], true);
           }
         }
+        // This var will not be used anymore.
         delete this.loader_add_default;
         // Load all other scripts then run ready functions.
         if (this.default_package !== null) {
           this.unpack(this.default_package, function () {
+            // A transcode has been created for wjs, incorporate it.
+            this.transcode = new (this.proto('wjs'))();
             // Execute startup functions.
             this.ready_complete();
           }.bind(this));
@@ -123,7 +126,7 @@
       this.is_ready = true;
       for (i in this.ready_functions) {
         if (this.ready_functions.hasOwnProperty(i)) {
-          this.ready_functions[i]();
+          this.ready_functions[i].call(this);
         }
       }
     },
@@ -160,8 +163,10 @@
      * @returns {*}
      */
     loader_add: function (name, methods, init) {
-      // Wait for wjs init.
-      if (this.is_ready === false && init !== true) {
+      // If wjs is not ready to add loaders, we have
+      // a temporary variable for loaders, it is removed
+      // into wjs init function.
+      if (this.loader_add_default !== undefined && init !== true) {
         this.loader_add_default[name] = methods;
         return false;
       }
@@ -279,18 +284,18 @@
     event: function (name, dom_element) {
       var event;
       // Check browser support.
-      if (window.document.createEvent) {
-        event = window.document.createEvent("HTMLEvents");
+      if (this.window.document.createEvent) {
+        event = this.window.document.createEvent("HTMLEvents");
         event.initEvent(name, true, true);
       }
       else {
-        event = window.document.createEventObject();
+        event = this.window.document.createEventObject();
         event.eventType = name;
       }
 
       event.eventName = name;
 
-      if (window.document.createEvent) {
+      if (this.window.document.createEvent) {
         dom_element.dispatchEvent(event);
       }
       else {
@@ -333,7 +338,7 @@
     url: function (path, settings) {
       // If file or absolute url specified.
       if (settings !== undefined && (settings.hasOwnProperty('absolute') && settings.absolute === true)) {
-        path = window.location.origin + '/' + path;
+        path = this.window.location.origin + '/' + path;
       }
       // Return non absolute url for a file.
       return path + ((settings !== undefined && settings.hasOwnProperty('query')) ? '?' + this.param(settings.query) : '');
@@ -384,25 +389,25 @@
     ajax: function (options) {
       options.method = (options.hasOwnProperty('method')) ? options.method : 'GET';
       options.async = (options.hasOwnProperty('async')) ? options.async : false;
-
-      var ajax_request = new window.XMLHttpRequest();
-      ajax_request.open(options.method, options.url, options.async);
-      ajax_request.onreadystatechange = function () {
-        // Success.
-        if (ajax_request.readyState === 4 && ajax_request.status === 200) {
-          // Callback function specified.
-          if (options.hasOwnProperty('success') && typeof options.success === 'function') {
-            options.success(ajax_request);
+      this.xhr.open(options.method, options.url, options.async);
+      this.xhr.onreadystatechange = function () {
+        // Process complete.
+        if (this.xhr.readyState === 4) {
+          if (this.xhr.status === 200) {
+            // Callback function specified.
+            if (options.hasOwnProperty('success') && typeof options.success === 'function') {
+              options.success(this.xhr);
+            }
+          }
+          else {
+            options.error(this.xhr);
           }
         }
-        else if (options.hasOwnProperty('error') && typeof options.error === 'function') {
-          options.error(ajax_request);
-        }
-      };
+      }.bind(this);
       if (options.method === 'POST') {
-        ajax_request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        this.xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       }
-      ajax_request.send(this.param(options.data));
+      this.xhr.send(this.param(options.data));
     },
 
     /**
@@ -444,14 +449,14 @@
      * @returns {*}
      */
     object_find: function (path, object, result) {
-      var base = object, item;
+      var base = object, item, result_save = (result !== undefined && typeof result === 'object');
       path = path.split('.');
       while (path.length > 0) {
         item = path.shift();
         if (base.hasOwnProperty(item)) {
           // We are on the last item.
           if (path.length === 0) {
-            if (typeof result === 'object') {
+            if (result_save) {
               result.key = item;
               result.container = base;
             }
@@ -473,11 +478,11 @@
         // Use indirect eval for code inspectors.
         var eval_callback = eval;
         // We need to pass reference to this into eval.
-        window.object_cleanup_temp = object;
+        this.window.object_cleanup_temp = object;
         // Use eval to access variable to delete.
-        eval_callback('delete window.object_cleanup_temp.' + path + ';');
+        eval_callback('delete this.window.object_cleanup_temp.' + path + ';');
         // Delete reference.
-        delete window.object_cleanup_temp;
+        delete this.window.object_cleanup_temp;
       }
     },
 
@@ -569,13 +574,14 @@
       // Not plain objects:
       // - Any object or value whose internal [[Class]] property is not "[object Object]"
       // - DOM nodes
-      // - window
+      // - win dow
       if (obj === null || typeof obj !== "object" || obj.nodeType || (obj !== null && obj === obj.window)) {
         return false;
       }
       // Support: Firefox <20
       // The try/catch suppresses exceptions thrown when attempting to access
-      // the "constructor" property of certain host objects, ie. |window.location|
+      // the "constructor" property of certain host objects, ie. |win dow.location
+
       // https://bugzilla.mozilla.org/show_bug.cgi?id=814622
       try {
         if (obj.constructor && !this.hasOwnProperty.call(obj.constructor.prototype, "isPrototypeOf")) {
@@ -597,7 +603,7 @@
      */
     is_dom_node: function (object) {
       return (
-        typeof window.Node === "object" ? object instanceof window.Node :
+        typeof this.window.Node === "object" ? object instanceof this.window.Node :
           object && typeof object === "object" && typeof object.nodeType === "number" && typeof object.nodeName === "string"
         );
     },
@@ -610,15 +616,16 @@
      */
     is_dom_element: function (object) {
       return (
-        typeof window.HTMLElement === "object" ? object instanceof window.HTMLElement : // DOM2
+        typeof this.window.HTMLElement === "object" ? object instanceof this.window.HTMLElement : // DOM2
           object && typeof object === "object" && object !== null && object.nodeType === 1 && typeof object.nodeName === "string"
         );
     },
 
     /**
-     * Call super method of the given object and method.
-     * This function create a temporary variable called "_call_base_reference",
-     * to inspect whole inheritance linage. It will be deleted at the end of inspection.
+     * Call super method of the given object and method, searching for
+     * multiple inheritance levels. This function creates a temporary
+     * variable called "_call_base_bases", to inspect whole inheritance linage.
+     * It will be deleted at the end of inspection.
      *
      * Usage : Inside your method use call_base(this, 'method_name', arguments);
      *
@@ -628,9 +635,22 @@
      * @returns {*} The data returned from the super method.
      */
     call_base: function (object, method, args) {
+      // We create an object to keep reference to "base" object,
+      // it will be replaced during linage exploration to always keep
+      // direct parent object. We use a object to save multiple references
+      // if various call_base are launched for different methods.
+      if (!object.hasOwnProperty('_call_base_bases')) {
+        object._call_base_bases = {};
+        object._call_base_pass = {};
+      }
+      // Create shortcuts.
+      var passes = object._call_base_pass,
+        bases = object._call_base_bases,
+      // Get pass level in case of recursive calls.
+        pass_index = passes[method] !== undefined ? passes[method] : 0,
       // We get base object, first time it will be passed object,
-      // but in case of multiple inheritance, it will be instance of parent objects.
-      var base = object.hasOwnProperty('_call_base_reference') ? object._call_base_reference : object,
+      // but in case of multiple inheritance, it will be instance of parents objects.
+        base = bases.hasOwnProperty(method) && bases[method].hasOwnProperty(pass_index) ? bases[method][pass_index][bases[method][pass_index].length - 1] : object,
       // We get matching method, from current object,
       // this is a reference to define super method.
         object_current_method = base[method],
@@ -639,9 +659,10 @@
       // We define super function after founding current position.
         is_super = false,
       // Contain output data.
-        output = null;
+        output = null,
+        done = false;
       // Iterates over the base prototypes chain.
-      while (base !== null) {
+      while (base !== null && done !== true) {
         // Get method info
         descriptor = Object.getOwnPropertyDescriptor(base, method);
         if (descriptor !== undefined) {
@@ -654,22 +675,66 @@
           else if (is_super === true) {
             // We need to pass original object to apply() as first argument,
             // this allow to keep original instance definition along all method
-            // inheritance. But we also need to save reference to "base" who
+            // inheritance. But we also need to save reference to "base" who to
             // contain parent class, it will be used into this function startup
-            // to begin at the right chain position.
-            object._call_base_reference = base;
+            // begin at the right chain position. First we create method entry.
+            if (bases[method] === undefined) {
+              passes[method] = 0;
+              bases[method] = [];
+            }
+            // Then we create pass entry.
+            if (bases[method][pass_index] === undefined) {
+              bases[method][pass_index] = [];
+            }
+            // We store base object.
+            bases[method][pass_index].push(base);
+            // We replace own method by a launcher who manage internal iteration.
+            object[method] = this._call_base_callback(object, method, passes, object_current_method);
             // Apply super method.
             output = descriptor.value.apply(object, args);
+            // Return to original function.
+            object[method] = object_current_method;
             // Property have been used into super function if another
             // call_base() is launched. Reference is not useful anymore.
-            delete object._call_base_reference;
+            bases[method][pass_index].pop();
+            // Cleanup array.
+            if (bases[method][pass_index].length === 0) {
+              this.array_delete_index(bases[method], pass_index);
+            }
+            // Delete empty array.
+            if (bases[method].length === 0) {
+              delete bases[method];
+              delete passes[method];
+            }
             // Job is done.
-            return output;
+            done = true;
           }
         }
         // Iterate to the next parent inherited.
         base = Object.getPrototypeOf(base);
       }
+      // Cleanup temp variable.
+      if (this.object_size(bases) === 0) {
+        delete object._call_base_bases;
+        delete object._call_base_pass;
+      }
+      // Return retrieved content.
+      if (done) {
+        return output;
+      }
+    },
+
+    _call_base_callback: function (object, method, passes, object_current_method) {
+      return function () {
+        // We rise pass level.
+        passes[method] += 1;
+        // We execute function.
+        var output = object_current_method.apply(object, arguments);
+        // We lower pass level.
+        passes[method] -= 1;
+        // The return output content.
+        return output;
+      };
     },
 
     /**
@@ -769,20 +834,22 @@
      */
     inherit_function: function (object, base, add) {
       // Base method is called with __base() function.
-      return function (method, base_method) {
-        return function () {
-          if (this === undefined) {
-            this.error('Call inherit function from undefined object : ' + method);
-          }
-          var baseSaved = this.__base,
-            result;
-          this.__base = (typeof base_method === 'function') ? base_method : function () {
-          };
-          result = method.apply(this, arguments);
-          this.__base = baseSaved;
-          return result;
-        }.bind(this);
-      }.apply(object, [add, base]);
+      return this._inherit_function.apply(object, [add, base]);
+    },
+
+    _inherit_function: function (method, base_method) {
+      return function () {
+        if (this === undefined) {
+          this.error('Call inherit function from undefined object : ' + method);
+        }
+        var baseSaved = this.__base,
+          result;
+        this.__base = (typeof base_method === 'function') ? base_method : function () {
+        };
+        result = method.apply(this, arguments);
+        this.__base = baseSaved;
+        return result;
+      }.bind(this);
     },
 
     /**
@@ -792,7 +859,7 @@
      * @param {object} object
      * @param {string} name
      */
-    inherit_package: function (object, name) {
+    inherit_linage: function (object, name) {
       var variables = this.inherit_get_property(object, name),
         i;
       // Reset package.
@@ -801,7 +868,7 @@
       for (i in variables) {
         if (variables.hasOwnProperty(i)) {
           // Create base constructor for functions.
-          this._inherit_package(object, object[name], variables[i]);
+          this._inherit_linage(object, object[name], variables[i]);
         }
       }
     },
@@ -813,13 +880,13 @@
      * @param {object} add
      * @private
      */
-    _inherit_package: function (object, result, add) {
+    _inherit_linage: function (object, result, add) {
       var i;
       for (i in add) {
         if (add.hasOwnProperty(i)) {
           if (typeof add[i] === 'function') {
             // We don't use inherit_method, we already got list of
-            // inherited property into the main inherit_package method.
+            // inherited property into the main inherit_linage method.
             result[i] = this.inherit_function(object, result[i], add[i]);
           }
           // Escape some objects to avoid recursions.
@@ -828,7 +895,7 @@
               result[i] = {};
             }
             // Continue to search for other functions.
-            this._inherit_package(object, result[i], add[i]);
+            this._inherit_linage(object, result[i], add[i]);
           }
           else if (Array.isArray(add[i])) {
             result[i] = [];
@@ -846,12 +913,22 @@
      * @param {string} name
      * @param {object} methods
      */
-    extend_class: function (name, methods) {
+    extend_class: function (name, methods, lineage) {
       if (this.methods.hasOwnProperty(name)) {
         this.extend(this.methods[name], methods);
       }
       else {
         this.methods[name] = methods;
+        if (lineage === true) {
+          // Create linage.
+          this.methods[name].lineage = '';
+          if (this.methods[name].base) {
+            if (this.methods[this.methods[name].base] !== undefined && this.methods[this.methods[name].base].hasOwnProperty('lineage') && this.methods[this.methods[name].base].lineage !== '') {
+              this.methods[name].lineage = this.methods[this.methods[name].base].lineage + '-';
+            }
+            this.methods[name].lineage += this.methods[name].base;
+          }
+        }
       }
     },
 
@@ -887,11 +964,17 @@
       }
       // Add extra method at each pass, in case of
       // prototype have been extended after first
-      // constrictor creation.
+      // constructor creation.
       if (this.methods.hasOwnProperty(name)) {
         this.extend(this.constructors[name].prototype, this.methods[name]);
       }
       return this.constructors[name];
+    },
+
+    proto_remove: function (name) {
+      if (this.constructors.hasOwnProperty(name)) {
+        delete this.constructors[name];
+      }
     },
 
     /**
@@ -911,7 +994,7 @@
      */
     document_ready: function (fn) {
       var done = false, top = true,
-        doc = window.document, root = doc.documentElement,
+        doc = this.window.document, root = doc.documentElement,
         add = doc.addEventListener ? 'addEventListener' : 'attachEvent',
         rem = doc.addEventListener ? 'removeEventListener' : 'detachEvent',
         pre = doc.addEventListener ? '' : 'on',
@@ -920,9 +1003,9 @@
           if (e.type === 'readystatechange' && doc.readyState !== 'complete') {
             return;
           }
-          (e.type === 'load' ? window : doc)[rem](pre + e.type, init, false);
+          (e.type === 'load' ? this.window : doc)[rem](pre + e.type, init, false);
           if (!done && (done = true) !== false) {
-            fn.call(window, e.type || e);
+            fn.call(this.window, e.type || e);
           }
         },
 
@@ -930,19 +1013,19 @@
           try {
             root.doScroll('left');
           } catch (e) {
-            window.setTimeout(poll, 50);
+            this.window.setTimeout(poll, 50);
             return;
           }
           init('poll');
         };
 
       if (doc.readyState === 'complete') {
-        fn.call(window, 'lazy');
+        fn.call(this.window, 'lazy');
       }
       else {
         if (doc.createEventObject && root.doScroll) {
           try {
-            top = !window.frameElement;
+            top = !this.window.frameElement;
           }
           catch (e) {
           }
@@ -952,13 +1035,15 @@
         }
         doc[add](pre + 'DOMContentLoaded', init, false);
         doc[add](pre + 'readystatechange', init, false);
-        window[add](pre + 'load', init, false);
+        this.window[add](pre + 'load', init, false);
       }
     }
   };
   // Create global instance.
-  window.w = new wjs_class();
-  
+  win.wjs =
+    // TODO Remove
+    win.w = new wjs_class();
+
   /**
    * Class transcode are used as base
    * constructor to allow object to be
@@ -969,11 +1054,11 @@
    * locations. This way, it maintain stability
    * of the same program between different environments.
    */
-  window.w.constructors['wjs\\transcode'] = function () {
+  wjs.constructors['wjs\\transcode'] = function () {
 
   };
 
-  window.w.constructors['wjs\\transcode'].prototype = {
+  wjs.constructors['wjs\\transcode'].prototype = {
     // List of required paths by constructor.
     paths_required: [],
     transcode_class_name: undefined,
@@ -1149,13 +1234,13 @@
       return this.transcoded_data;
     }
   };
-  
-  window.w.extend_class('wjs\\loader', {
+
+  wjs.extend_class('wjs\\loader', {
     type: 'undefined',
     w: null,
 
     __construct: function (type) {
-      window.w.call_base(this, '__construct', arguments);
+      this.w.call_base(this, '__construct', arguments);
       this.type = type;
       // Add an entry into wjs to save loaded scripts.
       if (!this.w.loaded.hasOwnProperty(this.type)) {
@@ -1226,7 +1311,7 @@
      */
     loading_process_launch_multiple: function (options) {
       // Create a new loading process.
-      return new window.wjs_process(this.w.extend_options(options), this.w);
+      return new this.w.process(this.w.extend_options(options), this.w);
     },
 
     load_ajax: function (name, options) {
@@ -1249,11 +1334,7 @@
      */
     get_script: function (url) {
       // Get script file asynchronously.
-      jQuery.ajax({
-        url: url,
-        dataType: "script",
-        async: false
-      });
+      this.load('javascript_link', url);
     },
 
     /**
@@ -1297,8 +1378,8 @@
       this.w.process_parse_queue_remove(this.type, name);
     }
   });
-  
-  window.wjs_process = function (options, w) {
+
+  wjs.process = function (options, w) {
     var i;
     // Default values
     this.async = false;
@@ -1318,7 +1399,7 @@
     }
   };
 
-  window.wjs_process.prototype = {
+  wjs.process.prototype = {
     scripts: [],
     /**
      * Call w, add loading queue management,
@@ -1371,6 +1452,10 @@
      */
     parse: function (data) {
       var i, collection, name;
+      if (data.hasOwnProperty('transcoded_data')) {
+        this.w.extend(true, this.w.transcoded_data, data.transcoded_data);
+        delete data.transcoded_data;
+      }
       // Append script to loading process.
       this.w.process_parse_queue_add(data, this);
       // Pass trough each kind of data.
@@ -1413,7 +1498,7 @@
     loading_queue_append: function () {
       if (this.started === false) {
         // Trigger event only on first start.
-        this.w.event('wjs_process_start', document);
+        this.w.event('wjs_process_start', this.w.document);
       }
       this.started = true;
       // Create a unique ID.
@@ -1448,11 +1533,26 @@
       // Remove this element from processes.
       this.w.array_delete(this.w.processes, this);
       // Event.
-      this.w.event('wjs_process_complete', document);
+      this.w.event('wjs_process_complete', this.w.document);
     }
   };
-  
-  window.w.loader_add('javascript', {
+
+  wjs.loader_add('css_link', {
+    /**
+     * Javascript are loaded via AJAX.
+     */
+    load: function (url) {
+      var script = this.w.document.createElement('link');
+      script.setAttribute('type', 'text/css');
+      script.setAttribute('rel', 'stylesheet');
+      script.setAttribute('media', 'all');
+      script.setAttribute('href', url);
+      this.w.document.head.appendChild(script);
+      this.w.collection(this.type, url, true);
+    }
+  });
+
+  wjs.loader_add('javascript', {
     /**
      * Javascript are loaded via AJAX.
      */
@@ -1489,8 +1589,45 @@
       }
     }
   });
-  
-  window.w.loader_add('json', {
+
+  wjs.loader_add('javascript_link', {
+    /**
+     * Javascript are loaded via AJAX.
+     */
+    load: function (urls, complete) {
+      urls = (typeof urls === 'string') ? [urls] : urls;
+      this.queue = urls;
+      this.queue_complete = complete;
+      this.js_link_queue_check();
+    },
+
+    js_link_queue_next: function () {
+      var url = this.queue.shift(),
+        script = this.w.document.createElement('script');
+
+      script.onreadystatechange = function () {
+        if (this.readyState === 'complete') {
+          this.js_link_queue_check();
+        }
+      }.bind(this);
+      script.onload = this.js_link_queue_check.bind(this);
+      script.setAttribute('type', 'text/javascript');
+      script.setAttribute('src', url);
+      this.w.document.head.appendChild(script);
+      this.w.collection(this.type, url, true);
+    },
+
+    js_link_queue_check: function () {
+      if (this.queue.length > 0) {
+        this.js_link_queue_next();
+      }
+      else if (typeof this.queue_complete === 'function') {
+        this.queue_complete();
+      }
+    }
+  });
+
+  wjs.loader_add('json', {
 
     load: function (name, options) {
       // We can use load_json with no name. In this case
@@ -1534,4 +1671,4 @@
     }
   });
   // [-->
-}());
+}(window));

@@ -1,8 +1,7 @@
 <?php
 
 define('WJS_PATH_ROOT', str_replace('\\', '/', dirname(__FILE__)) . '/');
-define('WJS_VERSION', '2.6.6');
-define('WJS_SUBVERSION', 'source');
+define('WJS_VERSION', '2.6.9');
 
 require_once WJS_PATH_ROOT . 'wjs.transcode.inc';
 require_once WJS_PATH_ROOT . 'wjs.loader.inc';
@@ -54,27 +53,22 @@ class wjs extends \wjs\transcode {
    * @var array $js_core_files
    */
   var $js_core_files = array(
-    'source'   => array(
+    'master' => array(
+      // Minified version
+      'wjs.packed.min.js',
+    ),
+    'source' => array(
       'js/wjs.js',
       'js/wjs.transcode.js',
       'js/wjs.loader.js',
       'js/wjs.process.js',
     ),
-    'factory'  => array(
-      'wjs.js'
-    ),
-    'minified' => array(
-      'wjs.js'
-    ),
-    'packed'   => array(
-      'wjs.js'
-    )
   );
   /**
    * Define which js files to use.
    * @var string $js_core_files_version
    */
-  var $js_core_files_version = 'source';
+  var $js_core_files_version = 'master';
   /**
    * Contain list of core loaders which
    * are automatically added to wjs.
@@ -82,6 +76,8 @@ class wjs extends \wjs\transcode {
    */
   var $loaders_core = array(
     'javascript',
+    'javascript_link',
+    'css_link',
     'json',
   );
   /**
@@ -122,15 +118,12 @@ class wjs extends \wjs\transcode {
   );
 
   function __construct($paths) {
-    // Force wjs path, path server root is required.
-    $paths['server']['wjs'] = $this->path_subtract(WJS_PATH_ROOT, $paths['server']['root']);
-    parent::__construct($paths);
-    // In development mode core subversion have token
-    // with a $ at this position, in this case we use source files,
-    // in other case, we use subversion name de define core files.
-    if (strpos(WJS_SUBVERSION, '$') !== 1) {
-      $this->js_core_files_version = WJS_SUBVERSION;
+    // Force wjs path, path server root is required, so we
+    // suggest that wjs is into the same folder as sites root.
+    if (!isset($paths['server']['wjs'])) {
+      $paths['server']['wjs'] = $this->path_subtract(WJS_PATH_ROOT, $paths['server']['root']);
     }
+    parent::__construct($paths);
     // If not specified, use server path to define factory client path.
     if ($this->path('client', 'wjs') === FALSE) {
       $this->path('client', 'wjs', $this->path_raw('server', 'wjs'));
@@ -290,7 +283,7 @@ class wjs extends \wjs\transcode {
     $this->library_append_item($library);
     $this->library_append_pattern($library);
     $this->library_append_directory($library);
-    $this->library_output_group_default += $library->output_group_default;
+    $this->library_output_group_default = array_merge($this->library_output_group_default, $library->output_group_default);
   }
 
   function library_append_loader(\wjs\library $library) {
@@ -359,6 +352,20 @@ class wjs extends \wjs\transcode {
    * Return packed JS data to execute on page startup.
    */
   function js_package() {
+    // Add transcoded data.
+    if (!empty($this->output_transcode)) {
+      $data = new \stdClass();
+      /* @var \wjs\transcode $transcode */
+      foreach ($this->output_transcode as $type => $transcodes) {
+        $data->$type             = new \stdClass();
+        $class                   = new ReflectionClass($type);
+        $data->$type->__PARENT__ = $class->getParentClass()->getName();
+        foreach ($transcodes as $transcode_id => $transcode) {
+          $data->$type->$transcode_id = $transcode->convert('array');
+        }
+      }
+      $this->output['transcoded_data'] = $data;
+    }
     return ($this->output) ? json_encode($this->output) : '{}';
   }
 
@@ -368,21 +375,7 @@ class wjs extends \wjs\transcode {
    * ready to parse on page loading.
    */
   function js_unpacker() {
-    $output = '';
-    // Create transcoder output.
-    $data = new \stdClass();
-    /* @var \wjs\transcode $transcode */
-    foreach ($this->output_transcode as $type => $transcodes) {
-      $data->$type             = new \stdClass();
-      $class                   = new ReflectionClass($type);
-      $data->$type->__PARENT__ = $class->getParentClass()->getName();
-      foreach ($transcodes as $transcode_id => $transcode) {
-        $data->$type->$transcode_id = $transcode->convert('array');
-      }
-    }
     $output_json = array();
-    // Add transcode data.
-    $output_json[] = 'transcoded_data:' . json_encode($data);
     // Add loaders types.
     $output_json[] = 'core_loaders:' . json_encode(array_keys($this->collections_loaders));
     // Load functions and class called in server side for this page.
@@ -393,8 +386,7 @@ class wjs extends \wjs\transcode {
     // Add object brackets.
     $output_json = (!empty($output_json)) ? '{' . implode(',', $output_json) . '}' : '';
     // Launch Javascript init function containing startup data.
-    $output .= 'window.w.init(' . $output_json . ');';
-    return $output;
+    return 'window.w.init(' . $output_json . ');';
   }
 
   /**
@@ -410,13 +402,15 @@ class wjs extends \wjs\transcode {
       $files[] = $this->path('client', 'wjs') . $file;
     }
     /* @var \wjs\loader $loader */
-    foreach ($this->collections_loaders as $loader) {
-      $js_file = $loader->js_file();
-      if (file_exists(dirname($loader->inc) . '/' . $js_file)) {
-        // Compute the path of loader's js file,
-        // regarding server side site's root,
-        // and loader .inc folder path.
-        $files[] = $this->path('client', 'root') . $this->path_subtract(dirname($loader->inc), $this->path('server', 'root')) . $js_file;
+    foreach ($this->collections_loaders as $loader_name => $loader) {
+      if ($this->js_core_files_version !== 'master' || !in_array($loader_name, $this->loaders_core)) {
+        $js_file = $loader->js_file();
+        if ($js_file !== FALSE && file_exists(dirname($loader->inc) . '/' . $js_file)) {
+          // Compute the path of loader's js file,
+          // regarding server side site's root,
+          // and loader .inc folder path.
+          $files[] = $this->path('client', 'root') . $this->path_subtract(dirname($loader->inc), $this->path('server', 'root')) . $js_file;
+        }
       }
     }
     return $files;

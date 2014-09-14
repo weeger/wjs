@@ -7,10 +7,10 @@
  * This is useful when loading is asynchronous and allows
  * to launch several processes separately.
  */
-(function () {
-  "use strict";
+(function (wjs) {
+  'use strict';
   // <--]
-  window.wjs_process = function (options, w) {
+  wjs.process = function (options, w) {
     var i;
     // Default values
     this.async = false;
@@ -30,7 +30,7 @@
     }
   };
 
-  window.wjs_process.prototype = {
+  wjs.process.prototype = {
     scripts: [],
     /**
      * Call w, add loading queue management,
@@ -83,6 +83,10 @@
      */
     parse: function (data) {
       var i, collection, name;
+      if (data.hasOwnProperty('transcoded_data')) {
+        this.w.extend(true, this.w.transcoded_data, data.transcoded_data);
+        delete data.transcoded_data;
+      }
       // Append script to loading process.
       this.w.process_parse_queue_add(data, this);
       // Pass trough each kind of data.
@@ -125,7 +129,7 @@
     loading_queue_append: function () {
       if (this.started === false) {
         // Trigger event only on first start.
-        this.w.event('wjs_process_start', document);
+        this.w.event('wjs_process_start', this.w.document);
       }
       this.started = true;
       // Create a unique ID.
@@ -160,8 +164,8 @@
       // Remove this element from processes.
       this.w.array_delete(this.w.processes, this);
       // Event.
-      this.w.event('wjs_process_complete', document);
+      this.w.event('wjs_process_complete', this.w.document);
     }
   };
   // [-->
-}());
+}(wjs));

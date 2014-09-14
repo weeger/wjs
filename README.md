@@ -36,7 +36,7 @@ FEATURES
 
 INSTALL
 -------
-In order to use wJs you need to have some base element to transfert data from PHP to Javascript. Due to the lot of different projects and the amout of changes, this install file may not be up to date. If you have some questions, please contact me on my we page.  
+In order to use wJs you need to have some base element to transfert data from PHP to Javascript. Due to the lot of different projects and the amout of changes, this install file may not be up to date. If you have some questions, please contact me on my web page.  
   
   
   

@@ -1,5 +1,5 @@
-(function () {
-  "use strict";
+(function (wjs) {
+  'use strict';
   // <--]
   /**
    * Class transcode are used as base
@@ -11,11 +11,11 @@
    * locations. This way, it maintain stability
    * of the same program between different environments.
    */
-  window.w.constructors['wjs\\transcode'] = function () {
+  wjs.constructors['wjs\\transcode'] = function () {
 
   };
 
-  window.w.constructors['wjs\\transcode'].prototype = {
+  wjs.constructors['wjs\\transcode'].prototype = {
     // List of required paths by constructor.
     paths_required: [],
     transcode_class_name: undefined,
@@ -192,4 +192,4 @@
     }
   };
   // [-->
-}());
+}(wjs));

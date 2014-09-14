@@ -1,10 +1,10 @@
 /**
  * json contain the data of ajax response.
  */
-(function () {
-  "use strict";
+(function (wjs) {
+  'use strict';
   // <--]
-  window.w.loader_add('json', {
+  wjs.loader_add('json', {
 
     load: function (name, options) {
       // We can use load_json with no name. In this case
@@ -48,4 +48,4 @@
     }
   });
   // [-->
-}());
+}(wjs));

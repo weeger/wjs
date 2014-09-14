@@ -1,7 +1,7 @@
-(function () {
-  "use strict";
+(function (wjs) {
+  'use strict';
   // <--]
-  window.w.loader_add('javascript', {
+  wjs.loader_add('javascript', {
     /**
      * Javascript are loaded via AJAX.
      */
@@ -39,4 +39,4 @@
     }
   });
   // [-->
-}());
+}(wjs));

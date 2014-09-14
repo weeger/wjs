@@ -69,14 +69,4 @@ class loader extends \wjs\transcode {
   function js_file() {
     return 'loader.' . $this->type . '.js';
   }
-
-  /**
-   * Pack object when generating output.
-   * Packing can include cache management or other
-   * string treatment to allow javascript to parse
-   * content correctly.
-   */
-  function item_pack($type, $name, $script) {
-    return $script;
-  }
 }

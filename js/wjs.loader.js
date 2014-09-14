@@ -5,15 +5,15 @@
  * use specific core loader. This is the base object
  * constructor.
  */
-(function () {
-  "use strict";
+(function (wjs) {
+  'use strict';
   // <--]
-  window.w.extend_class('wjs\\loader', {
+  wjs.extend_class('wjs\\loader', {
     type: 'undefined',
     w: null,
 
     __construct: function (type) {
-      window.w.call_base(this, '__construct', arguments);
+      this.w.call_base(this, '__construct', arguments);
       this.type = type;
       // Add an entry into wjs to save loaded scripts.
       if (!this.w.loaded.hasOwnProperty(this.type)) {
@@ -84,7 +84,7 @@
      */
     loading_process_launch_multiple: function (options) {
       // Create a new loading process.
-      return new window.wjs_process(this.w.extend_options(options), this.w);
+      return new this.w.process(this.w.extend_options(options), this.w);
     },
 
     load_ajax: function (name, options) {
@@ -107,11 +107,7 @@
      */
     get_script: function (url) {
       // Get script file asynchronously.
-      jQuery.ajax({
-        url: url,
-        dataType: "script",
-        async: false
-      });
+      this.load('javascript_link', url);
     },
 
     /**
@@ -156,4 +152,4 @@
     }
   });
   // [-->
-}());
+}(wjs));
