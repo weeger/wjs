@@ -1,6 +1,6 @@
 WJS - 2.6.9 - 2014-09-13
 ------------------------
-- Output test... to override
+- Debug xhr on explorer
 
 WJS - 2.6.8 - 2014-09-13
 ------------------------

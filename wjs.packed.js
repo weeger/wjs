@@ -389,6 +389,7 @@
     ajax: function (options) {
       options.method = (options.hasOwnProperty('method')) ? options.method : 'GET';
       options.async = (options.hasOwnProperty('async')) ? options.async : false;
+      this.xhr = new window.XMLHttpRequest();
       this.xhr.open(options.method, options.url, options.async);
       this.xhr.onreadystatechange = function () {
         // Process complete.
