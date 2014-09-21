@@ -1,7 +1,7 @@
 <?php
 
 define('WJS_PATH_ROOT', str_replace('\\', '/', dirname(__FILE__)) . '/');
-define('WJS_VERSION', '2.6.9');
+define('WJS_VERSION', '2.6.10');
 
 require_once WJS_PATH_ROOT . 'wjs.transcode.inc';
 require_once WJS_PATH_ROOT . 'wjs.loader.inc';

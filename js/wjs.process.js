@@ -11,7 +11,7 @@
   'use strict';
   // <--]
   wjs.process = function (options, w) {
-    var i;
+    var i, length;
     // Default values
     this.async = false;
     this.loading_queue = {};
@@ -21,9 +21,9 @@
     // Save it into w.
     w.processes.push(this);
     // Process.
-    for (i in this.scripts) {
+    for (i = 0, length = this.scripts.length; i < length; i += 1) {
       // Check if loader exists.
-      if (this.scripts.hasOwnProperty(i) && w.loaders.hasOwnProperty(this.scripts[i].type)) {
+      if (w.loaders.hasOwnProperty(this.scripts[i].type)) {
         // Run process hook into core loader object of this type of script.
         w.loader(this.scripts[i].type).process(this, this.scripts[i]);
       }
@@ -82,7 +82,7 @@
      * Parse JSON response.
      */
     parse: function (data) {
-      var i, collection, name;
+      var i, length, collection, name;
       if (data.hasOwnProperty('transcoded_data')) {
         this.w.extend(true, this.w.transcoded_data, data.transcoded_data);
         delete data.transcoded_data;
@@ -92,14 +92,12 @@
       // Pass trough each kind of data.
       // Returned package contain different types
       // of data grouped by loader type.
-      for (i in this.w.core_loaders) {
-        if (this.w.core_loaders.hasOwnProperty(i)) {
-          collection = this.w.core_loaders[i];
-          if (data.hasOwnProperty(collection)) {
-            for (name in data[collection]) {
-              if (data[collection].hasOwnProperty(name)) {
-                this.parse_item(collection, name, data[collection][name]);
-              }
+      for (i = 0, length = this.w.core_loaders.length; i < length; i += 1) {
+        collection = this.w.core_loaders[i];
+        if (data.hasOwnProperty(collection)) {
+          for (name in data[collection]) {
+            if (data[collection].hasOwnProperty(name)) {
+              this.parse_item(collection, name, data[collection][name]);
             }
           }
         }

@@ -1,5 +1,5 @@
 /**
- * wJs v2.6.9
+ * wJs v2.6.10
  *
  * Copyright Romain WEEGER 2010 / 2014
  * http://www.wexample.com
@@ -30,7 +30,7 @@
   wjs_class.prototype = {
     defaults: {
       client_only: true,
-      version: '2.6.9',
+      version: '2.6.10',
       core_loaders: [],
       ready_functions: [],
       is_ready: false,
@@ -120,14 +120,12 @@
      * Called by we_javascript_footer().
      */
     ready_complete: function () {
-      var i;
+      var i, length;
       // Mark as is_ready, further ready functions
       // will be executed directly.
       this.is_ready = true;
-      for (i in this.ready_functions) {
-        if (this.ready_functions.hasOwnProperty(i)) {
-          this.ready_functions[i].call(this);
-        }
+      for (i = 0, length = this.ready_functions.length; i < length; i += 1) {
+        this.ready_functions[i].call(this);
       }
     },
 
@@ -211,7 +209,6 @@
     process_parse_queue_add: function (data, process) {
       var collection,
         item;
-
       for (collection in data) {
         if (data.hasOwnProperty(collection)) {
           // Create object if missing.

@@ -1,5 +1,5 @@
 /**
- * wJs v2.6.9
+ * wJs v2.6.10
  *
  * Copyright Romain WEEGER 2010 / 2014
  * http://www.wexample.com
@@ -30,7 +30,7 @@
   wjs_class.prototype = {
     defaults: {
       client_only: true,
-      version: '2.6.9',
+      version: '2.6.10',
       core_loaders: [],
       ready_functions: [],
       is_ready: false,
@@ -120,14 +120,12 @@
      * Called by we_javascript_footer().
      */
     ready_complete: function () {
-      var i;
+      var i, length;
       // Mark as is_ready, further ready functions
       // will be executed directly.
       this.is_ready = true;
-      for (i in this.ready_functions) {
-        if (this.ready_functions.hasOwnProperty(i)) {
-          this.ready_functions[i].call(this);
-        }
+      for (i = 0, length = this.ready_functions.length; i < length; i += 1) {
+        this.ready_functions[i].call(this);
       }
     },
 
@@ -211,7 +209,6 @@
     process_parse_queue_add: function (data, process) {
       var collection,
         item;
-
       for (collection in data) {
         if (data.hasOwnProperty(collection)) {
           // Create object if missing.
@@ -1381,7 +1378,7 @@
   });
 
   wjs.process = function (options, w) {
-    var i;
+    var i, length;
     // Default values
     this.async = false;
     this.loading_queue = {};
@@ -1391,9 +1388,9 @@
     // Save it into w.
     w.processes.push(this);
     // Process.
-    for (i in this.scripts) {
+    for (i = 0, length = this.scripts.length; i < length; i += 1) {
       // Check if loader exists.
-      if (this.scripts.hasOwnProperty(i) && w.loaders.hasOwnProperty(this.scripts[i].type)) {
+      if (w.loaders.hasOwnProperty(this.scripts[i].type)) {
         // Run process hook into core loader object of this type of script.
         w.loader(this.scripts[i].type).process(this, this.scripts[i]);
       }
@@ -1452,7 +1449,7 @@
      * Parse JSON response.
      */
     parse: function (data) {
-      var i, collection, name;
+      var i, length, collection, name;
       if (data.hasOwnProperty('transcoded_data')) {
         this.w.extend(true, this.w.transcoded_data, data.transcoded_data);
         delete data.transcoded_data;
@@ -1462,14 +1459,12 @@
       // Pass trough each kind of data.
       // Returned package contain different types
       // of data grouped by loader type.
-      for (i in this.w.core_loaders) {
-        if (this.w.core_loaders.hasOwnProperty(i)) {
-          collection = this.w.core_loaders[i];
-          if (data.hasOwnProperty(collection)) {
-            for (name in data[collection]) {
-              if (data[collection].hasOwnProperty(name)) {
-                this.parse_item(collection, name, data[collection][name]);
-              }
+      for (i = 0, length = this.w.core_loaders.length; i < length; i += 1) {
+        collection = this.w.core_loaders[i];
+        if (data.hasOwnProperty(collection)) {
+          for (name in data[collection]) {
+            if (data[collection].hasOwnProperty(name)) {
+              this.parse_item(collection, name, data[collection][name]);
             }
           }
         }
