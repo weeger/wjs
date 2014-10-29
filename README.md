@@ -21,7 +21,24 @@ Wjs takes one arguments defining routes for both client and server paths.
 
 On server side : 
 ```php
-[CONF_WJS_INSTANCE]
+$wjs = new \Wjs(array(
+  'server' => array(
+    // Path to wjs is used by wjs to retrieve
+    // core scripts and internal library.
+    'wjs' => $pathToWjsLibrary,
+  ),
+  'client' => array(
+    // This path is not required, but recommended,
+    // It is for example used to generate proper based paths
+    // on using the jsFiles() method.
+    'wjs'          => $pathToWjsFromClientSide,
+    // Response path define the URL used by AJAX
+    // to retrieve extensions on your server, you
+    // obviously need to handle the path on server
+    // side, see bellow.
+    'responsePath' => $yourCustomResponsePath
+  )
+));
 ```
 
 
@@ -34,7 +51,9 @@ Registered data is also depending of each loader behavior, more information on l
 
 On server side : 
 ```php
-[CONF_EXT_ADD]
+$wjs->extensionAdd('jsArray', 'myTestArray', array(
+  0 => 'MyItem',
+));
 ```
 
 
@@ -44,23 +63,30 @@ Linking Javascript
 Adding javascript into your html page make the connexion between server and client environment. Due to the variation of loaders, preloaded extensions, or platforms where wjs can be included, the files included can change a lot from on page to another. Some tools are included into wjs to help you to achieve this point. To start the most quickly with wjs, just put this PHP code into your <head> :
 
 ```php
-[INIT_WJS_QUICK]
+<?php print $wjs->renderHeader(); ?>
 ```
 
 If you want more control on the way you integrates the links, there is a mor detailed method to use :
 ```php
-[PULL_INIT_JS_FILES_PHP]
+// Retrieve list of files used by core
+$files = $wjs->jsFiles();
 ```
 This method will return js files used by core, depending of the core version used, the loaders defined, and required. Ex:
 
 ```php
-[PULL_INIT_JS_FILES_PHP_RETURN]
+array(
+  'js/wjs.js',
+  'js/loader.js',
+  'js/process.js',
+  'loader/jsScript/jsScript.js',
+  'loader/wjsLoader/wjsLoader.js',
+);
 ```
 
 You can now include these links into your html page. The next point is to init wjs. This action will unpack pushed content from PHP, and execute startup function (see "ready" method).
 On client side : 
 ```javascript
-[PULL_INIT_JS_FILES_JS_INIT]
+wjs.init(<?php print $this->wjs->initPackage(); ?>);
 ```
 
 
@@ -72,18 +98,35 @@ You have now connected client to server wjs instances, you have also defined whi
 
 
 ```php
-[REQUEST_CONTENT]
+print_r($_GET['wjs']);
+/*
+ * Array (
+ *   [0] => Array (
+ *     [t] => jsArray
+ *     [n] => testArray
+ *   )
+ * )
+ */
 ```
 
 So you can filter and manage returned content.
 ```php
-[REQUEST_CONTENT_PUSH]
+// Think about always make some verification on requested content.
+if ($_GET['wjs'][0]['t'] === 'jsArray' && $_GET['wjs'][0]['n'] === 'testArray') {
+  // Manage which data to retrieve.
+  $wjs->push('jsArray', 'testArray');
+  // One response is okay, this function will add json headers,
+  // print package content, then exit.
+  $wjs->response();
+}
 ```
 
 
 A simple method has been made for quickly handle client requests, but always think about filtering data from get before to use it.
 ```php
-[HANDLE_REMOTE_REQUEST]
+// This will return requested data from GET,
+// and manage print and exit, in one time.
+$this->wjs->extensionPushRequest($_GET['wjs']);
 ```
 
 
@@ -99,11 +142,17 @@ Simple Javascript Object
 
 On server side : 
 ```php
-[PULL_JSOBJECT_PHP]
+// Add array as a jsObject.
+$wjs->extensionAdd('jsObject', 'testObject', array(
+  'thisIs'        => 'ATest',
+  'thisIsAlso'    => 'AnOtherTest',
+  'thisIsANumber' => 123,
+  'thisIsAnArray' => array('foo' => 'bar')
+));
 ```
 On client side : 
 ```javascript
-[PULL_JSOBJECT_JS]
+wjs.pull('jsObject', 'testObject');
 ```
 
 
@@ -114,11 +163,17 @@ Like objects, you can also append data as javascript arrays. Note that array key
 
 On server side : 
 ```php
-[PULL_JSARRAY_PHP]
+$wjs->extensionAdd('jsArray', 'testArray', array(
+  0           => 'ATest',
+  1           => 'AnOtherTest',
+  'keysWill'  => 123,
+  'disaperar' => array(0 => 'bar')
+));
 ```
 On client side : 
 ```javascript
-[PULL_JSARRAY_JS]
+// Will return : ["ATest", "AnOtherTest", 123, Array[1]]
+wjs.pull('jsArray', 'testArray');
 ```
 
 
@@ -129,11 +184,18 @@ You can easily add simple javascript code for your own usage.
 
 On server side : 
 ```php
-[PULL_JSSCRIPT_PHP]
+// Add a remote file.
+$wjs->extensionAdd('jsScript', 'testScriptFile', $filePath);
+// Add an inline code.
+$wjs->extensionAdd('jsScript', 'testScriptInline', 'window.jsScriptInlineLoaded = true;');
 ```
 On client side : 
 ```javascript
-[PULL_JSSCRIPT_JS]
+wjs.pull('jsScript', 'testScriptFile');
+console.log(window.jsScriptFileLoaded); // true
+// This script will add
+wjs.pull('jsScript', 'testScriptInline');
+console.log(window.jsScriptInlineLoaded); // true
 ```
 
 
@@ -144,7 +206,8 @@ You can load simple javascript methods with wjs, asynchronously or not, and exec
 
 On server side : 
 ```php
-[PULL_JSMETHOD_PHP]
+// Add javascript method from a file.
+$wjs->extensionAdd('jsMethod', 'objectLength', $pathToWjs . 'extension/jsMethod/objectLength.js');
 ```
 Your Js file must also be wrapped, it allows wjs to catch it :
 
@@ -173,7 +236,15 @@ Your Js file must also be wrapped, it allows wjs to catch it :
 
 On client side : 
 ```javascript
-[PULL_JSMETHOD_JS]
+var testObject = {
+  'lorem': 'ipsum',
+  'dolor': 'sit',
+  'amet': 'poireau'
+};
+// We execute method directly through wjs,
+var length = wjs.pull('jsMethod', 'objectLength')(testObject);
+// Return 3
+console.log(length);
 ```
 
 
@@ -185,7 +256,10 @@ You can also use wjs to retrieve images, and use it only when load complete. Ima
 
 On client side : 
 ```javascript
-[PULL_IMAGE]
+// We load the HTML5 Image Logo
+wjs.pull('image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
+  complete: yourCustomCallback
+});
 ```
 
 
@@ -196,11 +270,19 @@ Now enter in the craziness of wjs.. Now you can also load loaders as extensions.
 
 On server side : 
 ```php
-[PULL_WJSLOADER_PHP]
+// We add a loader, this one exists in wjs core,
+// so this action is just here for example.
+$wjs->extensionAdd('wjsLoader', 'jsArray', $filePath);
 ```
 On client side : 
 ```javascript
-[PULL_WJSLOADER_JS]
+// First we load loader,
+// this action is also for example,
+// in real life, wjs make this action
+// automatically when pull a script.
+wjs.pull('wjsLoader', 'jsArray');
+// Then we load script.
+wjs.pull('jsArray', 'testArray');
 ```
 Obviously you should declare your loader into a separated javascript file. See into wjs core for more info.
 
