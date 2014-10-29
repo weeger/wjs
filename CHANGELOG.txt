@@ -1,6 +1,15 @@
-WJS - 3.0.0 - 2014-09-28
+WJS - 3.0.0 - 2014-10-29
+------------------------
+- Total rewrite
+- Core js size extremely reduced
+- Performances boosted
+- More clear API
+- And so on..
+
+WJS - 2.6.11 - 2014-10-14
 -------------------------
-- Full new version
+- Code style
+- Variables renaming
 
 WJS - 2.6.10 - 2014-09-21
 -------------------------

@@ -6,20 +6,21 @@
  * multiple scripts in the same time.
  * @param {WjsProto} wjs
  */
-(function (wjs) {
+(function (context) {
   'use strict';
   // <--]
   /** @constructor */
-  wjs.classExtend('WjsLoader', {
+  context.wjs.classExtend('WjsLoader', {
     type: 'undefined',
     preventReload: true,
 
     __construct: function () {
+      var self = this;
       // Generate base hook name
-      this.parseHook = 'parse' + this.wjs.upperCaseFirst(this.type);
+      self.parseHook = 'parse' + self.wjs.upperCaseFirst(self.type);
       // Hooks can be a chain of
-      while (typeof this.parseHook === 'string') {
-        this.parseHook = this[this.parseHook] || false;
+      while (typeof self.parseHook === 'string') {
+        self.parseHook = self[self.parseHook] || false;
       }
     },
 
@@ -65,24 +66,24 @@
      * @param {string} extensionData
      */
     responseParseItem: function (extensionName, extensionData, process) {
-      var output, require;
+      var output, require, self = this;
       // Load required elements first.
       if (extensionData['#require'] !== undefined) {
         // Save requirements, it allows to delete
         // dependencies on object destroy.
-        this.wjs.extRequire[this.type][extensionName] =
-          this.wjs.extRequire[this.type][extensionName] || {};
-        this.wjs.extendObject(
-          this.wjs.extRequire[this.type][extensionName],
+        self.wjs.extRequire[self.type][extensionName] =
+          self.wjs.extRequire[self.type][extensionName] || {};
+        self.wjs.extendObject(
+          self.wjs.extRequire[self.type][extensionName],
           extensionData['#require']);
         // Requirement may be already parsed before this item.
-        if (this.requireMissing(extensionData['#require'])) {
+        if (self.requireMissing(extensionData['#require'])) {
           // Local save.
           require = extensionData['#require'];
           // Delete requirement for further loop.
           extensionData['#require'] = undefined;
           // Launch pull.
-          this.wjs.extPullMultiple(require);
+          self.wjs.extPullMultiple(require);
           // Stop parsing at this point,
           // item has not been marked as complete,
           // so it will be parsed again on next iteration,
@@ -93,11 +94,11 @@
       // By default save raw data.
       output = extensionData['#data'];
       // Let loader manage own parsing method.
-      if (this.parseHook) {
-        output = this.parseHook(extensionName, output, process);
+      if (self.parseHook) {
+        output = self.parseHook(extensionName, output, process);
       }
       if (output !== false) {
-        process.parseItemComplete(this.type, extensionName, output);
+        process.parseItemComplete(self.type, extensionName, output);
       }
     },
 
@@ -123,4 +124,4 @@
     }
   });
   // [-->
-}(wjs));
+}(window));

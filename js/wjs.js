@@ -1,7 +1,8 @@
+// wJs v3.0.0 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '[$version]', WJSProto;
+  var wjsVersion = '3.0.0', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -28,6 +29,8 @@
       loadersExtra: [],
       /** @type {Object.Object} */
       loadersBuffer: {},
+      /** @type {Object.Object} */
+      loadersBasic: {},
       /** @type {Object.Object.?} */
       extLoaded: {},
       /** @type {Object.Array.string} */
@@ -54,33 +57,34 @@
      * Must be executed when document is ready.
      */
     init: function (options) {
+      var self = this;
       this.window.onload = function () {
         // Apply options.
-        this.extendObject(this, options);
+        self.extendObject(self, options);
+        // Create basic loaders who are required by package.
+        for (var i = 0, length = self.loadersBasic.length; i < length; i++) {
+          self.loaderAdd(self.loadersBasic[i]);
+        }
+        delete self.loadersBasic;
         // Load extensions loaders added before init.
-        this.loaderBufferFlush();
+        self.loaderBufferFlush();
         // Function is used only once.
-        delete this.loaderBufferFlush;
+        delete self.loaderBufferFlush;
         // Load all other scripts then run ready functions.
         // Execute startup functions.
-        this.unpack(this.packageDefault, this.onloadComplete.bind(this));
-      }.bind(this);
-    },
-
-    /**
-     * Execute all "ready" functions.
-     * Called by we_javascript_footer().
-     */
-    onloadComplete: function () {
-      var i, length;
-      // Mark as readyComplete, further ready functions
-      // will be executed directly.
-      this.readyComplete = true;
-      for (i = 0, length = this.readyCallbacks.length; i < length; i += 1) {
-        this.readyCallbacks[i].call(this);
-        // Callback useless.
-        delete this.readyCallbacks[i];
-      }
+        self.unpack(self.packageDefault, function () {
+          // Execute all "ready" functions.
+          var i, length;
+          // Mark as readyComplete, further ready functions
+          // will be executed directly.
+          self.readyComplete = true;
+          for (i = 0, length = self.readyCallbacks.length; i < length; i += 1) {
+            self.readyCallbacks[i].call(self);
+            // Callback useless.
+            delete self.readyCallbacks[i];
+          }
+        });
+      };
     },
 
     /**
@@ -118,25 +122,26 @@
      * @param {Object} methods
      */
     loaderAdd: function (name, methods) {
+      var self = this;
       // We can define loader with no special method.
       methods = methods || {};
       // If wjs is not ready to add loaders, we have
       // a temporary variable for loaders, it is removed
       // into wjs init function.
-      if (this.loadersBuffer !== undefined) {
-        this.loadersBuffer[name] = methods;
+      if (self.loadersBuffer !== undefined) {
+        self.loadersBuffer[name] = methods;
         return;
       }
-      if (!this.loaders[name]) {
-        var className = 'WjsLoader' + this.upperCaseFirst(name);
+      if (!self.loaders[name]) {
+        var className = 'WjsLoader' + self.upperCaseFirst(name);
         // Add name to prototype.
         methods.type = name;
         // Allow to use custom base class.
         methods.classExtends = methods.classExtends || 'WjsLoader';
-        this.classExtend(className, methods);
-        this.loaders[name] = new (this.classProto(className))(name);
-        this.extLoaded[name] = {};
-        this.extRequire[name] = {};
+        self.classExtend(className, methods);
+        self.loaders[name] = new (self.classProto(className))(name);
+        self.extLoaded[name] = {};
+        self.extRequire[name] = {};
       }
     },
 
@@ -146,17 +151,18 @@
      * @return {WjsLoader}
      */
     loaderGet: function (name) {
-      if (!this.loaders[name]) {
+      var self = this;
+      if (!self.loaders[name]) {
         // We know that an extra loader is available remotely.
-        if (this.loadersExtra.indexOf(name) !== -1) {
-          this.extPull('wjsLoader', name);
+        if (self.loadersExtra.indexOf(name) !== -1) {
+          self.extPull('wjsLoader', name);
         }
         // Extension definitively not exists.
         else {
-          this.error('Undefined loader "' + name + '"');
+          self.error('Undefined loader "' + name + '"');
         }
       }
-      return this.loaders[name];
+      return self.loaders[name];
     },
 
     /**
@@ -165,13 +171,14 @@
      * @param {string} name
      */
     loaderDestroy: function (name) {
+      var self = this;
       // Remove extension if exists.
-      this.extDestroy('wjsLoader', name);
+      self.extDestroy('wjsLoader', name);
       // Remove prototype.
-      this.classProtoDestroy('WjsLoader' + this.upperCaseFirst(name));
-      delete this.loaders[name];
-      delete this.extLoaded[name];
-      delete this.extRequire[name];
+      self.classProtoDestroy('WjsLoader' + self.upperCaseFirst(name));
+      delete self.loaders[name];
+      delete self.extLoaded[name];
+      delete self.extRequire[name];
     },
 
     /**
@@ -180,13 +187,14 @@
      */
     loaderBufferFlush: function () {
       var loaderName,
-        buffer = this.loadersBuffer;
+        self = this,
+        buffer = self.loadersBuffer;
       // This var will not be used anymore.
-      delete this.loadersBuffer;
+      delete self.loadersBuffer;
       // Create loaders prototypes.
       for (loaderName in buffer) {
         if (buffer.hasOwnProperty(loaderName)) {
-          this.loaderAdd(loaderName, buffer[loaderName]);
+          self.loaderAdd(loaderName, buffer[loaderName]);
         }
       }
     },
@@ -199,14 +207,15 @@
      * @return {?}
      */
     extPull: function (type, name, options) {
-      var i, extensionData = this.extGet(type, name),
-        processes = this.processes,
+      var i, self = this,
+        extensionData = self.extGet(type, name),
+        processes = self.processes,
         length = processes.length;
-      options = this.extendOptions(options) || {};
+      options = self.extendOptions(options) || {};
       options.async = options.async || (options.complete !== undefined);
       if (!extensionData ||
         // Reload is allowed internally
-        this.loaderGet(type).preventReload === false ||
+        self.loaderGet(type).preventReload === false ||
         // Reload is forced by user.
         (options.reload === true)) {
         // First search if a process is not
@@ -220,7 +229,7 @@
           }
         }
         // Item not found, we need to retrieve it.
-        this.loaderGet(type).extLoad(name, options);
+        self.loaderGet(type).extLoad(name, options);
       }
       // Extension already loaded.
       // We have to execute callback manually.
@@ -230,7 +239,7 @@
       // Return data if exists, we can't guarantee
       // that data can be loaded, due to various loader
       // parse management, even async is false (ex, image loader).
-      return this.extGet(type, name);
+      return self.extGet(type, name);
     },
 
     /**
@@ -267,22 +276,23 @@
      * @param {boolean=} withDependencies
      */
     extDestroy: function (type, name, withDependencies) {
-      if (this.extGet(type, name)) {
+      var self = this;
+      if (self.extGet(type, name)) {
         var requirementType, i,
-          require = this.extRequire[type][name];
+          require = self.extRequire[type][name];
         // Do not delete parent container for "type"
         // which is created by loader
         if (require && withDependencies) {
           for (requirementType in require) {
             if (require.hasOwnProperty(requirementType)) {
               for (i = 0; i < require[requirementType].length; i++) {
-                this.extDestroy(requirementType, require[requirementType][i]);
+                self.extDestroy(requirementType, require[requirementType][i]);
               }
             }
           }
-          delete this.extRequire[type][name];
+          delete self.extRequire[type][name];
         }
-        delete this.extLoaded[type][name];
+        delete self.extLoaded[type][name];
       }
     },
 
@@ -419,11 +429,12 @@
      * @param {Object} methods
      */
     classExtend: function (name, methods) {
-      if (this.classMethods[name]) {
-        this.extendProto(this.classMethods[name], methods);
+      var self = this;
+      if (self.classMethods[name]) {
+        self.extendProto(self.classMethods[name], methods);
       }
       else {
-        this.classMethods[name] = methods;
+        self.classMethods[name] = methods;
       }
     },
 
@@ -433,31 +444,33 @@
      * @return {Object} Prototype ready to be instantiated with "new".
      */
     classProto: function (name) {
+      var self = this;
       // Base object is created once.
-      if (!this.classProtos[name]) {
+      if (!self.classProtos[name]) {
         // It may have base constructor send from server.
         var classExtends = false,
           WJSClassProto,
           base = Object,
-          classMethod = this.classMethods[name];
+          classMethod = self.classMethods[name];
         // Or is specified into prototype.
         classExtends = classMethod && classMethod.classExtends ?
           classMethod.classExtends : classExtends;
         if (classExtends) {
-          base = this.classProto(classExtends);
+          base = self.classProto(classExtends);
         }
         // Create base object.
         WJSClassProto =
           // keep a internal copy.
-          this.classProtos[name] = function () {
+          self.classProtos[name] = function () {
+            var self = this;
             // All object generated by wjs has a constructor.
-            return (this.__construct) ?
-              this.__construct.apply(this, arguments) : null;
+            return (self.__construct) ?
+              self.__construct.apply(self, arguments) : null;
           };
         // Append base constructor.
         WJSClassProto.prototype = Object.create(base.prototype);
         // Adjust constructor to make instanceof works,
-        this.extendObject(WJSClassProto.prototype, {
+        self.extendObject(WJSClassProto.prototype, {
           constructor: base,
           className: name,
           wjs: this
@@ -466,13 +479,13 @@
       // Add extra method even constructor exists,
       // in case of prototype have been extended
       // after first constructor creation.
-      if (this.classMethods[name]) {
-        this.extendProto(
-          this.classProtos[name].prototype,
-          this.classMethods[name]
+      if (self.classMethods[name]) {
+        self.extendProto(
+          self.classProtos[name].prototype,
+          self.classMethods[name]
         );
       }
-      return this.classProtos[name];
+      return self.classProtos[name];
     },
 
     /**
@@ -480,11 +493,12 @@
      * @param {string} name
      */
     classProtoDestroy: function (name) {
-      if (this.classProtos[name]) {
-        delete this.classProtos[name];
+      var self = this;
+      if (self.classProtos[name]) {
+        delete self.classProtos[name];
       }
-      if (this.classMethods[name]) {
-        delete this.classMethods[name];
+      if (self.classMethods[name]) {
+        delete self.classMethods[name];
       }
     },
 
