@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.0.1';
+const WJS_VERSION                    = '3.0.2';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 

@@ -1,8 +1,8 @@
-// wJs v3.0.1 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.0.2 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.0.1', WJSProto;
+  var wjsVersion = '3.0.2', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -58,7 +58,7 @@
      */
     init: function (options) {
       var self = this;
-      this.window.onload = function () {
+      this.window.addEventListener('load', function () {
         // Apply options.
         self.extendObject(self, options);
         // Create basic loaders who are required by package.
@@ -84,7 +84,7 @@
             delete self.readyCallbacks[i];
           }
         });
-      };
+      });
     },
 
     /**
@@ -306,7 +306,7 @@
       options.async = options.async || false;
       var self = this,
         xhr = new self.window.XMLHttpRequest(),
-        event = new Event('wjsAjaxCall');
+        event = self.document.createEvent('Event');
       xhr.open(options.method, options.url, options.async);
       xhr.onreadystatechange = function () {
         // Process complete.
@@ -326,6 +326,7 @@
         xhr.setRequestHeader('Content-type',
           'application/x-www-form-urlencoded');
       }
+      event.initEvent('wjsAjaxCall', true, true);
       self.window.dispatchEvent(event);
       xhr.send(self.param(options.data));
     },
