@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.0.0';
+const WJS_VERSION                    = '3.0.1';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 
@@ -51,6 +51,8 @@ class Wjs extends Router {
       'js/wjs.js',
       'js/loader.js',
       'js/process.js',
+      'loader/jsScript/jsScript.js',
+      'loader/wjsLoader/wjsLoader.js',
     ),
   );
   /**
@@ -63,12 +65,18 @@ class Wjs extends Router {
    * @var array $settings
    */
   var $settings = array(
-    'responsePath'            => '',
-    'responseQueryExtraParam' => '',
-    'requestVariableName'     => 'wjs',
-    'requestVariableKeyType'  => 't',
-    'requestVariableKeyName'  => 'n',
+    'responsePath'              => '',
+    'responseQueryExtraParam'   => '',
+    'requestVariableName'       => 'wjs',
+    'requestVariableKeyType'    => 't',
+    'requestVariableKeyName'    => 'n',
+    'requestVariableKeyExclude' => 'no',
   );
+  /**
+   * Keep a reference to added summaries.
+   * @var array
+   */
+  var $summaries = array();
   var $errorLevel = E_USER_ERROR;
 
   /**
@@ -104,7 +112,7 @@ class Wjs extends Router {
 
   /**
    * @param      $name
-   * @param bool $reload
+   * @param bool $reload Used internally to avoid recursion.
    *
    * @return \Wjs\Loader
    */
@@ -128,6 +136,7 @@ class Wjs extends Router {
    * @param \Wjs\Summary $summary
    */
   function summaryAdd(\Wjs\Summary $summary) {
+    $this->summaries[get_class($summary)] = $summary;
     $this->summaryImportExtensionsLoaders($summary);
     $this->summaryImportExtensions($summary);
   }
@@ -168,12 +177,16 @@ class Wjs extends Router {
 
   /**
    * Add previously registered function to the output package.
+   *
+   * @param            $extensionType
+   * @param            $extensionName
+   * @param bool|array $excludeRequire
    */
-  function extensionPush($extensionType, $extensionName) {
+  function extensionPush($extensionType, $extensionName, $excludeRequire = FALSE) {
     $loader = $this->loaderGet($extensionType);
     if ($loader) {
       if (isset($loader->extensions[$extensionName])) {
-        $extensionData = $loader->extensionPush($extensionName, $loader->extensions[$extensionName]);
+        $extensionData = $loader->extensionPush($extensionName, $loader->extensions[$extensionName], $excludeRequire);
       }
       else {
         $extensionData = WJS_ERR_PUSH_MISSING_EXTENSION;
@@ -192,7 +205,24 @@ class Wjs extends Router {
 
   function extensionPushRequest($requestArray) {
     foreach ($requestArray as $item) {
-      $this->extensionPush($item[$this->settings['requestVariableKeyType']], $item[$this->settings['requestVariableKeyName']]);
+      $excludeRequire = isset($item[$this->settings['requestVariableKeyExclude']]) ? $item[$this->settings['requestVariableKeyExclude']] : FALSE;
+      // Must be boolean or array,
+      // param for true is "1".
+      if ($excludeRequire) {
+        if (is_array($excludeRequire)) {
+          foreach ($excludeRequire as $type => $items) {
+            $excludeRequire[$type] = explode(',', $items);
+          }
+        }
+        else {
+          $excludeRequire = TRUE;
+        }
+      }
+      $this->extensionPush(
+        $item[$this->settings['requestVariableKeyType']],
+        $item[$this->settings['requestVariableKeyName']],
+        $excludeRequire
+      );
     }
   }
 
@@ -273,12 +303,6 @@ class Wjs extends Router {
     $files = array();
     foreach ($this->jsCoreFiles[$this->jsCoreFilesVersion] as $file) {
       $files[] = $basePath . $file;
-    }
-    /* @var \Wjs\Loader $loader */
-    foreach ($this->loaders as $loader_name => $loader) {
-      if ($loader->pathJsFileRel && ($loader_name !== 'wjsLoader' || $this->jsCoreFilesVersion === 'source')) {
-        $files[] = $basePath . $loader->pathJsFileRel;
-      }
     }
     return $files;
   }

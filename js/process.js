@@ -64,26 +64,41 @@
      * Launch retrieving.
      */
     loadingStart: function () {
-      var i,
+      var i, j,
         self = this,
         requests = self.extRequests,
+        request,
+        prefix,
+        settings = this.wjs.settings,
         length = self.extRequests.length,
         serverRequest = {},
         responsePackage = {};
       self.loadingStarted = true;
       // Treat requests list.
       for (i = 0; i < length; i++) {
-        switch (requests[i].mode) {
+        request = requests[i];
+        switch (request.mode) {
           case 'server':
+            prefix = 'wjs[' + i + '][';
             // Build query for server.
-            serverRequest['wjs[' + i + '][t]'] = requests[i].type;
-            serverRequest['wjs[' + i + '][n]'] = requests[i].name;
+            serverRequest[prefix + settings.requestVariableKeyType + ']'] = request.type;
+            serverRequest[prefix + settings.requestVariableKeyName + ']'] = request.name;
+            if (request.excludeRequire) {
+              if (request.excludeRequire === true) {
+                serverRequest[prefix + settings.requestVariableKeyExclude + ']'] = '1';
+              }
+              else {
+                for (j in request.excludeRequire) {
+                  serverRequest[prefix + settings.requestVariableKeyExclude + '][' + j + ']'] = request.excludeRequire[j].join(',');
+                }
+              }
+            }
             break;
           case 'parse':
-            if (responsePackage[requests[i].type] === undefined) {
-              responsePackage[requests[i].type] = {};
+            if (responsePackage[request.type] === undefined) {
+              responsePackage[request.type] = {};
             }
-            responsePackage[requests[i].type][requests[i].name] =
+            responsePackage[request.type][request.name] =
             {'#data': true};
             break;
         }
@@ -91,7 +106,7 @@
       // Do we need a server request.
       if (!self.wjs.objectIsEmpty(serverRequest)) {
         // Launch AJAX call.
-        self.wjs.remoteRequest({
+        self.wjs.ajax({
           url: self.wjs.settings.responsePath + '?' +
             self.wjs.param(serverRequest) +
             self.wjs.settings.responseQueryExtraParam,

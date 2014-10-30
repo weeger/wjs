@@ -53,13 +53,40 @@ class Loader extends Router {
     $this->extensionsRequire[$name][$requireType][] = $requireName;
   }
 
-  function extensionPush($name, $value) {
+  /**
+   * @param            $name
+   * @param            $value
+   * @param bool|array $excludeRequire
+   *
+   * @return array
+   */
+  function extensionPush($name, $value, $excludeRequire = FALSE) {
     $package = array(
       '#data' => $value,
     );
-    if (isset($this->extensionsRequire[$name])) {
-      $package['#require'] = $this->extensionsRequire[$name];
-      $this->wjs->extensionPushArray($this->extensionsRequire[$name]);
+    // Add dependency to element loader itself,
+    // Do not load core loaders extensions.
+    if (!isset($this->wjs->summaries['Wjs\WjsCoreSummary']->loaders[$this->name])) {
+      $this->extensionAddRequire($this->name, $name, 'wjsLoader', $this->name);
+    }
+    // Get dependencies.
+    if (isset($this->extensionsRequire[$name]) && $excludeRequire !== TRUE) {
+      $require = $this->extensionsRequire[$name];
+      // Var can be false at this point.
+      if (is_array($excludeRequire)) {
+        // Only get non filtered dependencies.
+        foreach ($this->extensionsRequire[$name] as $requireType => $requireItems) {
+          if (isset($excludeRequire[$requireType])) {
+            // We filter data with array values to have clean indexes,
+            // it allow to javascript to save and destroy requirement properly.
+            $require[$requireType] = array_values(array_diff($requireItems, $excludeRequire[$requireType]));
+          }
+        }
+      }
+      // Save require for javascript parsing.
+      $package['#require'] = $require;
+      // Push requirements.
+      $this->wjs->extensionPushArray($require);
     }
     return $package;
   }

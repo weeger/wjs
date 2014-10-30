@@ -470,16 +470,13 @@ wjs.classProto("className"))(arguments);
 
 Copyright
 ---------
-Copyright Romain WEEGER 2010 / 2014  
-http://www.wexample.com  
-  
-Licensed
-under the MIT and GPL licenses :  
-  
- -
-http://www.opensource.org/licenses/mit-license.php  
- -
-http://www.gnu.org/licenses/gpl.html
+Copyright Romain WEEGER 2010 / 2014
+http://www.wexample.com
+
+Licensed under the MIT and GPL licenses :
+
+ - http://www.opensource.org/licenses/mit-license.php
+ - http://www.gnu.org/licenses/gpl.html
 
 Thanks
 ------

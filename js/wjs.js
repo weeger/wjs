@@ -1,8 +1,8 @@
-// wJs v3.0.0 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.0.1 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.0.0', WJSProto;
+  var wjsVersion = '3.0.1', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -213,6 +213,7 @@
         length = processes.length;
       options = self.extendOptions(options) || {};
       options.async = options.async || (options.complete !== undefined);
+      // Check if data is missing.
       if (!extensionData ||
         // Reload is allowed internally
         self.loaderGet(type).preventReload === false ||
@@ -300,10 +301,12 @@
      * Simple AJAX request
      * @param {Object} options Contain various ajax options.
      */
-    remoteRequest: function (options) {
+    ajax: function (options) {
       options.method = options.method || 'GET';
       options.async = options.async || false;
-      var xhr = new this.window.XMLHttpRequest();
+      var self = this,
+        xhr = new self.window.XMLHttpRequest(),
+        event = new Event('wjsAjaxCall');
       xhr.open(options.method, options.url, options.async);
       xhr.onreadystatechange = function () {
         // Process complete.
@@ -323,7 +326,8 @@
         xhr.setRequestHeader('Content-type',
           'application/x-www-form-urlencoded');
       }
-      xhr.send(this.param(options.data));
+      self.window.dispatchEvent(event);
+      xhr.send(self.param(options.data));
     },
 
     /**

@@ -31,9 +31,12 @@
      * @param {Object} options
      */
     extLoad: function (name, options) {
+      // We need to split options between process and request,
+      // a process can handle multiple requests.
       this.processSingle(options, {
         mode: 'server',
-        name: name
+        name: name,
+        excludeRequire: options.excludeRequire
       });
     },
 
@@ -48,7 +51,11 @@
       requestOptions.type = this.type;
       /** @type {WJSProcessProto} */
       var process = new this.wjs.processProto(
-        this.wjs.extendOptions(processOptions,
+        this.wjs.extendOptions({
+            // We filter options manually here,
+            async: processOptions.async,
+            complete: processOptions.complete
+          },
           // Add type / name of the main requested object,
           // @see process prototype.
           {
@@ -66,22 +73,22 @@
      * @param {string} extensionData
      */
     responseParseItem: function (extensionName, extensionData, process) {
-      var output, require, self = this;
+      var output, require, self = this, requireKey = '#require';
       // Load required elements first.
-      if (extensionData['#require'] !== undefined) {
+      if (extensionData[requireKey] !== undefined) {
         // Save requirements, it allows to delete
         // dependencies on object destroy.
         self.wjs.extRequire[self.type][extensionName] =
           self.wjs.extRequire[self.type][extensionName] || {};
         self.wjs.extendObject(
           self.wjs.extRequire[self.type][extensionName],
-          extensionData['#require']);
+          extensionData[requireKey]);
         // Requirement may be already parsed before this item.
-        if (self.requireMissing(extensionData['#require'])) {
+        if (self.requireMissing(extensionData[requireKey])) {
           // Local save.
-          require = extensionData['#require'];
+          require = extensionData[requireKey];
           // Delete requirement for further loop.
-          extensionData['#require'] = undefined;
+          extensionData[requireKey] = undefined;
           // Launch pull.
           self.wjs.extPullMultiple(require);
           // Stop parsing at this point,
