@@ -12,6 +12,6 @@ class wjsLoader extends jsScript {
     $path = $value . $name . '.js';
     // wjsLoader value is always a folder path,
     // expecting that a js file inside it exists.
-    return parent::extensionPush($name, is_file($path) ? $path : TRUE);
+    return parent::extensionPush($name, is_file($path) ? $path : TRUE, $excludeRequire);
   }
 }

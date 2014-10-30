@@ -12,6 +12,6 @@ class jsArray extends Loader {
    * Append object to the output array.
    */
   function extensionPush($name, $value, $excludeRequire = FALSE) {
-    return parent::extensionPush($name, array_values($value));
+    return parent::extensionPush($name, array_values($value), $excludeRequire);
   }
 }

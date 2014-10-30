@@ -11,6 +11,8 @@ class WjsCoreSummary extends Summary {
     // Add extra core loaders.
     'wjsLoader' => array(
       'jsObject' => '../loader/jsObject/',
+      'jsLink'   => '../loader/jsLink/',
+      'cssLink'  => '../loader/cssLink/',
       'jsMethod' => '../loader/jsMethod/',
       'jsArray'  => '../loader/jsArray/',
       'image'    => '../loader/image/',

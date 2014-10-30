@@ -40,7 +40,10 @@ $wjs = new \Wjs(array(
   'server' => array(
     // Path to wjs is used by wjs to retrieve
     // core scripts and internal library.
-    'wjs' => $pathToWjsLibrary,
+    'wjs'   => $pathToWjsLibrary,
+    // If you want to use cache, you have
+    // to specify route for the local folder.
+    'cache' => $yourCustomCachePath
   ),
   'client' => array(
     // This path is not required, but recommended,
@@ -324,6 +327,61 @@ On client side
 wjs.pull('image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
   complete: yourCustomCallback
 });
+```
+
+
+Javascript links
+----------------
+
+wjs is also able to append script links into your pages.
+
+On
+client side : 
+```javascript
+// We load an external js.
+wjs.pull('jsLink', pathToYourJsFile, {
+  complete: yourCustomCallback
+});
+```
+
+
+But also several links, if you need to add them in a specific order
+On
+client side : 
+```javascript
+// If several links are declared from an array,
+// All links are loaded, in order. Each link wait for
+// the previous one to be loaded.
+wjs.pull('jsLink', [pathToYourJsFile, pathToYourJsFile2],
+yourCustomCallback2);
+```
+
+
+CSS links
+---------
+
+Like .js, you can also retireve css links, as link tags. They will be
+appended to your document head.
+
+On client side : 
+```javascript
+// We load an
+external js.
+wjs.pull('cssLink', pathToYourCssFile, {
+  complete: yourCustomCallback
+});
+```
+
+
+And for multiple css. On client side : 
+```javascript
+// If several
+links are declared from an array,
+// All links are loaded, in order. Each link wait for
+// the previous one to be loaded,
+// wrong css links do not block the process.
+wjs.pull('cssLink', [pathToYourCssFile, pathToYourCssFile2],
+yourCustomCallback2);
 ```
 
 

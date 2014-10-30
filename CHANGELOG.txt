@@ -1,3 +1,8 @@
+WJS - 3.0.3 - 2014-10-30
+------------------------
+- Loaders for .css and .js links
+- Move js files to src
+
 WJS - 3.0.2 - 2014-10-30
 ------------------------
 - ie debug

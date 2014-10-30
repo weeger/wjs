@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.0.2';
+const WJS_VERSION                    = '3.0.3';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 
@@ -48,9 +48,9 @@ class Wjs extends Router {
       // Files order is important.
       // In this case, wjsLoader loader
       // is added via the normal js list way.
-      'js/wjs.js',
-      'js/loader.js',
-      'js/process.js',
+      'src/wjs.js',
+      'src/loader.js',
+      'src/process.js',
       'loader/jsScript/jsScript.js',
       'loader/wjsLoader/wjsLoader.js',
     ),
@@ -77,6 +77,7 @@ class Wjs extends Router {
    * @var array
    */
   var $summaries = array();
+  var $cacheEnabled = FALSE;
   var $errorLevel = E_USER_ERROR;
 
   /**
@@ -128,6 +129,21 @@ class Wjs extends Router {
     }
     $this->error(WJS_ERR_MISSING_LOADER . ' : ' . $name);
     return NULL;
+  }
+
+  function cacheEnable() {
+    $pathCache = $this->routeGet('server', 'cache');
+    if ($pathCache) {
+      if (file_exists($pathCache) && is_writable($pathCache)) {
+        $this->cacheEnabled = TRUE;
+      }
+      else {
+        $this->error('Path cache not found or not writable : ' . $pathCache);
+      }
+    }
+    else {
+      $this->error('Missing cache path');
+    }
   }
 
   /**

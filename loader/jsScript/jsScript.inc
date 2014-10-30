@@ -16,6 +16,6 @@ class jsScript extends Loader {
     if (is_file($value)) {
       $value = file_get_contents($value);
     }
-    return parent::extensionPush($name, $value);
+    return parent::extensionPush($name, $value, $excludeRequire);
   }
 }
