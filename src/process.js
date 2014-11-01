@@ -17,9 +17,9 @@
   var WJSProcessProto = function (options) {
     options = options || {};
     // Default values
-    wjs.extendObject(this, {
+    context.wjs.extendObject(this, {
       /** @type {WJSProto} */
-      wjs: wjs,
+      wjs: context.wjs,
       /** @type {Object.Object} */
       parseQ: {},
       /** @type {boolean} Async mode is specified for whole process. */
@@ -39,7 +39,7 @@
       mainName: options.mainName
     });
     // Save it into w.
-    wjs.processes.push(this);
+    this.wjs.processes.push(this);
   };
 
   WJSProcessProto.prototype = {

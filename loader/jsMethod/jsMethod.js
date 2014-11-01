@@ -1,7 +1,7 @@
-(function (wjs) {
+(function (context) {
   'use strict';
   // <--]
-  wjs.loaderAdd('jsMethod', {
+  context.wjs.loaderAdd('jsMethod', {
     // Extends full named loader class.
     classExtends: 'WjsLoaderJsScript',
     methodAddLast: null,
@@ -50,4 +50,4 @@
     }
   });
   // [-->
-}(wjs));
+}(typeof wjsContext !== 'undefined' ? wjsContext : window));

@@ -1,15 +1,15 @@
-(function (wjs) {
+(function (context) {
   'use strict';
   // <--]
-  wjs.loaderAdd('jsLink', {
+  context.wjs.loaderAdd('jsLink', {
 
     /**
      * Javascript are loaded via AJAX.
      */
     extLoad: function (urls, options) {
+      urls = (!Array.isArray(urls)) ? [urls] : urls;
       // Init a new process.
-      var i, urls = (!Array.isArray(urls)) ? [urls] : urls,
-        length = urls.length,
+      var i, length = urls.length,
         process = new this.wjs.processProto({
           async: options.async,
           complete: options.complete,
@@ -43,4 +43,4 @@
     }
   });
   // [-->
-}(wjs));
+}(typeof wjsContext !== 'undefined' ? wjsContext : window));

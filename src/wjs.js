@@ -1,7 +1,8 @@
+// wJs v3.0.4 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.0.3', WJSProto;
+  var wjsVersion = '3.0.4', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -12,8 +13,8 @@
   /** @constructor */
   WJSProto = function () {
     this.extendObject(this, {
-      window: context.window,
-      document: context.document,
+      window: context.window || window,
+      document: context.document || window.document,
       /** @type {string} */
       version: wjsVersion,
       /** @type Array.Function */

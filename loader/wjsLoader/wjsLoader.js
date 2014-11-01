@@ -1,7 +1,7 @@
-(function (wjs) {
+(function (context) {
   'use strict';
   // <--]
-  wjs.loaderAdd('wjsLoader', {
+  context.wjs.loaderAdd('wjsLoader', {
     // Extends full named loader class.
     classExtends: 'WjsLoaderJsScript',
     // Loader is created by javascript.
@@ -19,4 +19,4 @@
     }
   });
   // [-->
-}(wjs));
+}(typeof wjsContext !== 'undefined' ? wjsContext : window));

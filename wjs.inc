@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.0.3';
+const WJS_VERSION                    = '3.0.4';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 
@@ -43,6 +43,9 @@ class Wjs extends Router {
       // Minified version contain core js,
       // and also wjsLoader loader.
       'wjs.min.js',
+    ),
+    'jQuery' => array(
+      'wjs.jquery.js',
     ),
     'source' => array(
       // Files order is important.
@@ -352,7 +355,7 @@ class Wjs extends Router {
    * @return string
    */
   function renderJsUnpacker() {
-    return 'window.wjs.init(' . $this->initPackage() . ');';
+    return ($this->jsCoreFilesVersion === 'jQuery' ? 'jQuery' : 'window') . '.wjs.init(' . $this->initPackage() . ');';
   }
 
   /**

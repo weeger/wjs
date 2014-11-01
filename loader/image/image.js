@@ -1,7 +1,7 @@
-(function (wjs) {
+(function (context) {
   'use strict';
   // <--]
-  wjs.loaderAdd('image', {
+  context.wjs.loaderAdd('image', {
 
     /**
      * We need a special process with no ajax request,
@@ -40,4 +40,4 @@
     }
   });
   // [-->
-}(wjs));
+}(typeof wjsContext !== 'undefined' ? wjsContext : window));

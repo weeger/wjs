@@ -1,4 +1,9 @@
-WJS - 3.0.3 - 2014-10-30
+WJS - 3.0.4 - 2014-11-01
+------------------------
+- wjs as jQuery plugin
+- 
+
+WJS - 3.0.3 - 2014-11-01
 ------------------------
 - Loaders for .css and .js links
 - Move js files to src

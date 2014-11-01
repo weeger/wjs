@@ -5,14 +5,24 @@ Introduction
 
 ![Alt text](wjs-logo.png?raw=true "The discreet library")
 Load
-everything you need as an extension. Wjs is an entry point to make your
-Javascript web app retrieve data from your server, via AJAX, or not. Everything
-is an extension with wjs : script, image, html, etc..., and all extensions may
-load dependencies. It is really lightweight and infinitely extensible by your
-own application data. It makes all your components packable, and let your
-clients download it only when they need. The advantage is to not load useless
-data in your page, and also to not care about predicting user needs. Obviously,
-it requires a minimum of configuration before.. 
+everything you need as an extensions package. Wjs is an entry point to make your
+Javascript web app retrieve assets from your server, via AJAX, or not.
+Everything is an extension with wjs : script, image, html, etc..., and all
+extensions can load dependencies. This library is for you, if you want to :
+
+-
+Load complex packages from your PHP application to javascript, in a minimum of
+requests.
+- Lazy load all components of your pages (js methods, classes, images,
+links, etc...).
+- Instantiate javascript class objects. 
+
+It is really
+lightweight and infinitely extensible by your own application components.
+Obviously, it requires a minimum of configuration before.. Checkout a demo on
+this <a target="_blank"
+href="http://wemplate.wexample.com/?p=1C2A8&changes=1">demo
+website</a>.
 
 Configuration
 =============

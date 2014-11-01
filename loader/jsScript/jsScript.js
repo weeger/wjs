@@ -1,7 +1,7 @@
-(function (wjs) {
+(function (context) {
   'use strict';
   // <--]
-  wjs.loaderAdd('jsScript', {
+  context.wjs.loaderAdd('jsScript', {
     /**
      * Execute retrieved javascript.
      * @param {string} name
@@ -26,4 +26,4 @@
     }
   });
   // [-->
-}(wjs));
+}(typeof wjsContext !== 'undefined' ? wjsContext : window));
