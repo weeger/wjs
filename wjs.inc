@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.0.4';
+const WJS_VERSION                    = '3.0.5';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 
@@ -328,14 +328,17 @@ class Wjs extends Router {
 
   /**
    * Return all needed scripts for HTML head to init wjs.
+   * @param int $indentLength Allow links to be indented.
+   *
    * @return string
    */
-  function renderHeader() {
+  function renderHeader($indentLength = 0) {
     $output = '';
+    $indent = $indentLength === 0 ? '' : "\n" . str_repeat(' ', $indentLength);
     foreach ($this->jsFiles() as $file) {
-      $output .= $this->renderJsInclude($file);
+      $output .=  $indent . $this->renderJsInclude($file);
     }
-    $output .= '<script type="text/javascript">' . $this->renderJsUnpacker() . '</script>';
+    $output .= $indent . '<script type="text/javascript">' . $this->renderJsUnpacker() . '</script>';
     return $output;
   }
 

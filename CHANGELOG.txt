@@ -1,3 +1,8 @@
+WJS - 3.0.5 - 2014-11-01
+------------------------
+- npm package.json
+- header indentation
+
 WJS - 3.0.4 - 2014-11-01
 ------------------------
 - wjs as jQuery plugin
