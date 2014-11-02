@@ -1,7 +1,7 @@
 (function (context) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('jsMethod', {
+  context.wjs.loaderAdd('JsMethod', {
     // Extends full named loader class.
     classExtends: 'WjsLoaderJsScript',
     methodAddLast: null,

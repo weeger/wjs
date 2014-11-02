@@ -27,20 +27,35 @@ class Loader extends Router {
    */
   var $extensions = array();
   var $extensionsRequire = array();
+  var $lineage = array();
 
-  function __construct($routes, $name, \Wjs $wjs) {
+  function __construct($routes, \Wjs $wjs) {
     parent::__construct($routes);
-    $this->name          = $name;
+    $reflector           = new \ReflectionClass($this);
+    $this->name          = $reflector->getShortName();
     $this->wjs           = $wjs;
-    $reflector           = new \ReflectionClass(get_class($this));
     $this->pathPhpFile   = $this->pathCleanupSlashes(dirname($reflector->getFileName()) . '/');
     $this->pathJsFile    = $this->pathPhpFile . $this->name . '.js';
     $this->pathJsFile    = file_exists($this->pathJsFile) ? $this->pathJsFile : FALSE;
     $this->pathJsFileRel = $this->pathSubtract($this->pathCleanupSlashes(realpath($this->wjs->routeGet('server', 'wjs'))) . '/', $this->pathJsFile);
+    // Get inheritance linage,
+    // for extension load dependencies.
+    /** @var \ReflectionClass $class */
+    $class         = $reflector;
+    $this->lineage = array();
+    while ($class = $class->getParentClass()) {
+      $parent = $class->getName();
+      if ($parent !== 'Wjs\Loader') {
+        $this->lineage[] = $class->getShortName();
+      }
+      else {
+        break;
+      }
+    }
   }
 
-  function extensionAdd($name, $path) {
-    $this->extensions[$name] = $path;
+  function extensionAdd($name, $data) {
+    $this->extensions[$name] = $data;
   }
 
   function extensionAddRequire($name, $requireType, $requireName) {
@@ -67,7 +82,7 @@ class Loader extends Router {
     // Add dependency to element loader itself,
     // Do not load core loaders extensions.
     if (!isset($this->wjs->summaries['Wjs\WjsCoreSummary']->loaders[$this->name])) {
-      $this->extensionAddRequire($this->name, $name, 'wjsLoader', $this->name);
+      $this->extensionAddRequire($this->name, $name, 'WjsLoader', $this->name);
     }
     // Get dependencies.
     if (isset($this->extensionsRequire[$name]) && $excludeRequire !== TRUE) {

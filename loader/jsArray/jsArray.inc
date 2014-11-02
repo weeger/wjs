@@ -7,7 +7,7 @@ use \Wjs\Loader;
 /**
  * Transmit an array to a JS array.
  */
-class jsArray extends Loader {
+class JsArray extends Loader {
   /**
    * Append object to the output array.
    */

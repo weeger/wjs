@@ -7,5 +7,5 @@ use \Wjs\Loader;
 /**
  * Transmit an array to a JS object.
  */
-class jsObject extends Loader {
+class JsObject extends Loader {
 }

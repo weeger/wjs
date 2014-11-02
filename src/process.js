@@ -11,6 +11,8 @@
   'use strict';
   // <--]
   /**
+   * We don't use classExtend, given that
+   * processes does not use class inheritances.
    * @param {Object=} options
    * @constructor
    */
@@ -56,7 +58,7 @@
         self.extRequests.push(requestData);
       }
       else {
-        self.wjs.error('Try to add extensions request after process start.');
+        self.wjs.err('Try to add extensions request after process start.');
       }
     },
 
@@ -99,7 +101,7 @@
               responsePackage[request.type] = {};
             }
             responsePackage[request.type][request.name] =
-            {'#data': true};
+            {'#data': request.data};
             break;
         }
       }
@@ -200,7 +202,7 @@
       // If not, may be an unknown script is present in
       // the returned package.
       if (!self.wjs.objectIsEmpty(queue)) {
-        self.wjs.error('Parse queue not empty.');
+        self.wjs.err('Parse queue not empty.');
       }
       self.loadingComplete();
     },
@@ -214,7 +216,7 @@
     responseParseItem: function (extensionType, extensionName) {
       var self = this;
       // Parse using according loader.
-      self.wjs.loaderGet(extensionType)
+      self.wjs.loaders[extensionType]
         .responseParseItem(
           extensionName,
           self.parseQ[extensionType][extensionName],

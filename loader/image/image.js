@@ -1,7 +1,7 @@
 (function (context) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('image', {
+  context.wjs.loaderAdd('Image', {
 
     /**
      * We need a special process with no ajax request,

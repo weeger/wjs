@@ -18,7 +18,10 @@ class Router {
    */
   function __construct($routes = array()) {
     // Allow to set paths to null, but creates route array instead.
+    // This is useful to not manage that in subclasses.
     $routes = $routes === NULL ? array() : $routes;
+    // Merge routes with default values.
+    $routes = array_merge_recursive($this->routeDefault, $routes);
     // Search for unfilled required routes.
     foreach ($this->routeRequired as $side => $routeRequired) {
       if (!isset($routes[$side])) {

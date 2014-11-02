@@ -7,6 +7,6 @@ use \Wjs\Loader;
 /**
  * Transmit an array to a JS array.
  */
-class image extends Loader {
+class Image extends Loader {
 
 }

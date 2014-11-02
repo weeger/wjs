@@ -1,12 +1,14 @@
 <?php
 
-const WJS_VERSION                    = '3.0.5';
+const WJS_VERSION                    = '3.1.0';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 
 require_once 'class/router.inc';
 require_once 'class/loader.inc';
 require_once 'class/summary.inc';
+require_once 'loader/JsLink/JsLink.inc';
+require_once 'loader/WjsLoader/WjsLoader.inc';
 require_once 'summary/core.wjs.inc';
 
 use \Wjs\Router;
@@ -30,7 +32,7 @@ class Wjs extends Router {
   /**
    * Contain data to transmit to wjs javascript object.
    */
-  var $outputPackage;
+  var $outputPackage = array();
   /**
    * Contain list of core files, used to complete list
    * of output js files list. Core files can differ from
@@ -41,7 +43,7 @@ class Wjs extends Router {
   var $jsCoreFiles = array(
     'master' => array(
       // Minified version contain core js,
-      // and also wjsLoader loader.
+      // and also WjsLoader loader.
       'wjs.min.js',
     ),
     'jQuery' => array(
@@ -49,13 +51,13 @@ class Wjs extends Router {
     ),
     'source' => array(
       // Files order is important.
-      // In this case, wjsLoader loader
+      // In this case, WjsLoader loader
       // is added via the normal js list way.
       'src/wjs.js',
       'src/loader.js',
       'src/process.js',
-      'loader/jsScript/jsScript.js',
-      'loader/wjsLoader/wjsLoader.js',
+      'loader/JsLink/JsLink.js',
+      'loader/WjsLoader/WjsLoader.js',
     ),
   );
   /**
@@ -88,50 +90,28 @@ class Wjs extends Router {
    */
   function __construct($routes = array()) {
     parent::__construct($routes);
+    // Add core wjs loader manually.
+    $this->loaders['WjsLoader'] = new \Wjs\Loader\WjsLoader(NULL, $this);
+    // Load core summary,
+    // paths defined must be relocated accordingly wjs.
+    $summary = new \Wjs\WjsCoreSummary();
+    foreach ($summary->extensions['WjsLoader'] as $loaderName => $args) {
+      $summary->extensions['WjsLoader'][$loaderName] = array(
+        $this->routeGet('server', 'wjs') . $summary->extensions['WjsLoader'][$loaderName][0],
+        $this->routeGet('client', 'wjs') . $summary->extensions['WjsLoader'][$loaderName][1],
+      );
+    }
     // Add default loaders.
-    $this->summaryAdd(new \Wjs\WjsCoreSummary());
-  }
-
-  /**
-   * Add new extension loader.
-   */
-  function loaderAdd($name, $path) {
-    // Directory must have loader name.
-    $path .= $name;
-    // Directory must contain at least one PHP file :
-    //   - [name].inc : Containing PHP class
-    // The JS loader must exists, but file can be declared
-    // from another source.
-    //   - [name].js : Containing Js class
-    if (!is_file($path . '.inc')) {
-      trigger_error('wjs error : missing ' . $path . '.inc file for loader ' . $name, E_USER_ERROR);
-    }
-    else {
-      // Load PHP class definition.
-      require_once $path . '.inc';
-      $class_name           = '\Wjs\Loader\\' . $name;
-      $this->loaders[$name] = new $class_name(NULL, $name, $this);
-    }
+    $this->summaryAdd($summary);
   }
 
   /**
    * @param      $name
-   * @param bool $reload Used internally to avoid recursion.
    *
    * @return \Wjs\Loader
    */
-  function loaderGet($name, $reload = FALSE) {
-    if (isset($this->loaders[$name])) {
-      return $this->loaders[$name];
-    }
-    elseif ($reload === FALSE && $this->extensionGet('wjsLoader', $name)) {
-      // Add loader from registered extension.
-      $this->loaderAdd($name, $this->extensionGet('wjsLoader', $name));
-      // Loader must have been added.
-      return $this->loaderGet($name, TRUE);
-    }
-    $this->error(WJS_ERR_MISSING_LOADER . ' : ' . $name);
-    return NULL;
+  function loaderGet($name) {
+    return $this->loaders[$name];
   }
 
   function cacheEnable() {
@@ -156,20 +136,13 @@ class Wjs extends Router {
    */
   function summaryAdd(\Wjs\Summary $summary) {
     $this->summaries[get_class($summary)] = $summary;
-    $this->summaryImportExtensionsLoaders($summary);
     $this->summaryImportExtensions($summary);
-  }
-
-  function summaryImportExtensionsLoaders(\Wjs\Summary $summary) {
-    foreach ($summary->loaders as $loaderName => $loaderDirectory) {
-      $this->loaderAdd($loaderName, $summary->pathPhpFile . $loaderDirectory);
-    }
   }
 
   function summaryImportExtensions(\Wjs\Summary $summary) {
     foreach ($summary->extensions as $type => $items) {
-      foreach ($items as $name => $path) {
-        $this->extensionAdd($type, $name, $summary->pathPhpFile . $path);
+      foreach ($items as $name => $data) {
+        $this->extensionAdd($type, $name, $data);
       }
     }
   }
@@ -275,7 +248,7 @@ class Wjs extends Router {
   }
 
   function responsePackage() {
-    return ($this->outputPackage) ? json_encode($this->outputPackage) : '{}';
+    return (!empty($this->outputPackage)) ? json_encode($this->outputPackage) : '{}';
   }
 
   /**
@@ -283,22 +256,27 @@ class Wjs extends Router {
    * ready to parse on page loading.
    */
   function initPackage() {
+    // Append loaders for pushed extensions,
+    // it allow to parse start package completely.
+    foreach ($this->outputPackage as $type => $items) {
+      $this->extensionPush('WjsLoader', $type);
+    }
+    $output_json = array();
+    // Add settings.
+    $output_json[] = '"settings":' . json_encode($this->settings);
     // Create a list of loaders who are added,
     // but no script file for them, so we need to
-    // build it at startup.
+    // build them at startup.
     $loadersBasic = array();
     foreach ($this->loaders as $loader) {
       if ($loader->pathJsFile === FALSE) {
         $loadersBasic[] = $loader->name;
       }
     }
-    // Add list of wjsLoaders available remotely,
-    // it prevent wjs to fail when retrieving undefined loaders.
-    $output_json = array();
-    // Add loaders types.
-    $output_json[] = '"settings":' . json_encode($this->settings);
     $output_json[] = '"loadersBasic":' . json_encode($loadersBasic);
-    $output_json[] = '"loadersExtra":' . json_encode(array_keys($this->loaderGet('wjsLoader')->extensions));
+    // Add list of WjsLoader available remotely,
+    // it prevent wjs to fail when retrieving undefined loaders.
+    $output_json[] = '"loadersExtra":' . json_encode(array_keys($this->loaderGet('WjsLoader')->extensions));
     // Load functions and class called in server side for this page.
     $js_package = $this->responsePackage();
     if ($js_package !== NULL) {
@@ -328,6 +306,7 @@ class Wjs extends Router {
 
   /**
    * Return all needed scripts for HTML head to init wjs.
+   *
    * @param int $indentLength Allow links to be indented.
    *
    * @return string
@@ -336,7 +315,7 @@ class Wjs extends Router {
     $output = '';
     $indent = $indentLength === 0 ? '' : "\n" . str_repeat(' ', $indentLength);
     foreach ($this->jsFiles() as $file) {
-      $output .=  $indent . $this->renderJsInclude($file);
+      $output .= $indent . $this->renderJsInclude($file);
     }
     $output .= $indent . '<script type="text/javascript">' . $this->renderJsUnpacker() . '</script>';
     return $output;

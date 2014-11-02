@@ -4,7 +4,7 @@ namespace Wjs\Loader;
 
 use \Wjs\Loader;
 
-class jsMethod extends jsScript {
+class JsMethod extends jsScript {
   function extensionPush($name, $value, $excludeRequire = FALSE) {
     $output = parent::extensionPush($name, $value, $excludeRequire);
     // Add closure callback. It close parse process.

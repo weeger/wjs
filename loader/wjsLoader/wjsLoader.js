@@ -1,9 +1,24 @@
 (function (context) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('wjsLoader', {
+  context.wjs.loaderAdd('WjsLoader', {
     // Extends full named loader class.
-    classExtends: 'WjsLoaderJsScript',
+    classExtends: 'WjsLoaderJsLink',
+
+    extLoad: function () {
+      // We use base extLoad, a single process to server.
+      this.wjs.classMethods.WjsLoader.extLoad.apply(this, arguments);
+    },
+
+    extDestroy: function (name) {
+      var wjs = this.wjs;
+      // Remove prototype.
+      wjs.classProtoDestroy('WjsLoader' + name);
+      delete wjs.loaders[name];
+      delete wjs.extLoaded[name];
+      delete wjs.extRequire[name];
+    },
+
     // Loader is created by javascript.
     parseWjsLoader: function (name, value, process) {
       // If value is true,
@@ -14,7 +29,7 @@
         this.wjs.loaderAdd(name);
       }
       else {
-        return this.parseJsScript(name, value, process);
+        return this.parseJsLink(name, value, process);
       }
     }
   });

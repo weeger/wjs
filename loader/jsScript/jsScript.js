@@ -1,7 +1,7 @@
 (function (context) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('jsScript', {
+  context.wjs.loaderAdd('JsScript', {
     /**
      * Execute retrieved javascript.
      * @param {string} name
@@ -15,6 +15,7 @@
       // we are forced to evaluate it.
       var isFunction = typeof value === 'function';
       if (!isFunction) {
+        this.wjs.trigger('wjsEval');
         // wjs, process and loader variables
         // can be used by scripts to register data.
         // We have to add local vars here, this allow to give

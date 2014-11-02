@@ -1,11 +1,8 @@
 (function (context) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('jsLink', {
+  context.wjs.loaderAdd('JsLink', {
 
-    /**
-     * Javascript are loaded via AJAX.
-     */
     extLoad: function (urls, options) {
       urls = (!Array.isArray(urls)) ? [urls] : urls;
       // Init a new process.
@@ -21,11 +18,17 @@
         process.extRequestAdd({
           mode: 'parse',
           type: this.type,
-          name: urls[i]
+          name: urls[i],
+          data: urls[i]
         });
       }
       // Start process.
       process.loadingStart();
+    },
+
+    extDestroy: function (name, data) {
+      // Remove child from dom.
+      data.parentNode.removeChild(data);
     },
 
     parseJsLink: function (name, value, process) {
@@ -37,7 +40,7 @@
         process.parseItemComplete(type, name, domScript);
       };
       // We don't specify type as it is not required in HTML5.
-      domScript.setAttribute('src', name);
+      domScript.setAttribute('src', value);
       self.wjs.document.head.appendChild(domScript);
       return false;
     }

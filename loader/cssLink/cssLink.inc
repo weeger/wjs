@@ -7,6 +7,6 @@ use \Wjs\Loader;
 /**
  * @package Wjs\Loader
  */
-class cssLink extends Loader {
+class CssLink extends Loader {
 
 }

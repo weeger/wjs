@@ -1,7 +1,7 @@
 (function (context) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('cssLink', {
+  context.wjs.loaderAdd('CssLink', {
 
     /**
      * Javascript are loaded via AJAX.
@@ -26,6 +26,11 @@
       }
       // Start process.
       process.loadingStart();
+    },
+
+    extDestroy: function (name, data) {
+      // Remove child from dom.
+      data.parentNode.removeChild(data);
     },
 
     parseCssLink: function (name, value, process) {

@@ -67,7 +67,7 @@ Registered data is also depending of each loader behavior, more information on l
 
 On server side : 
 ```php
-$wjs->extensionAdd('jsArray', 'myTestArray', array(
+$wjs->extensionAdd('JsArray', 'myTestArray', array(
   0 => 'MyItem',
 ));
 ```
@@ -130,7 +130,7 @@ So you can filter and manage returned content.
 // Think about always make some verification on requested content.
 if ($_GET['wjs'][0]['t'] === 'jsArray' && $_GET['wjs'][0]['n'] === 'testArray') {
   // Manage which data to retrieve.
-  $wjs->push('jsArray', 'testArray');
+  $wjs->push('JsArray', 'testArray');
   // When response is ready to be sent,
   // this function will add json headers,
   // print package content, then exit.
@@ -159,8 +159,8 @@ Simple Javascript Object
 
 On server side : 
 ```php
-// Add array as a jsObject.
-$wjs->extensionAdd('jsObject', 'testObject', array(
+// Add array as a JsObject.
+$wjs->extensionAdd('JsObject', 'testObject', array(
   'thisIs'        => 'ATest',
   'thisIsAlso'    => 'AnOtherTest',
   'thisIsANumber' => 123,
@@ -169,28 +169,28 @@ $wjs->extensionAdd('jsObject', 'testObject', array(
 ```
 On client side : 
 ```javascript
-wjs.pull('jsObject', 'testObject');
+wjs.pull('JsObject', 'testObject');
 ```
 
 
 Simple Javascript Array
 -----------------------
 
-Like objects, you can also append data as javascript arrays. Note that array keys will be turned to indexes only if not numeric, as JavaScript arrays do not support string indexes (otherwise use jsObjects). 
+Like objects, you can also append data as javascript arrays. Note that array keys will be turned to indexes only if not numeric, as JavaScript arrays do not support string indexes (otherwise use JsObjects). 
 
 On server side : 
 ```php
-$wjs->extensionAdd('jsArray', 'testArray', array(
+$wjs->extensionAdd('JsArray', 'testArray', array(
   0           => 'ATest',
   1           => 'AnOtherTest',
   'keysWill'  => 123,
-  'disaperar' => array(0 => 'bar')
+  'disappear' => array(0 => 'bar')
 ));
 ```
 On client side : 
 ```javascript
 // Will return : ["ATest", "AnOtherTest", 123, Array[1]]
-wjs.pull('jsArray', 'testArray');
+wjs.pull('JsArray', 'testArray');
 ```
 
 
@@ -202,17 +202,23 @@ You can easily add simple javascript code for your own usage.
 On server side : 
 ```php
 // Add a remote file.
-$wjs->extensionAdd('jsScript', 'testScriptFile', $filePath);
+$wjs->extensionAdd('JsScript', 'testScriptFile', $filePath);
 // Add an inline code.
-$wjs->extensionAdd('jsScript', 'testScriptInline', 'window.jsScriptInlineLoaded = true;');
+$wjs->extensionAdd('JsScript', 'testScriptInline', 'window.jsScriptInlineLoaded = true;');
+// Add reloadable script,
+// it will increment global var at each pull, with the reload:true option.
+$wjs->extensionAdd('JsScript', 'jsScriptReloadable', 'window.jsScriptReloadCount===undefined ? window.jsScriptReloadCount = 0 : window.jsScriptReloadCount++;');
 ```
 On client side : 
 ```javascript
-wjs.pull('jsScript', 'testScriptFile');
-console.log(window.jsScriptFileLoaded); // true
-// This script will add
-wjs.pull('jsScript', 'testScriptInline');
-console.log(window.jsScriptInlineLoaded); // true
+// If loader do not exists, it will be loaded first.
+wjs.pull('JsScript', 'testScriptFile', function () {
+  console.log(window.jsScriptFileLoaded); // true
+  // Inline script will be executed as well.
+  wjs.pull('JsScript', 'testScriptInline');
+  console.log(window.jsScriptInlineLoaded); // true
+  continueYourScript();
+});
 ```
 
 
@@ -224,7 +230,7 @@ You can load simple javascript methods with wjs, asynchronously or not, and exec
 On server side : 
 ```php
 // Add javascript method from a file.
-$wjs->extensionAdd('jsMethod', 'objectLength', $pathToWjs . 'extension/jsMethod/objectLength.js');
+$wjs->extensionAdd('JsMethod', 'objectLength', $pathToWjs . 'extension/JsMethod/objectLength.js');
 ```
 Your Js file must also be wrapped, it allows wjs to catch it :
 
@@ -253,15 +259,18 @@ Your Js file must also be wrapped, it allows wjs to catch it :
 
 On client side : 
 ```javascript
-var testObject = {
-  'lorem': 'ipsum',
-  'dolor': 'sit',
-  'amet': 'poireau'
-};
 // We execute method directly through wjs,
-var length = wjs.pull('jsMethod', 'objectLength')(testObject);
-// Return 3
-console.log(length);
+var length = wjs.pull('JsMethod', 'objectLength', function (method) {
+  var testObject = {
+    'lorem': 'ipsum',
+    'dolor': 'sit',
+    'amet': 'poireau'
+  };
+  // Return 3
+  var length = method(length);
+  // ...
+  continueYourScript();
+});
 ```
 
 
@@ -274,7 +283,7 @@ You can also use wjs to retrieve images, and use it only when load complete. Ima
 On client side : 
 ```javascript
 // We load the HTML5 Image Logo
-wjs.pull('image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
+wjs.pull('Image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
   complete: yourCustomCallback
 });
 ```
@@ -288,7 +297,7 @@ wjs is also able to append script links into your pages.
 On client side : 
 ```javascript
 // We load an external js.
-wjs.pull('jsLink', pathToYourJsFile, {
+wjs.pull('JsLink', pathToYourJsFile, {
   complete: yourCustomCallback
 });
 ```
@@ -300,7 +309,7 @@ On client side :
 // If several links are declared from an array,
 // All links are loaded, in order. Each link wait for
 // the previous one to be loaded.
-wjs.pull('jsLink', [pathToYourJsFile, pathToYourJsFile2], yourCustomCallback2);
+wjs.pull('JsLink', [pathToYourJsFile2, pathToYourJsFile3], yourCustomCallback2);
 ```
 
 
@@ -312,7 +321,7 @@ Like .js, you can also retireve css links, as link tags. They will be appended t
 On client side : 
 ```javascript
 // We load an external js.
-wjs.pull('cssLink', pathToYourCssFile, {
+wjs.pull('CssLink', pathToYourCssFile, {
   complete: yourCustomCallback
 });
 ```
@@ -324,7 +333,7 @@ And for multiple css. On client side :
 // All links are loaded, in order. Each link wait for
 // the previous one to be loaded,
 // wrong css links do not block the process.
-wjs.pull('cssLink', [pathToYourCssFile, pathToYourCssFile2], yourCustomCallback2);
+wjs.pull('CssLink', [pathToYourCssFile2, pathToYourCssFile3], yourCustomCallback2);
 ```
 
 
@@ -337,7 +346,10 @@ On server side :
 ```php
 // We add a loader, this one exists in wjs core,
 // so this action is just here for example.
-$wjs->extensionAdd('wjsLoader', 'jsArray', $filePath);
+$wjs->extensionAdd('WjsLoader', 'jsArray', array(
+  0 => $pathToPHPFileOnServer,
+  1 => $pathToJsFileFromClient
+));
 ```
 On client side : 
 ```javascript
@@ -345,9 +357,9 @@ On client side :
 // this action is also for example,
 // in real life, wjs make this action
 // automatically when pull a script.
-wjs.pull('wjsLoader', 'jsArray');
+wjs.pull('WjsLoader', 'JsArray');
 // Then we load script.
-wjs.pull('jsArray', 'testArray');
+wjs.pull('JsArray', 'testArray');
 ```
 Obviously you should declare your loader into a separated javascript file. See into wjs core for more info.
 
@@ -365,9 +377,9 @@ A simple function allows you to connect an extension to another one.
 
 On server side : 
 ```php
-// Extension of type jsObject > testObject,
-// will be loaded with  jsObject > testObject2 when asked.
-$wjs->extensionAddRequire('jsObject', 'testObject', 'jsObject', 'testObject2');
+// Extension of type JsObject > testObject,
+// will be loaded with  JsObject > testObject2 when asked.
+$wjs->extensionAddRequire('JsObject', 'testObject', 'JsObject', 'testObject2');
 ```
 
 
@@ -379,7 +391,7 @@ A dangerous point with dependencies is to retrieve multiple times the same exten
 On client side : 
 ```javascript
 // We don't want any dependency.
-object = wjs.pull('jsObject', 'testObject', {
+object = wjs.pull('JsObject', 'testObject', {
   excludeRequire: true
 });
 ```
@@ -387,11 +399,11 @@ object = wjs.pull('jsObject', 'testObject', {
 Or more precisely. On client side : 
 ```javascript
 // We don't want multiple dependencies, but we allow others.
-object = wjs.pull('jsObject', 'testObject', {
+object = wjs.pull('JsObject', 'testObject', {
   // We don't want these dependencies.
   excludeRequire: {
-    jsObject: ['testObject2'],
-    jsArray: ['testArray2']
+    JsObject: ['testObject2'],
+    JsArray: ['testArray2']
   }
 });
 ```

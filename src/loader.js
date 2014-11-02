@@ -17,7 +17,7 @@
     __construct: function () {
       var self = this;
       // Generate base hook name
-      self.parseHook = 'parse' + self.wjs.upperCaseFirst(self.type);
+      self.parseHook = 'parse' + self.type;
       // Hooks can be a chain of
       while (typeof self.parseHook === 'string') {
         self.parseHook = self[self.parseHook] || false;
@@ -38,6 +38,15 @@
         name: name,
         excludeRequire: options.excludeRequire
       });
+    },
+
+    /**
+     * Hook called by wjs on destroying extension.
+     * @param {string} name
+     * @param {?} data
+     */
+    extDestroy: function (name, data) {
+      // To override...
     },
 
     /**

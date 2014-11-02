@@ -1,8 +1,8 @@
-// wJs v3.0.5 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.1.0 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.0.5', WJSProto;
+  var wjsVersion = '3.1.0', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -32,7 +32,7 @@
       /** @type {Object.Object} */
       loadersBasic: {},
       /** @type {Object.Object.?} */
-      extLoaded: {},
+      extLoaded: {WjsLoader: {}},
       /** @type {Object.Array.string} */
       extRequire: {},
       /** @type {WJSProcessProto} Reference to prototype */
@@ -61,29 +61,42 @@
       this.window.addEventListener('load', function () {
         // Apply options.
         self.extendObject(self, options);
+        // Load extensions loaders added before init.
+        var loaderName,
+          buffer = self.loadersBuffer;
+        // This var will not be used anymore,
+        // we have to remove it before empty the buffer.
+        delete self.loadersBuffer;
+        // Create loaders prototypes.
+        for (loaderName in buffer) {
+          if (buffer.hasOwnProperty(loaderName)) {
+            self.loaderAdd(loaderName, buffer[loaderName], true);
+          }
+        }
         // Create basic loaders who are required by package.
         for (var i = 0, length = self.loadersBasic.length; i < length; i++) {
-          self.loaderAdd(self.loadersBasic[i]);
+          self.loaderAdd(self.loadersBasic[i], undefined, true);
         }
         delete self.loadersBasic;
-        // Load extensions loaders added before init.
-        self.loaderBufferFlush();
-        // Function is used only once.
-        delete self.loaderBufferFlush;
         // Load all other scripts then run ready functions.
         // Execute startup functions.
-        self.unpack(self.packageDefault, function () {
-          // Execute all "ready" functions.
-          var i, length;
-          // Mark as readyComplete, further ready functions
-          // will be executed directly.
-          self.readyComplete = true;
-          for (i = 0, length = self.readyCallbacks.length; i < length; i += 1) {
-            self.readyCallbacks[i].call(self);
-            // Callback useless.
-            delete self.readyCallbacks[i];
+        // Create a loading process to parse package content.
+        new self.processProto({
+          complete: function () {
+            // Execute all "ready" functions.
+            var i, length;
+            // Mark as readyComplete, further ready functions
+            // will be executed directly.
+            self.readyComplete = true;
+            for (i = 0, length = self.readyCallbacks.length; i < length; i += 1) {
+              self.readyCallbacks[i].call(self);
+              // Callback useless.
+              delete self.readyCallbacks[i];
+            }
           }
-        });
+        })
+          // Directly treat object as response.
+          .responseParse(self.packageDefault);
       });
     },
 
@@ -102,26 +115,13 @@
     },
 
     /**
-     * Parse json data.
-     * Used when data is not loaded by AJAX.
-     * Basically as document startup.
-     * @param {!Object} object
-     * @param {function(...)} complete Callback executed on loading complete.
-     */
-    unpack: function (object, complete) {
-      // Create a loading process to parse package content.
-      new this.processProto(this.extendOptions(complete))
-        // Directly treat object as response.
-        .responseParse(object);
-    },
-
-    /**
      * Add new collection loader to wjs.
      * It must be an instance of WjsLoader.
      * @param {string} name
      * @param {Object} methods
+     * @param {boolean=} register True says to save as loaded extension.
      */
-    loaderAdd: function (name, methods) {
+    loaderAdd: function (name, methods, register) {
       var self = this;
       // We can define loader with no special method.
       methods = methods || {};
@@ -133,68 +133,25 @@
         return;
       }
       if (!self.loaders[name]) {
-        var className = 'WjsLoader' + self.upperCaseFirst(name);
+        var className = 'WjsLoader' + name;
         // Add name to prototype.
         methods.type = name;
         // Allow to use custom base class.
         methods.classExtends = methods.classExtends || 'WjsLoader';
         self.classExtend(className, methods);
         self.loaders[name] = new (self.classProto(className))(name);
-        self.extLoaded[name] = {};
         self.extRequire[name] = {};
-      }
-    },
-
-    /**
-     * Return extensions loader.
-     * @param {string} name
-     * @return {WjsLoader}
-     */
-    loaderGet: function (name) {
-      var self = this;
-      if (!self.loaders[name]) {
-        // We know that an extra loader is available remotely.
-        if (self.loadersExtra.indexOf(name) !== -1) {
-          self.extPull('wjsLoader', name);
-        }
-        // Extension definitively not exists.
-        else {
-          self.error('Undefined loader "' + name + '"');
-        }
-      }
-      return self.loaders[name];
-    },
-
-    /**
-     * Destroy loader object. Loaded content
-     * by this loader are not affected.
-     * @param {string} name
-     */
-    loaderDestroy: function (name) {
-      var self = this;
-      // Remove extension if exists.
-      self.extDestroy('wjsLoader', name);
-      // Remove prototype.
-      self.classProtoDestroy('WjsLoader' + self.upperCaseFirst(name));
-      delete self.loaders[name];
-      delete self.extLoaded[name];
-      delete self.extRequire[name];
-    },
-
-    /**
-     * Add loaders declared before init().
-     * They are stored into a temporary buffer.
-     */
-    loaderBufferFlush: function () {
-      var loaderName,
-        self = this,
-        buffer = self.loadersBuffer;
-      // This var will not be used anymore.
-      delete self.loadersBuffer;
-      // Create loaders prototypes.
-      for (loaderName in buffer) {
-        if (buffer.hasOwnProperty(loaderName)) {
-          self.loaderAdd(loaderName, buffer[loaderName]);
+        // We have to deal between WjsLoader, instance of and jsLink,
+        // wjs.extLoaded.WjsLoader must exists to save jsLink loader,
+        // but jsLink loader is base constructor of WjsLoader, so it
+        // have to be created before jsLink. wjs.extLoaded.WjsLoader
+        // is present before WjsLoader creation.
+        self.extLoaded[name] = self.extLoaded[name] || {};
+        if (register) {
+          // If register is set to true, we save loader as extension,
+          // It is useful when loader is not created with WjsLoader,
+          // like WjsLoader itself and basics ones.
+          self.extLoaded.WjsLoader[name] = methods;
         }
       }
     },
@@ -207,8 +164,22 @@
      * @return {?}
      */
     extPull: function (type, name, options) {
-      var i, self = this,
-        extensionData = self.extGet(type, name),
+      var self = this;
+      // Search for loader first.
+      if (!self.loaders[type]) {
+        // We know that an extra loader is available remotely.
+        if (self.loadersExtra.indexOf(type) !== -1) {
+          self.extPull('WjsLoader', type, function () {
+            self.extPull(type, name, options);
+          });
+          return;
+        }
+        // Extension definitively not exists.
+        self.err('Undefined loader "' + type + '"');
+        return;
+      }
+      // Loader exists, we can search for extension.
+      var i, extensionData = self.extGet(type, name),
         processes = self.processes,
         length = processes.length;
       options = self.extendOptions(options) || {};
@@ -216,7 +187,7 @@
       // Check if data is missing.
       if (!extensionData ||
         // Reload is allowed internally
-        self.loaderGet(type).preventReload === false ||
+        self.loaders[type].preventReload === false ||
         // Reload is forced by user.
         (options.reload === true)) {
         // First search if a process is not
@@ -230,7 +201,7 @@
           }
         }
         // Item not found, we need to retrieve it.
-        self.loaderGet(type).extLoad(name, options);
+        self.loaders[type].extLoad(name, options);
       }
       // Extension already loaded.
       // We have to execute callback manually.
@@ -293,6 +264,8 @@
           }
           delete self.extRequire[type][name];
         }
+        // Hook loader.
+        self.loaders[type].extDestroy(name, self.extLoaded[type][name]);
         delete self.extLoaded[type][name];
       }
     },
@@ -305,8 +278,7 @@
       options.method = options.method || 'GET';
       options.async = options.async || false;
       var self = this,
-        xhr = new self.window.XMLHttpRequest(),
-        event = self.document.createEvent('Event');
+        xhr = new self.window.XMLHttpRequest();
       xhr.open(options.method, options.url, options.async);
       xhr.onreadystatechange = function () {
         // Process complete.
@@ -326,8 +298,7 @@
         xhr.setRequestHeader('Content-type',
           'application/x-www-form-urlencoded');
       }
-      event.initEvent('wjsAjaxCall', true, true);
-      self.window.dispatchEvent(event);
+      this.trigger('wjsXhr');
       xhr.send(self.param(options.data));
     },
 
@@ -419,16 +390,6 @@
     },
 
     /**
-     * First letter of a string to uppercase.
-     * Use to generate class or hooks names.
-     * @param {string} string
-     * @return {string}
-     */
-    upperCaseFirst: function (string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    },
-
-    /**
      * Add definitions to an existing constructor.
      * @param {string} name
      * @param {Object} methods
@@ -507,12 +468,18 @@
       }
     },
 
+    trigger: function (eventName) {
+      var event = this.document.createEvent('Event');
+      event.initEvent(eventName, true, true);
+      this.window.dispatchEvent(event);
+    },
+
     /**
      * Thrown wjs specific error.
      * @param {string} message
      * @param {boolean=} fatal
      */
-    error: function (message, fatal) {
+    err: function (message, fatal) {
       var errorPrefix = '[wjs error] : ';
       if (!fatal && this.window.console) {
         this.window.console.error(errorPrefix + message);
