@@ -50,4 +50,4 @@
     }
   });
   // [-->
-}(typeof wjsContext !== 'undefined' ? wjsContext : window));
+}(wjsContext));

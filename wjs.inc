@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.1.0';
+const WJS_VERSION                    = '3.1.1';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 
@@ -90,16 +90,21 @@ class Wjs extends Router {
    */
   function __construct($routes = array()) {
     parent::__construct($routes);
-    // Add core wjs loader manually.
+    // Add core wjs loaders manually,
+    // This order has an impact on the order
+    // of rendering header links (based on loaders var).
     $this->loaders['WjsLoader'] = new \Wjs\Loader\WjsLoader(NULL, $this);
+    $this->loaders['JsLink']    = new \Wjs\Loader\JsLink(NULL, $this);
     // Load core summary,
     // paths defined must be relocated accordingly wjs.
     $summary = new \Wjs\WjsCoreSummary();
     foreach ($summary->extensions['WjsLoader'] as $loaderName => $args) {
       $summary->extensions['WjsLoader'][$loaderName] = array(
-        $this->routeGet('server', 'wjs') . $summary->extensions['WjsLoader'][$loaderName][0],
-        $this->routeGet('client', 'wjs') . $summary->extensions['WjsLoader'][$loaderName][1],
+        $this->routeGet('server', 'wjs') . $args[0]
       );
+      if (isset($args[1])) {
+        $summary->extensions['WjsLoader'][$loaderName][] = $this->routeGet('client', 'wjs') . $args[1];
+      }
     }
     // Add default loaders.
     $this->summaryAdd($summary);
@@ -175,6 +180,10 @@ class Wjs extends Router {
    * @param bool|array $excludeRequire
    */
   function extensionPush($extensionType, $extensionName, $excludeRequire = FALSE) {
+    // Do not push core loaders.
+    if ($extensionType === 'WjsLoader' && ($extensionName === 'WjsLoader' || $extensionName === 'JsLink')) {
+      return;
+    }
     $loader = $this->loaderGet($extensionType);
     if ($loader) {
       if (isset($loader->extensions[$extensionName])) {
@@ -183,7 +192,18 @@ class Wjs extends Router {
       else {
         $extensionData = WJS_ERR_PUSH_MISSING_EXTENSION;
       }
+      $loader->extensionsPushed[$extensionName] =
       $this->outputPackage[$extensionType][$extensionName] = $this->packageBuildEntry($extensionType, $extensionName, $extensionData);
+    }
+  }
+
+  function extensionPushRemove($extensionType, $extensionName) {
+    if (isset($this->outputPackage[$extensionType]) && isset($this->outputPackage[$extensionType][$extensionName])) {
+      unset($this->outputPackage[$extensionType][$extensionName]);
+      unset($this->loaderGet($extensionType)->extensionsPushed[$extensionName]);
+      if (empty($this->outputPackage[$extensionType])) {
+        unset($this->outputPackage[$extensionType]);
+      }
     }
   }
 
@@ -292,15 +312,27 @@ class Wjs extends Router {
    * append from external applications.
    * Ensure to fill client > wjs route to define location of wjs
    * core files when using this list.
+   *
+   * @param bool $flushLoaders Set to true says to retrieve links for
+   * "jsLink" type loaders and remove them to the output package.
+   *
    * @return array
    */
-  function jsFiles() {
+  function jsFiles($flushLoaders = TRUE) {
     $basePath = $this->routeGet('client', 'wjs');
     // Add core file.
     $files = array();
     foreach ($this->jsCoreFiles[$this->jsCoreFilesVersion] as $file) {
       $files[] = $basePath . $file;
     }
+
+    /** @var \Wjs\Loader $loader */
+    foreach ($this->loaders as $loader) {
+      if ($loaderFiles = $loader->jsFiles($flushLoaders)) {
+        $files = array_merge($files, $loaderFiles);
+      }
+    }
+
     return $files;
   }
 

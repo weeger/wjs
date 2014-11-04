@@ -4,10 +4,11 @@
   context.wjs.loaderAdd('WjsLoader', {
     // Extends full named loader class.
     classExtends: 'WjsLoaderJsLink',
+    processType: 'server',
 
-    extLoad: function () {
+    extRequestInit: function () {
       // We use base extLoad, a single process to server.
-      this.wjs.classMethods.WjsLoader.extLoad.apply(this, arguments);
+      this.wjs.classMethods.WjsLoader.extRequestInit.apply(this, arguments);
     },
 
     extDestroy: function (name) {
@@ -34,4 +35,4 @@
     }
   });
   // [-->
-}(typeof wjsContext !== 'undefined' ? wjsContext : window));
+}(wjsContext));

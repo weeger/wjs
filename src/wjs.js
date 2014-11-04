@@ -1,8 +1,8 @@
-// wJs v3.1.0 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.1.1 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.1.0', WJSProto;
+  var wjsVersion = '3.1.1', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -13,6 +13,7 @@
   /** @constructor */
   WJSProto = function () {
     this.extendObject(this, {
+      context: context,
       window: context.window || window,
       document: context.document || window.document,
       /** @type {string} */
@@ -48,6 +49,10 @@
       /** @type {Function} Shorthand */
       pull: this.extPull
     });
+    // Add a global wjsContext, use
+    // by scripts links to access to wjs.
+    this.context.wjsContext = context;
+    // [VARS_MAP]
   };
 
   WJSProto.prototype = {
@@ -81,22 +86,20 @@
         // Load all other scripts then run ready functions.
         // Execute startup functions.
         // Create a loading process to parse package content.
-        new self.processProto({
+        var proc = new self.processProto({
           complete: function () {
+            delete self.packageDefault;
             // Execute all "ready" functions.
             var i, length;
             // Mark as readyComplete, further ready functions
             // will be executed directly.
             self.readyComplete = true;
-            for (i = 0, length = self.readyCallbacks.length; i < length; i += 1) {
-              self.readyCallbacks[i].call(self);
-              // Callback useless.
-              delete self.readyCallbacks[i];
-            }
+            self.callbacks(self.readyCallbacks);
+
           }
-        })
-          // Directly treat object as response.
-          .responseParse(self.packageDefault);
+        });
+        // Directly treat object as response.
+        proc.responseParse(self.packageDefault);
       });
     },
 
@@ -111,6 +114,12 @@
       }
       else {
         this.readyCallbacks.push(callback);
+      }
+    },
+
+    callbacks: function (callbacksArray, args) {
+      for (var i = 0; i < callbacksArray.length; i++) {
+        callbacksArray[i].apply(this, args);
       }
     },
 
@@ -156,62 +165,107 @@
       }
     },
 
+    loadersExists: function (types, complete) {
+      types = Array.isArray(types) ? types : [types];
+      var self = this, i, length = types.length, exists = [], pull = [];
+      // Search for existing loaders.
+      for (i = 0; i < length; i++) {
+        if (!self.loaders[types[i]]) {
+          if (self.loadersExtra.indexOf(types[i])) {
+            pull.push(types[i]);
+          }
+          else {
+            // One loader do not exists at all.
+            return false;
+          }
+        }
+      }
+      return (pull.length > 0) ? this.pull({WjsLoader: pull}, complete) : complete();
+    },
+
     /**
      * Load specified collection of specified type / name.
+     * During the whole process we try to return loaded data if
+     * no async method is launched.
      * @param {string} type
      * @param {string} name
      * @param {Object|Function=} options
      * @return {?}
      */
-    extPull: function (type, name, options) {
+    extPull: function (request, options) {
       var self = this;
-      // Search for loader first.
-      if (!self.loaders[type]) {
-        // We know that an extra loader is available remotely.
-        if (self.loadersExtra.indexOf(type) !== -1) {
-          self.extPull('WjsLoader', type, function () {
-            self.extPull(type, name, options);
-          });
-          return;
-        }
-        // Extension definitively not exists.
-        self.err('Undefined loader "' + type + '"');
-        return;
+      // Treat if request is just two strings.
+      if (typeof request === 'string') {
+        // Transform request to a multi request.
+        var multiple = {};
+        // User request as type, options as name.
+        multiple[request] = [options];
+        options = self.extendOptions(arguments[2], {
+          mainType: request,
+          mainName: options
+        });
+        // And maybe option exists as a third argument.
+        return self.pull(multiple, options);
       }
-      // Loader exists, we can search for extension.
-      var i, extensionData = self.extGet(type, name),
-        processes = self.processes,
-        length = processes.length;
-      options = self.extendOptions(options) || {};
-      options.async = options.async || (options.complete !== undefined);
-      // Check if data is missing.
-      if (!extensionData ||
-        // Reload is allowed internally
-        self.loaders[type].preventReload === false ||
-        // Reload is forced by user.
-        (options.reload === true)) {
-        // First search if a process is not
-        // currently waiting to parse extension.
-        for (i = 0; i < length; i++) {
-          if (processes[i].parseQ[type] &&
-            processes[i].parseQ[type][name]) {
-            // If found, enforce process to parse item now.
-            processes[i].responseParseItem(type, name);
-            return;
+      // Make first a specific verification for loaders,
+      // Pull them if needed, loaders can't have
+      return self.loadersExists(Object.keys(request), function () {
+        // Loader exists, we can search for asked extension.
+        // Transform callback to object, if not already one.
+        options = self.extendOptions(options);
+        var i, j, k, type, name, pull, processQueued, types = Object.keys(request),
+          process = new (self.processProto)(options),
+          extensionData;
+        // Iterates over requested types.
+        for (i = 0; i < types.length; i++) {
+          type = types[i];
+          // Contain list of really missing extensions to retrieve.
+          pull = [];
+          // Iterates over items
+          for (j = 0; j < request[type].length; j++) {
+            name = request[type][j];
+            extensionData = self.extGet(type, name);
+            // Check if data is missing.
+            if (!extensionData ||
+              // Reload is allowed internally
+              self.loaders[type].preventReload === false ||
+              // Reload is forced by user.
+              options.reload === true) {
+              // Search if a process is not currently
+              // waiting to be parsed, and containing requested data,
+              // in this case, current process will be delayed again.
+              for (k = 0; k < self.processes.length; k++) {
+                processQueued = self.processes[k];
+                if (processQueued.parseQ[type] &&
+                  processQueued.parseQ[type][name]) {
+                  // We have found a non terminated process, we shut down this one.
+                  process.loadingComplete(true);
+                  // A process is about to parse requested extension,
+                  // We enforce process to parse it now.
+                  return processQueued.responseParseItem(type, name, function () {
+                    // Launch request again.
+                    return self.extPull(request, options);
+                  });
+                }
+              }
+              // Item not found, we need to retrieve it.
+              pull.push(name);
+            }
           }
+          // We hook loaders to add request(s).
+          self.loaders[type].extRequestInit(pull, process, options);
         }
-        // Item not found, we need to retrieve it.
-        self.loaders[type].extLoad(name, options);
-      }
-      // Extension already loaded.
-      // We have to execute callback manually.
-      else if (options.complete) {
-        options.complete(extensionData);
-      }
-      // Return data if exists, we can't guarantee
-      // that data can be loaded, due to various loader
-      // parse management, even async is false (ex, image loader).
-      return self.extGet(type, name);
+        // We start process.
+        process.loadingStart();
+        if (options.mainType) {
+          // Return data if exists,
+          // If only async process and parsing as been asked
+          // and retrieved, or if extension have been already loaded,
+          // there is a chance that content can be return, otherwise
+          // user should have conscience of type of content he manipulates.
+          return self.extGet(options.mainType, options.mainName);
+        }
+      });
     },
 
     /**

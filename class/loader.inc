@@ -26,6 +26,7 @@ class Loader extends Router {
    * @var array
    */
   var $extensions = array();
+  var $extensionsPushed = array();
   var $extensionsRequire = array();
   var $lineage = array();
 
@@ -104,5 +105,23 @@ class Loader extends Router {
       $this->wjs->extensionPushArray($require);
     }
     return $package;
+  }
+
+  function extensionPushedFlush() {
+    foreach ($this->extensions as $name => $data) {
+      $this->wjs->extensionPushRemove($this->name, $name);
+    }
+  }
+
+  /**
+   * Return a list of JS files to render.
+   * @param $flush Define if user want extensions
+   * to not be loaded into default package as well.
+   *
+   * @return array List of .js files.
+   */
+  function jsFiles($flush) {
+    // To offerride
+    return array();
   }
 }

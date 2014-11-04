@@ -2,31 +2,7 @@
   'use strict';
   // <--]
   context.wjs.loaderAdd('CssLink', {
-
-    /**
-     * Javascript are loaded via AJAX.
-     */
-    extLoad: function (urls, options) {
-      urls = (!Array.isArray(urls)) ? [urls] : urls;
-      // Init a new process.
-      var i, length = urls.length,
-        process = new this.wjs.processProto({
-          async: options.async,
-          complete: options.complete,
-          mainType: this.type,
-          mainName: urls[0]
-        });
-      // Append all items as a request.
-      for (i = 0; i < urls.length; i++) {
-        process.extRequestAdd({
-          mode: 'parse',
-          type: this.type,
-          name: urls[i]
-        });
-      }
-      // Start process.
-      process.loadingStart();
-    },
+    processType: 'parse',
 
     extDestroy: function (name, data) {
       // Remove child from dom.
@@ -50,4 +26,4 @@
     }
   });
   // [-->
-}(typeof wjsContext !== 'undefined' ? wjsContext : window));
+}(wjsContext));

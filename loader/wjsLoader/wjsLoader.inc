@@ -24,12 +24,28 @@ class WjsLoader extends jsLink {
 
   function extensionPush($name, $value, $excludeRequire = FALSE) {
     // Avoid to add core loaders as extensions.
-    if (!isset($this->wjs->summaries['Wjs\WjsCoreSummary']->loaders[$name])) {
+    if ($name !== 'WjsLoader' && $name !== 'JsLink') {
       // Exported data is file URL.
-      $path = $value[1];
-      // WjsLoader value is always a folder path,
-      // expecting that a js file inside it exists.
+      $path = isset($value[1]) ? $value[1] : TRUE;
+      // WjsLoader value is a folder path,
+      // expecting that a js file inside it exists,
+      // It also can be equal to true if prototype is
+      // a basic loader (no js).
       return parent::extensionPush($name, is_file($path) ? $path : TRUE, $excludeRequire);
     }
+  }
+
+  function jsFiles($flush) {
+    $files = array();
+    foreach ($this->extensionsPushed as $name => $package) {
+      if (isset($this->extensions[$name][1])) {
+        $files[] = $this->extensions[$name][1];
+      }
+    }
+    if ($flush) {
+      // Loading js file cancel extension loading.
+      $this->extensionPushedFlush();
+    }
+    return $files;
   }
 }

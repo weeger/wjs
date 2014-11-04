@@ -27,11 +27,12 @@
       /** @type {boolean} Async mode is specified for whole process. */
       async: options.async || false,
       /** @type {Function} */
-      completeCallback: options.complete,
+      completeCallbacks: options.complete,
       /** @type {boolean} */
       loadingStarted: false,
       /** @type {Array.Object} */
       extRequests: [],
+      exclude: options.exclude,
       // Save which extension we should return at the end
       // of the process, even several content is returned into
       // the response package.
@@ -72,12 +73,11 @@
         request,
         prefix,
         settings = this.wjs.settings,
-        length = self.extRequests.length,
         serverRequest = {},
         responsePackage = {};
       self.loadingStarted = true;
       // Treat requests list.
-      for (i = 0; i < length; i++) {
+      for (i = 0; i < self.extRequests.length; i++) {
         request = requests[i];
         switch (request.mode) {
           case 'server':
@@ -85,13 +85,13 @@
             // Build query for server.
             serverRequest[prefix + settings.requestVariableKeyType + ']'] = request.type;
             serverRequest[prefix + settings.requestVariableKeyName + ']'] = request.name;
-            if (request.excludeRequire) {
-              if (request.excludeRequire === true) {
+            if (self.exclude) {
+              if (self.exclude === true) {
                 serverRequest[prefix + settings.requestVariableKeyExclude + ']'] = '1';
               }
               else {
-                for (j in request.excludeRequire) {
-                  serverRequest[prefix + settings.requestVariableKeyExclude + '][' + j + ']'] = request.excludeRequire[j].join(',');
+                for (j in self.exclude) {
+                  serverRequest[prefix + settings.requestVariableKeyExclude + '][' + j + ']'] = self.exclude[j].join(',');
                 }
               }
             }
@@ -131,22 +131,19 @@
     /**
      * Callback when all request complete,
      * only one complete callback after start.
+     *
+     * @param silent Set to true avoid callbacks calls.
      */
-    loadingComplete: function () {
-      var self = this;
+    loadingComplete: function (silent) {
+      var self = this, arg;
       // Remove this element from processes.
       self.wjs.processes.splice(self.wjs.processes.indexOf(self), 1);
       // Execute complete callback.
-      if (typeof self.completeCallback === 'function') {
-        var arg;
-        if (self.mainType && self.mainName) {
-          arg = self.wjs.extLoaded[self.mainType][self.mainName];
-        }
-        // Pass complete arguments.
-        self.completeCallback(arg);
+      if (!silent && self.completeCallbacks) {
+        self.wjs.callbacks([self.completeCallbacks], [self.wjs.extGet(self.mainType, self.mainName)]);
       }
-      // Protect against modification, object should be eligible
-      // for garbage collection.
+      // Protect against modification, object
+      // should be eligible for garbage collection.
       Object.freeze(self);
     },
 
@@ -213,13 +210,22 @@
      * @param {string} extensionType
      * @param {string} extensionName
      */
-    responseParseItem: function (extensionType, extensionName) {
-      var self = this;
+    responseParseItem: function (extensionType, extensionName, callback) {
+      var self = this, queueItem = self.parseQ[extensionType][extensionName];
+      // parseQ contains a editable object, we use it to store
+      // callbacks, they will wait for parse complete event requirements exists.
+      // These callbacks are different from request callbacks,
+      // they are executed at the end of parsing only and are
+      // used internally to manage requests queues an dependencies.
+      if (callback) {
+        queueItem['#callbacks'] = queueItem['#callbacks'] || [];
+        queueItem['#callbacks'].push(callback);
+      }
       // Parse using according loader.
       self.wjs.loaders[extensionType]
         .responseParseItem(
           extensionName,
-          self.parseQ[extensionType][extensionName],
+          queueItem,
           self);
     },
 
@@ -229,11 +235,14 @@
      * @param {?} saveData
      */
     parseItemComplete: function (extensionType, extensionName, saveData) {
-      var self = this;
+      var self = this, queueItem = self.parseQ[extensionType];
       // Save.
       self.wjs.extLoaded[extensionType][extensionName] = saveData;
+      if (queueItem[extensionName]['#callbacks']) {
+        self.wjs.callbacks(queueItem[extensionName]['#callbacks']);
+      }
       // Remove from queue.
-      delete self.parseQ[extensionType][extensionName];
+      delete queueItem[extensionName];
       if (self.wjs.objectIsEmpty(self.parseQ[extensionType])) {
         delete self.parseQ[extensionType];
       }

@@ -8,12 +8,18 @@ class WjsCoreSummary extends Summary {
     // Add extra core loaders.
     'WjsLoader' => array(
       'JsObject' => array(
-        'loader/JsObject/JsObject.inc',
-        'loader/JsObject/JsObject.js'
+        'loader/JsObject/JsObject.inc'
+      ),
+      'JsArray'  => array(
+        'loader/JsArray/JsArray.inc'
       ),
       'JsScript' => array(
         'loader/JsScript/JsScript.inc',
         'loader/JsScript/JsScript.js'
+      ),
+      'JsLink'   => array(
+        'loader/JsLink/JsLink.inc',
+        'loader/JsLink/JsLink.js'
       ),
       'CssLink'  => array(
         'loader/CssLink/CssLink.inc',
@@ -21,11 +27,7 @@ class WjsCoreSummary extends Summary {
       ),
       'JsMethod' => array(
         'loader/JsMethod/JsMethod.inc',
-        'loader/JsMethod/JsMethod.js'
-      ),
-      'JsArray'  => array(
-        'loader/JsArray/JsArray.inc',
-        'loader/JsArray/JsArray.js'
+      'loader/JsMethod/JsMethod.js'
       ),
       'Image'    => array(
         'loader/Image/Image.inc',

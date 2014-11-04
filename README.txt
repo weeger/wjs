@@ -79,7 +79,7 @@ Linking Javascript
 Adding javascript into your html page make the connexion between server and client environment. Due to the variation of loaders, preloaded extensions, or platforms where wjs can be included, the files included can change a lot from on page to another. Some tools are included into wjs to help you to achieve this point. To start the most quickly with wjs, just put this PHP code into your document "head" :
 
 ```php
-<?php print $wjs->renderHeader(); ?>
+<?php print $wjs->renderHeader(4); ?>
 ```
 
 If you want more control on the way you integrates the links, there is a mor detailed method to use :
@@ -128,7 +128,7 @@ print_r($_GET['wjs']);
 So you can filter and manage returned content.
 ```php
 // Think about always make some verification on requested content.
-if ($_GET['wjs'][0]['t'] === 'jsArray' && $_GET['wjs'][0]['n'] === 'testArray') {
+if ($_GET['wjs'][0]['t'] === 'JsArray' && $_GET['wjs'][0]['n'] === 'testArray') {
   // Manage which data to retrieve.
   $wjs->push('JsArray', 'testArray');
   // When response is ready to be sent,
@@ -309,7 +309,12 @@ On client side :
 // If several links are declared from an array,
 // All links are loaded, in order. Each link wait for
 // the previous one to be loaded.
-wjs.pull('JsLink', [pathToYourJsFile2, pathToYourJsFile3], yourCustomCallback2);
+wjs.pull({JsLink:
+  [
+    pathToYourJsFile2,
+    pathToYourJsFile3
+  ]
+}, yourCustomCallback2);
 ```
 
 
@@ -333,7 +338,9 @@ And for multiple css. On client side :
 // All links are loaded, in order. Each link wait for
 // the previous one to be loaded,
 // wrong css links do not block the process.
-wjs.pull('CssLink', [pathToYourCssFile2, pathToYourCssFile3], yourCustomCallback2);
+wjs.pull({
+  CssLink: [pathToYourCssFile2, pathToYourCssFile3]
+}, yourCustomCallback2);
 ```
 
 
@@ -392,7 +399,7 @@ On client side :
 ```javascript
 // We don't want any dependency.
 object = wjs.pull('JsObject', 'testObject', {
-  excludeRequire: true
+  exclude: true
 });
 ```
 
@@ -401,7 +408,7 @@ Or more precisely. On client side :
 // We don't want multiple dependencies, but we allow others.
 object = wjs.pull('JsObject', 'testObject', {
   // We don't want these dependencies.
-  excludeRequire: {
+  exclude: {
     JsObject: ['testObject2'],
     JsArray: ['testArray2']
   }

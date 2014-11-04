@@ -2,19 +2,7 @@
   'use strict';
   // <--]
   context.wjs.loaderAdd('Image', {
-
-    /**
-     * We need a special process with no ajax request,
-     * just simple parsing.
-     * @param {string} name
-     * @param {Object} options
-     */
-    extLoad: function (name, options) {
-      this.processSingle(options, {
-        mode: 'parse',
-        name: name
-      });
-    },
+    processType: 'parse',
 
     /**
      * Use Image loading to complete process.
@@ -40,4 +28,4 @@
     }
   });
   // [-->
-}(typeof wjsContext !== 'undefined' ? wjsContext : window));
+}(wjsContext));

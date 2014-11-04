@@ -13,6 +13,7 @@
   context.wjs.classExtend('WjsLoader', {
     type: 'undefined',
     preventReload: true,
+    processType: 'server',
 
     __construct: function () {
       var self = this;
@@ -24,20 +25,14 @@
       }
     },
 
-    /**
-     * Retrieve requested extension.
-     * This function may be overridden by subclasses.
-     * @param {string} name
-     * @param {Object} options
-     */
-    extLoad: function (name, options) {
-      // We need to split options between process and request,
-      // a process can handle multiple requests.
-      this.processSingle(options, {
-        mode: 'server',
-        name: name,
-        excludeRequire: options.excludeRequire
-      });
+    extRequestInit: function (names, process) {
+      for (var i = 0; i < names.length; i++) {
+        process.extRequestAdd({
+          mode: this.processType,
+          type: this.type,
+          name: names[i]
+        });
+      }
     },
 
     /**
@@ -47,33 +42,6 @@
      */
     extDestroy: function (name, data) {
       // To override...
-    },
-
-    /**
-     * Create a process, with a single request,
-     * and launch it.
-     * @param {Object} processOptions
-     * @param {Object} requestOptions
-     */
-    processSingle: function (processOptions, requestOptions) {
-      // Force process type.
-      requestOptions.type = this.type;
-      /** @type {WJSProcessProto} */
-      var process = new this.wjs.processProto(
-        this.wjs.extendOptions({
-            // We filter options manually here,
-            async: processOptions.async,
-            complete: processOptions.complete
-          },
-          // Add type / name of the main requested object,
-          // @see process prototype.
-          {
-            mainType: this.type,
-            mainName: requestOptions.name
-          }
-        ));
-      process.extRequestAdd(requestOptions);
-      process.loadingStart();
     },
 
     /**
