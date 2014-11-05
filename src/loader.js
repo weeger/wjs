@@ -15,16 +15,28 @@
     preventReload: true,
     processType: 'server',
 
+    /**
+     * Defines the base variables.
+     * @private
+     */
     __construct: function () {
       var self = this;
       // Generate base hook name
       self.parseHook = 'parse' + self.type;
-      // Hooks can be a chain of
+      // Hooks can be a chain of strings
+      // pointing to a parent inherited function.
       while (typeof self.parseHook === 'string') {
         self.parseHook = self[self.parseHook] || false;
       }
     },
 
+    /**
+     * Launched on extension pull request,
+     * by default iterates over the names
+     * of asked extensions.
+     * @param names
+     * @param process
+     */
     extRequestInit: function (names, process) {
       for (var i = 0; i < names.length; i++) {
         process.extRequestAdd({
@@ -50,7 +62,7 @@
      * @param {string} extensionData
      */
     responseParseItem: function (extensionName, extensionData, process) {
-      var output, require, self = this, requireKey = '#require';
+      var output, require, self = this, requireKey = '#require', i, j, keys, keys2;
       // Load required elements first.
       if (extensionData[requireKey] !== undefined) {
         // Save requirements, it allows to delete
@@ -67,7 +79,13 @@
           // Delete requirement for further loop.
           extensionData[requireKey] = undefined;
           // Launch pull.
-          self.wjs.extPullMultiple(require);
+          keys = Object.keys(require);
+          for (i = 0; i < keys.length; i++) {
+            keys2 = require[keys[i]];
+            for (j = 0; j < keys2.length; j++) {
+              self.wjs.pull(keys[i], require[keys[i]][j]);
+            }
+          }
           // Stop parsing at this point,
           // item has not been marked as complete,
           // so it will be parsed again on next iteration,
@@ -92,15 +110,11 @@
      * @return {boolean}
      */
     requireMissing: function (requireList) {
-      var requireExtensionType, i, length;
-      for (requireExtensionType in requireList) {
-        if (requireList.hasOwnProperty(requireExtensionType)) {
-          for (i = 0, length = requireList[requireExtensionType].length;
-               i < length; i++) {
-            if (this.wjs.extGet(requireExtensionType,
-              requireList[requireExtensionType][i]) === false) {
-              return true;
-            }
+      var i, j, keys = Object.keys(requireList);
+      for (i = 0; i < keys.length; i++) {
+        for (j = 0; j < requireList[keys[i]].length; j++) {
+          if (this.wjs.extGet(keys[i], requireList[keys[i]][i]) === false) {
+            return true;
           }
         }
       }

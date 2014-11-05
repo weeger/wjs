@@ -82,8 +82,8 @@ class Loader extends Router {
     );
     // Add dependency to element loader itself,
     // Do not load core loaders extensions.
-    if (!isset($this->wjs->summaries['Wjs\WjsCoreSummary']->loaders[$this->name])) {
-      $this->extensionAddRequire($this->name, $name, 'WjsLoader', $this->name);
+    if ($this->name !== 'WjsLoader' && $this->name !== 'JsLink') {
+      $this->extensionAddRequire($name, 'WjsLoader', $this->name);
     }
     // Get dependencies.
     if (isset($this->extensionsRequire[$name]) && $excludeRequire !== TRUE) {
@@ -96,32 +96,19 @@ class Loader extends Router {
             // We filter data with array values to have clean indexes,
             // it allow to javascript to save and destroy requirement properly.
             $require[$requireType] = array_values(array_diff($requireItems, $excludeRequire[$requireType]));
+            if (empty($require[$requireType])) {
+              unset($require[$requireType]);
+            }
           }
         }
       }
-      // Save require for javascript parsing.
-      $package['#require'] = $require;
-      // Push requirements.
-      $this->wjs->extensionPushArray($require);
+      if (!empty($require)) {
+        // Save require for javascript parsing.
+        $package['#require'] = $require;
+        // Push requirements.
+        $this->wjs->extensionPushArray($require, $excludeRequire);
+      }
     }
     return $package;
-  }
-
-  function extensionPushedFlush() {
-    foreach ($this->extensions as $name => $data) {
-      $this->wjs->extensionPushRemove($this->name, $name);
-    }
-  }
-
-  /**
-   * Return a list of JS files to render.
-   * @param $flush Define if user want extensions
-   * to not be loaded into default package as well.
-   *
-   * @return array List of .js files.
-   */
-  function jsFiles($flush) {
-    // To offerride
-    return array();
   }
 }

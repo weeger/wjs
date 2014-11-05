@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.1.1';
+const WJS_VERSION                    = '3.1.2';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
 
@@ -70,12 +70,11 @@ class Wjs extends Router {
    * @var array $settings
    */
   var $settings = array(
-    'responsePath'              => '',
-    'responseQueryExtraParam'   => '',
-    'requestVariableName'       => 'wjs',
-    'requestVariableKeyType'    => 't',
-    'requestVariableKeyName'    => 'n',
-    'requestVariableKeyExclude' => 'no',
+    'responsePath' => '',
+    'paramExtra'   => '',
+    'paramInc'     => 'wjs',
+    'paramExc'     => 'wjs-exc',
+    'avoidEval'    => FALSE
   );
   /**
    * Keep a reference to added summaries.
@@ -90,27 +89,29 @@ class Wjs extends Router {
    */
   function __construct($routes = array()) {
     parent::__construct($routes);
+    // Load core summary,
+    $summary = new \Wjs\WjsCoreSummary();
+    // paths defined must be relocated accordingly to wjs.
+    foreach ($summary->extensions['WjsLoader'] as $loaderName => $routesList) {
+      foreach ($routesList as $side => $routes) {
+        foreach ($routes as $name => $route) {
+          $summary->extensions['WjsLoader'][$loaderName][$side][$name] = $this->routeGet($side, 'wjs') . $summary->extensions['WjsLoader'][$loaderName][$side][$name];
+        }
+      }
+    }
     // Add core wjs loaders manually,
     // This order has an impact on the order
     // of rendering header links (based on loaders var).
-    $this->loaders['WjsLoader'] = new \Wjs\Loader\WjsLoader(NULL, $this);
-    $this->loaders['JsLink']    = new \Wjs\Loader\JsLink(NULL, $this);
-    // Load core summary,
-    // paths defined must be relocated accordingly wjs.
-    $summary = new \Wjs\WjsCoreSummary();
-    foreach ($summary->extensions['WjsLoader'] as $loaderName => $args) {
-      $summary->extensions['WjsLoader'][$loaderName] = array(
-        $this->routeGet('server', 'wjs') . $args[0]
-      );
-      if (isset($args[1])) {
-        $summary->extensions['WjsLoader'][$loaderName][] = $this->routeGet('client', 'wjs') . $args[1];
-      }
-    }
+    $this->loaders['WjsLoader']                          = new \Wjs\Loader\WjsLoader($summary->extensions['WjsLoader']['WjsLoader'], $this);
+    $this->loaders['WjsLoader']->extensions['WjsLoader'] = $summary->extensions['WjsLoader']['WjsLoader'];
+    unset($summary->extensions['WjsLoader']['WjsLoader']);
     // Add default loaders.
     $this->summaryAdd($summary);
   }
 
   /**
+   * Return an existing extension loader.
+   *
    * @param      $name
    *
    * @return \Wjs\Loader
@@ -120,13 +121,15 @@ class Wjs extends Router {
   }
 
   function cacheEnable() {
-    $pathCache = $this->routeGet('server', 'cache');
-    if ($pathCache) {
-      if (file_exists($pathCache) && is_writable($pathCache)) {
+    $pathCacheFile = $this->routeGet('server', 'cacheFile');
+    if ($pathCacheFile) {
+      // Check that directory exists for file.
+      $pathCacheDir = substr($pathCacheFile, 0, -strlen(strrchr($pathCacheFile, '/')));
+      if (file_exists($pathCacheDir) && is_writable($pathCacheDir)) {
         $this->cacheEnabled = TRUE;
       }
       else {
-        $this->error('Path cache not found or not writable : ' . $pathCache);
+        $this->error('Path cache not found or not writable : ' . $pathCacheFile);
       }
     }
     else {
@@ -207,34 +210,52 @@ class Wjs extends Router {
     }
   }
 
-  function extensionPushArray($array) {
+  function extensionPushArray($array, $exclude) {
     foreach ($array as $extensionType => $items) {
       foreach ($items as $extensionName) {
-        $this->extensionPush($extensionType, $extensionName);
+        $this->extensionPush($extensionType, $extensionName, $exclude);
       }
     }
   }
 
+  function queryExplode($query) {
+    foreach ($query as $type => $items) {
+      $query[$type] = explode(',', $items);
+    }
+    return $query;
+  }
+
   function extensionPushRequest($requestArray) {
-    foreach ($requestArray as $item) {
-      $excludeRequire = isset($item[$this->settings['requestVariableKeyExclude']]) ? $item[$this->settings['requestVariableKeyExclude']] : FALSE;
-      // Must be boolean or array,
-      // param for true is "1".
-      if ($excludeRequire) {
-        if (is_array($excludeRequire)) {
-          foreach ($excludeRequire as $type => $items) {
-            $excludeRequire[$type] = explode(',', $items);
-          }
-        }
-        else {
-          $excludeRequire = TRUE;
-        }
+    $requests = $this->queryExplode($requestArray[$this->settings['paramInc']]);
+    // Exclude must be boolean or array,
+    // param for true is "1".
+    if (isset($requestArray[$this->settings['paramExc']])) {
+      $exclude = $requestArray[$this->settings['paramExc']];
+      if (is_array($exclude)) {
+        $exclude = $this->queryExplode($exclude);
       }
-      $this->extensionPush(
-        $item[$this->settings['requestVariableKeyType']],
-        $item[$this->settings['requestVariableKeyName']],
-        $excludeRequire
-      );
+      else {
+        $exclude = TRUE;
+      }
+    }
+    else {
+      $exclude = array();
+    }
+    $excludeLoadersList = array(
+      'WjsLoader' => array_keys($this->loaderGet('WjsLoader')->extensions)
+    );
+    // Iterate over types.
+    foreach ($requests as $type => $items) {
+      // Iterate over items.
+      foreach ($items as $name) {
+        // Get normal exclusions.
+        $excludeItem = $exclude;
+        // Add custom exclusion for this kind of extension.
+        if ($excludeItem !== TRUE && $type !== 'WjsLoader' && $type !== TRUE) {
+          $excludeItem = array_merge_recursive($exclude, $excludeLoadersList);
+        }
+        $this->extensionPush($type, $name, $excludeItem);
+      }
     }
   }
 
@@ -258,6 +279,19 @@ class Wjs extends Router {
   }
 
   function response() {
+    // Remove loaders from dependencies of non-loader extensions.
+    foreach ($this->outputPackage as $type => $typeGroup) {
+      if ($type !== 'WjsLoader') {
+        foreach ($typeGroup as $typeName => $content) {
+          if (isset($this->outputPackage[$type][$typeName]['#require']['WjsLoader'])) {
+            unset($this->outputPackage[$type][$typeName]['#require']['WjsLoader']);
+            if (empty($this->outputPackage[$type][$typeName]['#require'])) {
+              unset($this->outputPackage[$type][$typeName]['#require']);
+            }
+          }
+        }
+      }
+    }
     header('Content-Type: application/json');
     print $this->responsePackage();
     exit;
@@ -313,27 +347,32 @@ class Wjs extends Router {
    * Ensure to fill client > wjs route to define location of wjs
    * core files when using this list.
    *
-   * @param bool $flushLoaders Set to true says to retrieve links for
-   * "jsLink" type loaders and remove them to the output package.
-   *
    * @return array
    */
-  function jsFiles($flushLoaders = TRUE) {
+  function jsFiles() {
     $basePath = $this->routeGet('client', 'wjs');
     // Add core file.
     $files = array();
     foreach ($this->jsCoreFiles[$this->jsCoreFilesVersion] as $file) {
       $files[] = $basePath . $file;
     }
-
     /** @var \Wjs\Loader $loader */
-    foreach ($this->loaders as $loader) {
-      if ($loaderFiles = $loader->jsFiles($flushLoaders)) {
-        $files = array_merge($files, $loaderFiles);
+    foreach ($this->loaderGet('WjsLoader')->extensionsPushed as $name => $loader) {
+      $loaderPath = $this->loaderGet($name)->routeGet('client', 'js');
+      if ($loaderPath) {
+        $files[] = $loaderPath;
       }
     }
-
     return $files;
+  }
+
+  function renderJsCache() {
+    $files        = $this->jsFiles();
+    $cacheContent = '';
+    foreach ($files as $file) {
+      $cacheContent .= file_get_contents($file);
+    }
+    return $cacheContent . $this->renderJsUnpacker();
   }
 
   /**
@@ -346,11 +385,22 @@ class Wjs extends Router {
   function renderHeader($indentLength = 0) {
     $output = '';
     $indent = $indentLength === 0 ? '' : "\n" . str_repeat(' ', $indentLength);
-    foreach ($this->jsFiles() as $file) {
-      $output .= $indent . $this->renderJsInclude($file);
+
+    // In case of cache we aggregate files in one.
+    if ($this->cacheEnabled) {
+      $cachePath = $this->routeGet('server', 'cacheFile');
+      file_put_contents($cachePath, $this->renderJsCache());
+      $output = $this->renderJsInclude($cachePath);
     }
-    $output .= $indent . '<script type="text/javascript">' . $this->renderJsUnpacker() . '</script>';
-    return $output;
+    else {
+      $files = $this->jsFiles();
+      foreach ($files as $file) {
+        $output .= $indent . $this->renderJsInclude($file);
+      }
+      $output .= $indent . '<script type="text/javascript">' . $this->renderJsUnpacker() . '</script>';
+    }
+
+    return trim($output);
   }
 
   /**

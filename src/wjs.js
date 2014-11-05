@@ -1,8 +1,8 @@
-// wJs v3.1.1 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.1.2 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.1.1', WJSProto;
+  var wjsVersion = '3.1.2', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -45,9 +45,7 @@
       /** @type {Object.Object} */
       classMethods: {},
       /** @type {Object} */
-      settings: null,
-      /** @type {Function} Shorthand */
-      pull: this.extPull
+      settings: null
     });
     // Add a global wjsContext, use
     // by scripts links to access to wjs.
@@ -68,25 +66,24 @@
         self.extendObject(self, options);
         // Load extensions loaders added before init.
         var loaderName,
-          buffer = self.loadersBuffer;
+          buffer = self.loadersBuffer,
+          bufferKeys = Object.keys(buffer), i;
         // This var will not be used anymore,
         // we have to remove it before empty the buffer.
         delete self.loadersBuffer;
         // Create loaders prototypes.
-        for (loaderName in buffer) {
-          if (buffer.hasOwnProperty(loaderName)) {
-            self.loaderAdd(loaderName, buffer[loaderName], true);
-          }
+        for (i = 0; i < bufferKeys.length; i++) {
+          self.loaderAdd(bufferKeys[i], buffer[bufferKeys[i]], true);
         }
         // Create basic loaders who are required by package.
-        for (var i = 0, length = self.loadersBasic.length; i < length; i++) {
+        for (i = 0; i < self.loadersBasic.length; i++) {
           self.loaderAdd(self.loadersBasic[i], undefined, true);
         }
         delete self.loadersBasic;
         // Load all other scripts then run ready functions.
         // Execute startup functions.
         // Create a loading process to parse package content.
-        var proc = new self.processProto({
+        new self.processProto({
           complete: function () {
             delete self.packageDefault;
             // Execute all "ready" functions.
@@ -97,9 +94,8 @@
             self.callbacks(self.readyCallbacks);
 
           }
-        });
-        // Directly treat object as response.
-        proc.responseParse(self.packageDefault);
+          // Directly treat object as response.
+        }).responseParse(self.packageDefault);
       });
     },
 
@@ -167,9 +163,9 @@
 
     loadersExists: function (types, complete) {
       types = Array.isArray(types) ? types : [types];
-      var self = this, i, length = types.length, exists = [], pull = [];
+      var self = this, i, exists = [], pull = [];
       // Search for existing loaders.
-      for (i = 0; i < length; i++) {
+      for (i = 0; i < types.length; i++) {
         if (!self.loaders[types[i]]) {
           if (self.loadersExtra.indexOf(types[i])) {
             pull.push(types[i]);
@@ -192,7 +188,7 @@
      * @param {Object|Function=} options
      * @return {?}
      */
-    extPull: function (request, options) {
+    pull: function (request, options) {
       var self = this;
       // Treat if request is just two strings.
       if (typeof request === 'string') {
@@ -244,7 +240,7 @@
                   // We enforce process to parse it now.
                   return processQueued.responseParseItem(type, name, function () {
                     // Launch request again.
-                    return self.extPull(request, options);
+                    return self.pull(request, options);
                   });
                 }
               }
@@ -266,21 +262,6 @@
           return self.extGet(options.mainType, options.mainName);
         }
       });
-    },
-
-    /**
-     * Take an object of requested extensions.
-     * @param {Object} object
-     */
-    extPullMultiple: function (object) {
-      var extensionType, i;
-      for (extensionType in object) {
-        if (object.hasOwnProperty(extensionType)) {
-          for (i = 0; i < arguments.length; i++) {
-            this.extPull(extensionType, object[extensionType][i]);
-          }
-        }
-      }
     },
 
     /**
@@ -419,11 +400,10 @@
      * @return {*}
      */
     extendProto: function (object, add) {
-      for (var i in add) {
-        if (add.hasOwnProperty(i)) {
-          Object.defineProperty(object, i,
-            Object.getOwnPropertyDescriptor(add, i));
-        }
+      var i, keys = Object.keys(add);
+      for (i = 0; i < keys.length; i++) {
+        Object.defineProperty(object, keys[i],
+          Object.getOwnPropertyDescriptor(add, keys[i]));
       }
       return object;
     },

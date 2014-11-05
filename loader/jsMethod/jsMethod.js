@@ -7,6 +7,12 @@
     methodAddLast: null,
     methodAddLastCallback: null,
 
+    extDestroy: function (name, data) {
+      if (this.wjs.hasOwnProperty(name)) {
+        delete this.wjs[name];
+      }
+    },
+
     /**
      * Treat returned content as normal javascript.
      * Extra javascript is added from server side to
@@ -42,10 +48,14 @@
      * @param {WJSProcessProto} process
      */
     methodAddedComplete: function (name, process) {
+      var self = this;
+      if (!self.wjs.hasOwnProperty(name)) {
+        self.wjs[name] = self.methodAddLastCallback;
+      }
       process.parseItemComplete(
-        this.type,
-        this.methodAddLast,
-        this.methodAddLastCallback
+        self.type,
+        self.methodAddLast,
+        self.methodAddLastCallback
       );
     }
   });

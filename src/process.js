@@ -67,12 +67,11 @@
      * Launch retrieving.
      */
     loadingStart: function () {
-      var i, j,
+      var i, key,
         self = this,
         requests = self.extRequests,
         request,
-        prefix,
-        settings = this.wjs.settings,
+        settings = self.wjs.settings,
         serverRequest = {},
         responsePackage = {};
       self.loadingStarted = true;
@@ -81,20 +80,9 @@
         request = requests[i];
         switch (request.mode) {
           case 'server':
-            prefix = 'wjs[' + i + '][';
             // Build query for server.
-            serverRequest[prefix + settings.requestVariableKeyType + ']'] = request.type;
-            serverRequest[prefix + settings.requestVariableKeyName + ']'] = request.name;
-            if (self.exclude) {
-              if (self.exclude === true) {
-                serverRequest[prefix + settings.requestVariableKeyExclude + ']'] = '1';
-              }
-              else {
-                for (j in self.exclude) {
-                  serverRequest[prefix + settings.requestVariableKeyExclude + '][' + j + ']'] = self.exclude[j].join(',');
-                }
-              }
-            }
+            key = settings.paramInc + '[' + request.type + ']';
+            serverRequest[key] = serverRequest[key] ? serverRequest[key] + ',' + request.name : request.name;
             break;
           case 'parse':
             if (responsePackage[request.type] === undefined) {
@@ -107,11 +95,25 @@
       }
       // Do we need a server request.
       if (!self.wjs.objectIsEmpty(serverRequest)) {
+        // Create exclusion vars.
+        // Exclusions are considered as global
+        // for the hole request.
+        if (self.exclude) {
+          if (self.exclude === true) {
+            serverRequest[settings.paramExc] = '1';
+          }
+          else {
+            key = Object.keys(self.exclude);
+            for (i = 0; i < key.length; i++) {
+              serverRequest[settings.paramExc + '[' + key[i] + ']'] = self.exclude[key[i]].join(',');
+            }
+          }
+        }
         // Launch AJAX call.
         self.wjs.ajax({
-          url: self.wjs.settings.responsePath + '?' +
+          url: settings.responsePath + '?' +
             self.wjs.param(serverRequest) +
-            self.wjs.settings.responseQueryExtraParam,
+            settings.paramExtra,
           method: 'GET',
           async: self.async,
           success: function (data) {
@@ -176,29 +178,25 @@
      */
     responseParseNext: function () {
       var self = this,
-        extensionsType,
-        extensionsName,
-        queue = self.parseQ;
-      // Pass trough each kind of data.
-      for (extensionsType in queue) {
-        if (queue.hasOwnProperty(extensionsType) &&
-          // Type must also exists in registered loaders.
-          self.wjs.loaders[extensionsType]) {
-          for (extensionsName in queue[extensionsType]) {
-            if (queue[extensionsType].hasOwnProperty(extensionsName)) {
-              self.responseParseItem(extensionsType, extensionsName);
-              // We stop to the first matched item.
-              // Next treatment should be launched by parsing function.
-              // It allows to treat asynchronous parsing, like files loading.
-              return;
-            }
-          }
+        queue = self.parseQ,
+        queueKeys = Object.keys(queue),
+        queueItemsKeys;
+      // Take first item.
+      // Type must also exists in registered loaders.
+      if (queueKeys[0] && self.wjs.loaders[queueKeys[0]]) {
+        queueItemsKeys = Object.keys(queue[queueKeys[0]]);
+        if (queueItemsKeys[0]) {
+          self.responseParseItem(queueKeys[0], queueItemsKeys[0]);
+          // We stop to the first matched item.
+          // Next treatment should be launched by parsing function.
+          // It allows to treat asynchronous parsing, like files.
+          return;
         }
       }
       // At the end of loading, queue must be empty.
       // If not, may be an unknown script is present in
       // the returned package.
-      if (!self.wjs.objectIsEmpty(queue)) {
+      if (queueKeys.length > 0) {
         self.wjs.err('Parse queue not empty.');
       }
       self.loadingComplete();

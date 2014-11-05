@@ -38,10 +38,11 @@ $wjs = new \Wjs(array(
   'server' => array(
     // Path to wjs is used by wjs to retrieve
     // core scripts and internal library.
-    'wjs'   => $pathToWjsLibrary,
+    'wjs'       => $pathToWjsLibrary,
     // If you want to use cache, you have
-    // to specify route for the local folder.
-    'cache' => $yourCustomCachePath
+    // to specify route for the local js file,
+    // it will be filled by all aggregated javascript.
+    'cacheFile' => $yourCustomCachePath
   ),
   'client' => array(
     // This path is not required, but recommended,
@@ -128,9 +129,11 @@ print_r($_GET['wjs']);
 So you can filter and manage returned content.
 ```php
 // Think about always make some verification on requested content.
-if ($_GET['wjs'][0]['t'] === 'JsArray' && $_GET['wjs'][0]['n'] === 'testArray') {
+if (isset($_GET['wjs']['JsArray']) && $_GET['wjs']['JsArray'] === 'testArray') {
   // Manage which data to retrieve.
   $wjs->push('JsArray', 'testArray');
+  $wjs->extensionPushRemove('WjsLoader', 'JsArray');
+  $wjs->extensionPushRemove('WjsLoader', 'WjsLoader');
   // When response is ready to be sent,
   // this function will add json headers,
   // print package content, then exit.
@@ -143,7 +146,7 @@ A simple method has been made for quickly handle client requests, but always thi
 ```php
 // This will return requested data from GET,
 // and manage print and exit, in one time.
-$wjs->extensionPushRequest($_GET['wjs']);
+$wjs->extensionPushRequest($_GET);
 ```
 
 
@@ -230,7 +233,7 @@ You can load simple javascript methods with wjs, asynchronously or not, and exec
 On server side : 
 ```php
 // Add javascript method from a file.
-$wjs->extensionAdd('JsMethod', 'objectLength', $pathToWjs . 'extension/JsMethod/objectLength.js');
+$wjs->extensionAdd('JsMethod', 'testMethod', 'projects/wjs/tests/objects/JsMethod/testMethod.js');
 ```
 Your Js file must also be wrapped, it allows wjs to catch it :
 
@@ -259,16 +262,18 @@ Your Js file must also be wrapped, it allows wjs to catch it :
 
 On client side : 
 ```javascript
-// We execute method directly through wjs,
-var length = wjs.pull('JsMethod', 'objectLength', function (method) {
+// The retrieved method will return the length of an object.
+var length = wjs.pull('JsMethod', 'testMethod', function (method) {
+  var length;
   var testObject = {
     'lorem': 'ipsum',
     'dolor': 'sit',
     'amet': 'poireau'
   };
   // Return 3
-  var length = method(length);
-  // ...
+  length = method(testObject);
+  // Or
+  length = wjs.testMethod(testObject);
   continueYourScript();
 });
 ```
@@ -354,8 +359,18 @@ On server side :
 // We add a loader, this one exists in wjs core,
 // so this action is just here for example.
 $wjs->extensionAdd('WjsLoader', 'jsArray', array(
-  0 => $pathToPHPFileOnServer,
-  1 => $pathToJsFileFromClient
+  'server' => array(
+    // Contain a class who extends the base
+    // \Wjs\Loader class.
+    'class' => $pathToPHPFileOnServer,
+    // Path to JS from server is required in case of
+    // cache enabling. It will be reached to
+    // aggregate scripts.
+    'js'    => $pathToJsFileFromServer
+  ),
+  'client' => array(
+    'js' => $pathToJsFileFromClient
+  )
 ));
 ```
 On client side : 
@@ -424,10 +439,9 @@ Settings
 Various settings can be configured into wjs to let you define wjs behavior, like used paths, query string names, etc...
 
 - responsePath : Path used from client to retrieve packages in AJAX.
-- responseQueryExtraParam : Extra parameters added into AJAX requests, empty by default.
-- requestVariableName : Define the name of the get variable used for remote requests.
-- requestVariableKeyType : Define the key of the array containing the type of extension.
-- requestVariableKeyName : Define the key of the array containing the name of extension.
+- paramExtra : Extra parameters added into AJAX requests, empty by default.
+- paramInc : Define the key of the get variable used for remote requests.
+- paramExc : Define the key of the get variable used for excluded extensions dependencies.
 
 Document ready
 --------------

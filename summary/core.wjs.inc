@@ -7,31 +7,69 @@ class WjsCoreSummary extends Summary {
   var $extensions = array(
     // Add extra core loaders.
     'WjsLoader' => array(
-      'JsObject' => array(
-        'loader/JsObject/JsObject.inc'
+      'WjsLoader' => array(
+        'server' => array(
+          'class' => 'loader/WjsLoader/WjsLoader.inc',
+          'js'    => 'loader/WjsLoader/WjsLoader.js'
+        ),
+        'client' => array(
+          'js' => 'loader/WjsLoader/WjsLoader.js'
+        )
       ),
-      'JsArray'  => array(
-        'loader/JsArray/JsArray.inc'
+      'JsObject'  => array(
+        'server' => array(
+          'class' => 'loader/JsObject/JsObject.inc'
+        )
       ),
-      'JsScript' => array(
-        'loader/JsScript/JsScript.inc',
-        'loader/JsScript/JsScript.js'
+      'JsArray'   => array(
+        'server' => array(
+          'class' => 'loader/JsArray/JsArray.inc'
+        )
       ),
-      'JsLink'   => array(
-        'loader/JsLink/JsLink.inc',
-        'loader/JsLink/JsLink.js'
+      'JsScript'  => array(
+        'server' => array(
+          'class' => 'loader/JsScript/JsScript.inc',
+          'js'    => 'loader/JsScript/JsScript.js',
+        ),
+        'client' => array(
+          'js' => 'loader/JsScript/JsScript.js',
+        )
       ),
-      'CssLink'  => array(
-        'loader/CssLink/CssLink.inc',
-        'loader/CssLink/CssLink.js'
+      'JsLink'    => array(
+        'server' => array(
+          'class' => 'loader/JsLink/JsLink.inc',
+          'js'    => 'loader/JsLink/JsLink.js',
+        ),
+        'client' => array(
+          'js' => 'loader/JsLink/JsLink.js',
+        ),
       ),
-      'JsMethod' => array(
-        'loader/JsMethod/JsMethod.inc',
-      'loader/JsMethod/JsMethod.js'
+      'CssLink'   => array(
+        'server' => array(
+          'class' => 'loader/CssLink/CssLink.inc',
+          'js'    => 'loader/CssLink/CssLink.js',
+        ),
+        'client' => array(
+          'js' => 'loader/CssLink/CssLink.js',
+        )
       ),
-      'Image'    => array(
-        'loader/Image/Image.inc',
-        'loader/Image/Image.js'
+      'JsMethod'  => array(
+        'server' => array(
+          'class' => 'loader/JsMethod/JsMethod.inc',
+          'js'    => 'loader/JsMethod/JsMethod.js',
+        ),
+        'client' => array(
+          'js' => 'loader/JsMethod/JsMethod.js',
+        )
+      ),
+      'Image'     => array(
+        'server' => array(
+          'class' => 'loader/Image/Image.inc',
+          'js'    => 'loader/Image/Image.js',
+        ),
+        'client' => array(
+          'js' => 'loader/Image/Image.js',
+        )
       ),
     )
   );
