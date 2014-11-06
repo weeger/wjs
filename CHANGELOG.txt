@@ -1,8 +1,14 @@
+WJS - 3.2.0 - 2014-11-06
+------------------------
+- Main functions refactoring
+- @require works for scripts
+- Use minified versions in loaders
+
 WJS - 3.1.2 - 2014-11-05
 ------------------------
 - Remove useless method
 - Cache management
-- Brwosers debug
+- Browsers debug
 
 WJS - 3.1.1 - 2014-11-04
 ------------------------

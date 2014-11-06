@@ -1,8 +1,8 @@
-// wJs v3.1.2 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.2.0 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.1.2', WJSProto;
+  var wjsVersion = '3.2.0', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -163,12 +163,12 @@
 
     loadersExists: function (types, complete) {
       types = Array.isArray(types) ? types : [types];
-      var self = this, i, exists = [], pull = [];
+      var self = this, i, exists = [], use = [];
       // Search for existing loaders.
       for (i = 0; i < types.length; i++) {
         if (!self.loaders[types[i]]) {
           if (self.loadersExtra.indexOf(types[i])) {
-            pull.push(types[i]);
+            use.push(types[i]);
           }
           else {
             // One loader do not exists at all.
@@ -176,7 +176,7 @@
           }
         }
       }
-      return (pull.length > 0) ? this.pull({WjsLoader: pull}, complete) : complete();
+      return (use.length > 0) ? this.use({WjsLoader: use}, complete) : complete();
     },
 
     /**
@@ -188,7 +188,7 @@
      * @param {Object|Function=} options
      * @return {?}
      */
-    pull: function (request, options) {
+    use: function (request, options) {
       var self = this;
       // Treat if request is just two strings.
       if (typeof request === 'string') {
@@ -201,26 +201,26 @@
           mainName: options
         });
         // And maybe option exists as a third argument.
-        return self.pull(multiple, options);
+        return self.use(multiple, options);
       }
       // Make first a specific verification for loaders,
-      // Pull them if needed, loaders can't have
+      // Use them if needed, loaders can't have
       return self.loadersExists(Object.keys(request), function () {
         // Loader exists, we can search for asked extension.
         // Transform callback to object, if not already one.
         options = self.extendOptions(options);
-        var i, j, k, type, name, pull, processQueued, types = Object.keys(request),
+        var i, j, k, type, name, use, processQueued, types = Object.keys(request),
           process = new (self.processProto)(options),
           extensionData;
         // Iterates over requested types.
         for (i = 0; i < types.length; i++) {
           type = types[i];
           // Contain list of really missing extensions to retrieve.
-          pull = [];
+          use = [];
           // Iterates over items
           for (j = 0; j < request[type].length; j++) {
             name = request[type][j];
-            extensionData = self.extGet(type, name);
+            extensionData = self.get(type, name);
             // Check if data is missing.
             if (!extensionData ||
               // Reload is allowed internally
@@ -240,16 +240,16 @@
                   // We enforce process to parse it now.
                   return processQueued.responseParseItem(type, name, function () {
                     // Launch request again.
-                    return self.pull(request, options);
+                    return self.use(request, options);
                   });
                 }
               }
               // Item not found, we need to retrieve it.
-              pull.push(name);
+              use.push(name);
             }
           }
           // We hook loaders to add request(s).
-          self.loaders[type].extRequestInit(pull, process, options);
+          self.loaders[type].extRequestInit(use, process, options);
         }
         // We start process.
         process.loadingStart();
@@ -259,7 +259,7 @@
           // and retrieved, or if extension have been already loaded,
           // there is a chance that content can be return, otherwise
           // user should have conscience of type of content he manipulates.
-          return self.extGet(options.mainType, options.mainName);
+          return self.get(options.mainType, options.mainName);
         }
       });
     },
@@ -270,7 +270,7 @@
      * @param {string} name
      * @return {?}
      */
-    extGet: function (type, name) {
+    get: function (type, name) {
       var extList = this.extLoaded[type];
       // Return value if defined.
       // Use hasOwnProperty allow to save "undefined" for not found ext.
@@ -282,9 +282,9 @@
      * @param {string} name
      * @param {boolean=} withDependencies
      */
-    extDestroy: function (type, name, withDependencies) {
+    destroy: function (type, name, withDependencies) {
       var self = this;
-      if (self.extGet(type, name)) {
+      if (self.get(type, name)) {
         var requirementType, i,
           require = self.extRequire[type][name];
         // Do not delete parent container for "type"
@@ -293,7 +293,7 @@
           for (requirementType in require) {
             if (require.hasOwnProperty(requirementType)) {
               for (i = 0; i < require[requirementType].length; i++) {
-                self.extDestroy(requirementType, require[requirementType][i]);
+                self.destroy(requirementType, require[requirementType][i]);
               }
             }
           }
@@ -301,6 +301,7 @@
         }
         // Hook loader.
         self.loaders[type].extDestroy(name, self.extLoaded[type][name]);
+        self.loaders[type].destroy(name, self.extLoaded[type][name]);
         delete self.extLoaded[type][name];
       }
     },

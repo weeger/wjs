@@ -42,6 +42,8 @@ $wjs = new \Wjs(array(
     // If you want to use cache, you have
     // to specify route for the local js file,
     // it will be filled by all aggregated javascript.
+    // One file may be generated for each page,
+    // wjs do not manage files names changes or cache control.
     'cacheFile' => $yourCustomCachePath
   ),
   'client' => array(
@@ -55,7 +57,9 @@ $wjs = new \Wjs(array(
     // side, see bellow.
     'responsePath' => $yourCustomResponsePath
   )
-));
+  // Optional, by default use "master" version (minified),
+  // Accepts also "jQuery" or "source" for debug mode.
+), $jsCoreFilesVersion);
 ```
 
 
@@ -131,7 +135,7 @@ So you can filter and manage returned content.
 // Think about always make some verification on requested content.
 if (isset($_GET['wjs']['JsArray']) && $_GET['wjs']['JsArray'] === 'testArray') {
   // Manage which data to retrieve.
-  $wjs->push('JsArray', 'testArray');
+  $wjs->import('JsArray', 'testArray');
   $wjs->extensionPushRemove('WjsLoader', 'JsArray');
   $wjs->extensionPushRemove('WjsLoader', 'WjsLoader');
   // When response is ready to be sent,
@@ -146,7 +150,7 @@ A simple method has been made for quickly handle client requests, but always thi
 ```php
 // This will return requested data from GET,
 // and manage print and exit, in one time.
-$wjs->extensionPushRequest($_GET);
+$wjs->response($_GET);
 ```
 
 
@@ -172,7 +176,7 @@ $wjs->extensionAdd('JsObject', 'testObject', array(
 ```
 On client side : 
 ```javascript
-wjs.pull('JsObject', 'testObject');
+wjs.use('JsObject', 'testObject');
 ```
 
 
@@ -193,7 +197,7 @@ $wjs->extensionAdd('JsArray', 'testArray', array(
 On client side : 
 ```javascript
 // Will return : ["ATest", "AnOtherTest", 123, Array[1]]
-wjs.pull('JsArray', 'testArray');
+wjs.use('JsArray', 'testArray');
 ```
 
 
@@ -215,10 +219,10 @@ $wjs->extensionAdd('JsScript', 'jsScriptReloadable', 'window.jsScriptReloadCount
 On client side : 
 ```javascript
 // If loader do not exists, it will be loaded first.
-wjs.pull('JsScript', 'testScriptFile', function () {
+wjs.use('JsScript', 'testScriptFile', function () {
   console.log(window.jsScriptFileLoaded); // true
   // Inline script will be executed as well.
-  wjs.pull('JsScript', 'testScriptInline');
+  wjs.use('JsScript', 'testScriptInline');
   console.log(window.jsScriptInlineLoaded); // true
   continueYourScript();
 });
@@ -238,13 +242,32 @@ $wjs->extensionAdd('JsMethod', 'testMethod', 'projects/wjs/tests/objects/JsMetho
 Your Js file must also be wrapped, it allows wjs to catch it :
 
 ```javascript
-[FILE:projects/wjs/tests/objects/extension/JsMethod/testMethod.js]
+(function (loader) {
+  'use strict';
+  // <--]
+  /**
+   * Return length of own properties of a given object.
+   * @param {Object} object
+   * @return {number}
+   */
+  loader.methodAdd('testMethod', function (object) {
+    var size = 0, key;
+    for (key in object) {
+      if (object.hasOwnProperty(key)) {
+        size += 1;
+      }
+    }
+    return size;
+  });
+  // [-->
+}(loader));
+
 ```
 
 On client side : 
 ```javascript
 // The retrieved method will return the length of an object.
-var length = wjs.pull('JsMethod', 'testMethod', function (method) {
+var length = wjs.use('JsMethod', 'testMethod', function (method) {
   var length;
   var testObject = {
     'lorem': 'ipsum',
@@ -269,7 +292,7 @@ You can also use wjs to retrieve images, and use it only when load complete. Ima
 On client side : 
 ```javascript
 // We load the HTML5 Image Logo
-wjs.pull('Image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
+wjs.use('Image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
   complete: yourCustomCallback
 });
 ```
@@ -283,7 +306,7 @@ wjs is also able to append script links into your pages.
 On client side : 
 ```javascript
 // We load an external js.
-wjs.pull('JsLink', pathToYourJsFile, {
+wjs.use('JsLink', pathToYourJsFile, {
   complete: yourCustomCallback
 });
 ```
@@ -295,7 +318,7 @@ On client side :
 // If several links are declared from an array,
 // All links are loaded, in order. Each link wait for
 // the previous one to be loaded.
-wjs.pull({JsLink:
+wjs.use({JsLink:
   [
     pathToYourJsFile2,
     pathToYourJsFile3
@@ -312,7 +335,7 @@ Like .js, you can also retireve css links, as link tags. They will be appended t
 On client side : 
 ```javascript
 // We load an external js.
-wjs.pull('CssLink', pathToYourCssFile, {
+wjs.use('CssLink', pathToYourCssFile, {
   complete: yourCustomCallback
 });
 ```
@@ -324,7 +347,7 @@ And for multiple css. On client side :
 // All links are loaded, in order. Each link wait for
 // the previous one to be loaded,
 // wrong css links do not block the process.
-wjs.pull({
+wjs.use({
   CssLink: [pathToYourCssFile2, pathToYourCssFile3]
 }, yourCustomCallback2);
 ```
@@ -360,9 +383,9 @@ On client side :
 // this action is also for example,
 // in real life, wjs make this action
 // automatically when pull a script.
-wjs.pull('WjsLoader', 'JsArray');
+wjs.use('WjsLoader', 'JsArray');
 // Then we load script.
-wjs.pull('JsArray', 'testArray');
+wjs.use('JsArray', 'testArray');
 ```
 Obviously you should declare your loader into a separated javascript file. See into wjs core for more info.
 
@@ -394,7 +417,7 @@ A dangerous point with dependencies is to retrieve multiple times the same exten
 On client side : 
 ```javascript
 // We don't want any dependency.
-object = wjs.pull('JsObject', 'testObject', {
+object = wjs.use('JsObject', 'testObject', {
   exclude: true
 });
 ```
@@ -402,7 +425,7 @@ object = wjs.pull('JsObject', 'testObject', {
 Or more precisely. On client side : 
 ```javascript
 // We don't want multiple dependencies, but we allow others.
-object = wjs.pull('JsObject', 'testObject', {
+object = wjs.use('JsObject', 'testObject', {
   // We don't want these dependencies.
   exclude: {
     JsObject: ['testObject2'],
@@ -431,7 +454,7 @@ To wjs to be loaded before using it, you should wrap your scripts into the wjs.r
 ```javascript
 w.ready(function(){ 
   console.log("Ready to pull !"); 
-  // Place here your wjs.pull() requests.
+  // Place here your wjs.use() requests.
 })
 ```
 

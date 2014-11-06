@@ -142,7 +142,7 @@
       self.wjs.processes.splice(self.wjs.processes.indexOf(self), 1);
       // Execute complete callback.
       if (!silent && self.completeCallbacks) {
-        self.wjs.callbacks([self.completeCallbacks], [self.wjs.extGet(self.mainType, self.mainName)]);
+        self.wjs.callbacks([self.completeCallbacks], [self.wjs.get(self.mainType, self.mainName)]);
       }
       // Protect against modification, object
       // should be eligible for garbage collection.

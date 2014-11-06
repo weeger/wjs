@@ -22,7 +22,7 @@ class WjsLoader extends jsLink {
     parent::extensionAdd($name, $data);
   }
 
-  function extensionPush($name, $value, $excludeRequire = FALSE) {
+  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
     // Avoid to add core loaders as extensions.
     if ($name !== 'WjsLoader' && $name !== 'JsLink') {
       // Exported data is file URL.
@@ -31,7 +31,7 @@ class WjsLoader extends jsLink {
       // expecting that a js file inside it exists,
       // It also can be equal to true if prototype is
       // a basic loader (no js).
-      return parent::extensionPush($name, $path ? $path : TRUE, $excludeRequire);
+      return parent::extensionPush($name, $excludeRequire, $path ? $path : TRUE);
     }
   }
 }

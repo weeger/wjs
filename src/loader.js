@@ -28,10 +28,24 @@
       while (typeof self.parseHook === 'string') {
         self.parseHook = self[self.parseHook] || false;
       }
+      // Launch init function for subclasses
+      this.init();
+    },
+
+    init:function() {
+      // To override...
+    },
+
+    load: function () {
+      // To override...
+    },
+
+    destroy: function () {
+      // To override...
     },
 
     /**
-     * Launched on extension pull request,
+     * Launched on extension use request,
      * by default iterates over the names
      * of asked extensions.
      * @param names
@@ -78,12 +92,12 @@
           require = extensionData[requireKey];
           // Delete requirement for further loop.
           extensionData[requireKey] = undefined;
-          // Launch pull.
+          // Launch use.
           keys = Object.keys(require);
           for (i = 0; i < keys.length; i++) {
             keys2 = require[keys[i]];
             for (j = 0; j < keys2.length; j++) {
-              self.wjs.pull(keys[i], require[keys[i]][j]);
+              self.wjs.use(keys[i], require[keys[i]][j]);
             }
           }
           // Stop parsing at this point,
@@ -99,6 +113,7 @@
       if (self.parseHook) {
         output = self.parseHook(extensionName, output, process);
       }
+      self.load(extensionName, output);
       if (output !== false) {
         process.parseItemComplete(self.type, extensionName, output);
       }
@@ -113,7 +128,7 @@
       var i, j, keys = Object.keys(requireList);
       for (i = 0; i < keys.length; i++) {
         for (j = 0; j < requireList[keys[i]].length; j++) {
-          if (this.wjs.extGet(keys[i], requireList[keys[i]][i]) === false) {
+          if (this.wjs.get(keys[i], requireList[keys[i]][i]) === false) {
             return true;
           }
         }

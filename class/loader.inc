@@ -9,9 +9,9 @@ namespace Wjs;
  */
 class Loader extends Router {
   /**
-   * @var string $name
+   * @var string $type
    */
-  var $name;
+  var $type;
   /**
    * @var \wjs $w
    */
@@ -33,10 +33,10 @@ class Loader extends Router {
   function __construct($routes, \Wjs $wjs) {
     parent::__construct($routes);
     $reflector           = new \ReflectionClass($this);
-    $this->name          = $reflector->getShortName();
+    $this->type          = $reflector->getShortName();
     $this->wjs           = $wjs;
     $this->pathPhpFile   = $this->pathCleanupSlashes(dirname($reflector->getFileName()) . '/');
-    $this->pathJsFile    = $this->pathPhpFile . $this->name . '.js';
+    $this->pathJsFile    = $this->pathPhpFile . $this->type . '.js';
     $this->pathJsFile    = file_exists($this->pathJsFile) ? $this->pathJsFile : FALSE;
     $this->pathJsFileRel = $this->pathSubtract($this->pathCleanupSlashes(realpath($this->wjs->routeGet('server', 'wjs'))) . '/', $this->pathJsFile);
     // Get inheritance linage,
@@ -70,20 +70,30 @@ class Loader extends Router {
   }
 
   /**
-   * @param            $name
-   * @param            $value
-   * @param bool|array $excludeRequire
+   * @param       $name
+   * @param bool  $excludeRequire
+   * @param mixed $value
    *
    * @return array
    */
-  function extensionPush($name, $value, $excludeRequire = FALSE) {
+  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+    // Search for value if not defined.
+    if ($value === NULL) {
+      if (isset($this->extensions[$name])) {
+        $value = $this->extensions[$name];
+      }
+      else {
+        return WJS_ERR_PUSH_MISSING_EXTENSION;
+      }
+    }
+    // Package base.
     $package = array(
       '#data' => $value,
     );
     // Add dependency to element loader itself,
     // Do not load core loaders extensions.
-    if ($this->name !== 'WjsLoader' && $this->name !== 'JsLink') {
-      $this->extensionAddRequire($name, 'WjsLoader', $this->name);
+    if ($this->type !== 'WjsLoader' && $this->type !== 'JsLink') {
+      $this->extensionAddRequire($name, 'WjsLoader', $this->type);
     }
     // Get dependencies.
     if (isset($this->extensionsRequire[$name]) && $excludeRequire !== TRUE) {

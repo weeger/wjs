@@ -23,7 +23,7 @@
       self.wjs.window.setTimeout(function () {
         // If extension has not been loaded, a problem happens.
         // So we make it complete instead.
-        if (!self.wjs.extGet(type, name)) {
+        if (!self.wjs.get(type, name)) {
           process.parseItemComplete(type, name, domLink);
         }
       }, 200);
