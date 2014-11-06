@@ -10,7 +10,7 @@ Load everything you need as an extensions package. Wjs is an entry point to make
 - Lazy load all components of your pages (js methods, classes, images, links, etc...).
 - Instantiate javascript class objects. 
 
-It is really lightweight and infinitely extensible by your own application components. Obviously, it requires a minimum of configuration before.. Checkout a demo on this <a target="_blank" href="http://wemplate.wexample.com/?p=1C2A8&changes=1">demo website</a>.
+It is really lightweight and infinitely extensible by your own application components. Obviously, it requires a minimum of configuration before.. Checkout a demo on this <a target="_blank" href="http://wjs.wexample.com">demo website</a>.
 
 Install
 =======
