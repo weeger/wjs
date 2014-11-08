@@ -22,6 +22,6 @@
       self.wjs.document.head.appendChild(domScript);
       return false;
     }
-  });
+  }, true);
   // [-->
 }(wjsContext));

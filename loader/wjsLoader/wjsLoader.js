@@ -33,6 +33,6 @@
         return this.parseJsLink(name, value, process);
       }
     }
-  });
+  }, true);
   // [-->
 }(wjsContext));

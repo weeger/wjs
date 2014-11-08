@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.2.0';
+const WJS_VERSION                    = '3.2.1';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_PUSH_WRONG_DATA_TYPE   = 'WJS_ERR_PUSH_WRONG_DATA_TYPE';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
@@ -369,13 +369,6 @@ class Wjs extends Router {
     $files = array();
     foreach ($this->jsCoreFiles[$this->jsCoreFilesVersion] as $file) {
       $files[] = $basePath . $file;
-    }
-    /** @var \Wjs\Loader $loader */
-    foreach ($this->loaderGet('WjsLoader')->extensionsPushed as $name => $loader) {
-      $loaderPath = $this->loaderGet($name)->routeGet('client', 'js');
-      if ($loaderPath) {
-        $files[] = $loaderPath;
-      }
     }
     return $files;
   }

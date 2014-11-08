@@ -1,8 +1,8 @@
-// wJs v3.2.0 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.2.1 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.2.0', WJSProto;
+  var wjsVersion = '3.2.1', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -28,8 +28,6 @@
       loaders: {},
       /** @type {Array.string} */
       loadersExtra: [],
-      /** @type {Object.Object} */
-      loadersBuffer: {},
       /** @type {Object.Object} */
       loadersBasic: {},
       /** @type {Object.Object.?} */
@@ -64,19 +62,8 @@
       this.window.addEventListener('load', function () {
         // Apply options.
         self.extendObject(self, options);
-        // Load extensions loaders added before init.
-        var loaderName,
-          buffer = self.loadersBuffer,
-          bufferKeys = Object.keys(buffer), i;
-        // This var will not be used anymore,
-        // we have to remove it before empty the buffer.
-        delete self.loadersBuffer;
-        // Create loaders prototypes.
-        for (i = 0; i < bufferKeys.length; i++) {
-          self.loaderAdd(bufferKeys[i], buffer[bufferKeys[i]], true);
-        }
         // Create basic loaders who are required by package.
-        for (i = 0; i < self.loadersBasic.length; i++) {
+        for (var i = 0; i < self.loadersBasic.length; i++) {
           self.loaderAdd(self.loadersBasic[i], undefined, true);
         }
         delete self.loadersBasic;
@@ -128,15 +115,8 @@
      */
     loaderAdd: function (name, methods, register) {
       var self = this;
-      // We can define loader with no special method.
+      // We can define loader with no specific method.
       methods = methods || {};
-      // If wjs is not ready to add loaders, we have
-      // a temporary variable for loaders, it is removed
-      // into wjs init function.
-      if (self.loadersBuffer !== undefined) {
-        self.loadersBuffer[name] = methods;
-        return;
-      }
       if (!self.loaders[name]) {
         var className = 'WjsLoader' + name;
         // Add name to prototype.
