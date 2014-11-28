@@ -15,7 +15,7 @@ class WjsCoreSummary extends Summary {
       'WjsLoader' => array(
         'server' => array(
           'class' => 'loader/WjsLoader/WjsLoader.inc',
-          'js'    => 'loader/WjsLoader/WjsLoader.min.min.js'
+          'js'    => 'loader/WjsLoader/WjsLoader.min.js'
         ),
         'client' => array(
           'js' => 'loader/WjsLoader/WjsLoader.min.js'
@@ -30,6 +30,11 @@ class WjsCoreSummary extends Summary {
         'server' => array(
           'class' => 'loader/JsArray/JsArray.inc'
         )
+      ),
+      'Group'     => array(
+        'server' => array(
+          'class' => 'loader/Group/Group.inc',
+        ),
       ),
       'JsScript'  => array(
         'server' => array(
@@ -67,6 +72,15 @@ class WjsCoreSummary extends Summary {
           'js' => 'loader/JsMethod/JsMethod.min.js',
         )
       ),
+      'JsClass'   => array(
+        'server' => array(
+          'class' => 'loader/JsClass/JsClass.inc',
+          'js'    => 'loader/JsClass/JsClass.min.js',
+        ),
+        'client' => array(
+          'js' => 'loader/JsClass/JsClass.min.js',
+        )
+      ),
       'Image'     => array(
         'server' => array(
           'class' => 'loader/Image/Image.inc',
@@ -76,6 +90,35 @@ class WjsCoreSummary extends Summary {
           'js' => 'loader/Image/Image.min.js',
         )
       ),
+      'WebComp'   => array(
+        'server' => array(
+          'class' => 'loader/WebComp/WebComp.inc',
+          'js'    => 'loader/WebComp/WebComp.min.js',
+        ),
+        'client' => array(
+          'js' => 'loader/WebComp/WebComp.min.js',
+        )
+      ),
+      'WebPage'   => array(
+        'server' => array(
+          'class' => 'loader/WebPage/WebPage.inc',
+          'js'    => 'loader/WebPage/WebPage.min.js',
+        ),
+        'client' => array(
+          'js' => 'loader/WebPage/WebPage.min.js',
+        )
+      ),
+    ),
+    'JsMethod'  => array(
+      'cssListAnimationDelay' => 'extension/JsMethod/cssListAnimationDelay.min.js',
+      'cssVendorPrefix'       => 'extension/JsMethod/cssVendorPrefix.min.js',
+      'eventKeyCode'          => 'extension/JsMethod/eventKeyCode.min.js',
+      'eventTransitionName'   => 'extension/JsMethod/eventTransitionName.min.js',
+      'isDomNode'             => 'extension/JsMethod/isDomNode.min.js',
+      'localClass'            => 'extension/JsMethod/localClass.min.js',
+      'objectToArray'         => 'extension/JsMethod/objectToArray.min.js',
+      'urlQueryParse'         => 'extension/JsMethod/urlQueryParse.min.js',
+      'urlQueryBuild'         => 'extension/JsMethod/urlQueryBuild.min.js',
     )
   );
 }

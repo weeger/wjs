@@ -10,7 +10,7 @@ Load everything you need as an extensions package. Wjs is an entry point to make
 - Lazy load all components of your pages (js methods, classes, images, links, etc...).
 - Instantiate javascript class objects. 
 
-It is really lightweight and infinitely extensible by your own application components. Obviously, it requires a minimum of configuration before.. Checkout a demo on this <a target="_blank" href="http://wjs.wexample.com">demo website</a>.
+It is really lightweight and infinitely extensible by your own application components. Obviously, it requires a minimum of configuration before.. Checkout a demo on this <a target="_blank" href="http://wemplate.wexample.com/?p=1C2A8&changes=1">demo website</a>.
 
 Install
 =======
@@ -107,7 +107,7 @@ array(
 You can now include these links into your html page. The next point is to init wjs. This action will unpack pushed content from PHP, and execute startup function (see "ready" method).
 On client side : 
 ```javascript
-wjs.init(<?php print $this->wjs->initPackage(); ?>);
+wjs.init(<?php print $wjs->initPackage(); ?>);
 ```
 
 
@@ -388,6 +388,26 @@ wjs.use('WjsLoader', 'JsArray');
 wjs.use('JsArray', 'testArray');
 ```
 Obviously you should declare your loader into a separated javascript file. See into wjs core for more info.
+
+Group
+-----
+
+###MISSING###
+
+JsClass
+-------
+
+###MISSING###
+
+WebComp
+-------
+
+###MISSING###
+
+WebPage
+-------
+
+###MISSING###
 
 
 

@@ -60,13 +60,19 @@ class Loader extends Router {
   }
 
   function extensionAddRequire($name, $requireType, $requireName) {
-    if (!isset($this->extensionsRequire[$name])) {
-      $this->extensionsRequire[$name] = array();
+    // Core loaders requirement is assumed.
+    if ($requireType !== 'WjsLoader' || ($requireName !== 'WjsLoader' && $requireName !== 'JsLink')) {
+      if (!isset($this->extensionsRequire[$name])) {
+        $this->extensionsRequire[$name] = array();
+      }
+      if (!isset($this->extensionsRequire[$name][$requireType])) {
+        $this->extensionsRequire[$name][$requireType] = array();
+      }
+      // Add requirements only once.
+      if (!in_array($requireName, $this->extensionsRequire[$name][$requireType])) {
+        $this->extensionsRequire[$name][$requireType][] = $requireName;
+      }
     }
-    if (!isset($this->extensionsRequire[$name][$requireType])) {
-      $this->extensionsRequire[$name][$requireType] = array();
-    }
-    $this->extensionsRequire[$name][$requireType][] = $requireName;
   }
 
   /**
@@ -90,11 +96,6 @@ class Loader extends Router {
     $package = array(
       '#data' => $value,
     );
-    // Add dependency to element loader itself,
-    // Do not load core loaders extensions.
-    if ($this->type !== 'WjsLoader' && $this->type !== 'JsLink') {
-      $this->extensionAddRequire($name, 'WjsLoader', $this->type);
-    }
     // Get dependencies.
     if (isset($this->extensionsRequire[$name]) && $excludeRequire !== TRUE) {
       $require = $this->extensionsRequire[$name];

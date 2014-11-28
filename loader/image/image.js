@@ -11,14 +11,15 @@
      * @param {WJSProcessProto} process
      * @return {?}
      */
-    parseImage: function (name, value, process) {
+    parse: function (name, value, process) {
       // Create a new object.
-      var image = new this.wjs.window.Image(),
-        type = this.type;
-      // Callback method when loading is complete.
-      image.onload = function () {
+      var self = this,
+        image = new self.wjs.window.Image(),
+        type = self.type,
+        loaded = true;
+      self.wjs.onload(image, function () {
         process.parseItemComplete(type, name, image);
-      };
+      });
       // This launch image load process.
       image.src = name;
       // Return false stops parsing process,

@@ -107,7 +107,7 @@ array(
 You can now include these links into your html page. The next point is to init wjs. This action will unpack pushed content from PHP, and execute startup function (see "ready" method).
 On client side : 
 ```javascript
-wjs.init(<?php print $this->wjs->initPackage(); ?>);
+wjs.init(<?php print $wjs->initPackage(); ?>);
 ```
 
 
@@ -388,6 +388,26 @@ wjs.use('WjsLoader', 'JsArray');
 wjs.use('JsArray', 'testArray');
 ```
 Obviously you should declare your loader into a separated javascript file. See into wjs core for more info.
+
+Group
+-----
+
+###MISSING###
+
+JsClass
+-------
+
+###MISSING###
+
+WebComp
+-------
+
+###MISSING###
+
+WebPage
+-------
+
+###MISSING###
 
 
 

@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.2.1';
+const WJS_VERSION                    = '3.3.0';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_PUSH_WRONG_DATA_TYPE   = 'WJS_ERR_PUSH_WRONG_DATA_TYPE';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
@@ -47,6 +47,9 @@ class Wjs extends Router {
       // and also WjsLoader loader.
       'wjs.min.js',
     ),
+    'packed' => array(
+      'wjs.packed.js',
+    ),
     'jQuery' => array(
       'wjs.jquery.js',
     ),
@@ -82,6 +85,11 @@ class Wjs extends Router {
    * @var array
    */
   var $summaries = array();
+  /**
+   * Specify to use cached content,
+   * cache directory must be known.
+   * @var bool $cacheEnabled
+   */
   var $cacheEnabled = FALSE;
   var $errorLevel = E_USER_ERROR;
 
@@ -91,6 +99,15 @@ class Wjs extends Router {
   function __construct($routes = array(), $jsCoreFilesVersion = 'master') {
     parent::__construct($routes);
     $this->jsCoreFilesVersion = $jsCoreFilesVersion;
+    // Add core summary.
+    $this->summaryCoreLoad();
+  }
+
+  /**
+   * Load core summary and relocate files,
+   * according the wjs root path.
+   */
+  function summaryCoreLoad() {
     // Load core summary,
     $summary = new \Wjs\WjsCoreSummary();
     // paths defined must be relocated accordingly to wjs.
@@ -98,7 +115,7 @@ class Wjs extends Router {
       foreach ($routesList as $side => $routes) {
         foreach ($routes as $name => $route) {
           // Non-source versions uses loader.min.js instead loader.js.
-          if ($this->jsCoreFilesVersion !== 'source' && $name === 'js') {
+          if ($this->jsCoreFilesVersion === 'source' && $name === 'js') {
             // Remove .min.js
             $summary->extensions['WjsLoader'][$loaderName][$side][$name] = str_replace('.min.js', '.js', $summary->extensions['WjsLoader'][$loaderName][$side][$name]);
           }
@@ -106,6 +123,12 @@ class Wjs extends Router {
         }
       }
     }
+    if ($this->jsCoreFilesVersion === 'source') {
+      foreach ($summary->extensions['JsMethod'] as $methodName => $path) {
+        $summary->extensions['JsMethod'][$methodName] = str_replace('.min.js', '.js', $summary->extensions['JsMethod'][$methodName]);
+      }
+    }
+    $this->summaryCoreRelocate($summary, 'JsMethod');
     // Add core wjs loaders manually,
     // This order has an impact on the order
     // of rendering header links (based on loaders var).
@@ -116,13 +139,18 @@ class Wjs extends Router {
     $this->summaryAdd($summary);
   }
 
+  function summaryCoreRelocate($summary, $name) {
+    foreach ($summary->extensions[$name] as $extensionName => $extensionValue) {
+      $summary->extensions[$name][$extensionName] = $this->routeGet('server', 'wjs') . $extensionValue;
+    }
+  }
+
   function define($type, $loaderData) {
     $this->extensionAdd('WjsLoader', $type, $loaderData);
   }
 
-  function register($type, $name, $arguments) {
-    // TODO $requirements.
-    $this->extensionAdd($type, $name, $arguments);
+  function register($type, $name, $arguments, $requirements = array()) {
+    $this->extensionAdd($type, $name, $arguments, $requirements);
   }
 
   /**
@@ -139,19 +167,6 @@ class Wjs extends Router {
   function response($get = NULL) {
     if ($get !== NULL) {
       $this->extensionPushRequest($get);
-    }
-    // Remove loaders from dependencies of non-loader extensions.
-    foreach ($this->outputPackage as $type => $typeGroup) {
-      if ($type !== 'WjsLoader') {
-        foreach ($typeGroup as $typeName => $content) {
-          if (isset($this->outputPackage[$type][$typeName]['#require']['WjsLoader'])) {
-            unset($this->outputPackage[$type][$typeName]['#require']['WjsLoader']);
-            if (empty($this->outputPackage[$type][$typeName]['#require'])) {
-              unset($this->outputPackage[$type][$typeName]['#require']);
-            }
-          }
-        }
-      }
     }
     header('Content-Type: application/json');
     print $this->responsePackage();
@@ -208,10 +223,20 @@ class Wjs extends Router {
    * Register extension file / folder into available list of extensions.
    * This will not push extension to output package.
    */
-  function extensionAdd($extensionType, $extensionName, $extensionData) {
+  function extensionAdd($extensionType, $extensionName, $extensionData, $requirements = array()) {
     $this
       ->loaderGet($extensionType)
       ->extensionAdd($extensionName, $extensionData);
+    $this->extensionAddRequireArray($extensionType, $extensionName, $requirements);
+  }
+
+  function extensionAddRequireArray($extensionType, $extensionName, $requirements) {
+    // Add requirements.
+    foreach ($requirements as $requireType => $requireNames) {
+      foreach ($requireNames as $requireName) {
+        $this->extensionAddRequire($extensionType, $extensionName, $requireType, $requireName);
+      }
+    }
   }
 
   function extensionAddRequire($extensionType, $extensionName, $requireType, $requireName) {
@@ -278,19 +303,12 @@ class Wjs extends Router {
     else {
       $exclude = array();
     }
-    $excludeLoadersList = array(
-      'WjsLoader' => array_keys($this->loaderGet('WjsLoader')->extensions)
-    );
     // Iterate over types.
     foreach ($requests as $type => $items) {
       // Iterate over items.
       foreach ($items as $name) {
         // Get normal exclusions.
         $excludeItem = $exclude;
-        // Add custom exclusion for this kind of extension.
-        if ($excludeItem !== TRUE && $type !== 'WjsLoader' && $type !== TRUE) {
-          $excludeItem = array_merge_recursive($exclude, $excludeLoadersList);
-        }
         $this->extensionPush($type, $name, $excludeItem);
       }
     }
@@ -371,6 +389,22 @@ class Wjs extends Router {
       $files[] = $basePath . $file;
     }
     return $files;
+  }
+
+  /**
+   * Get list of @require declarations into the given source.
+   *
+   * @param $extensionType
+   * @param $extensionName
+   * @param $jsContent
+   */
+  function jsParseRequire($extensionType, $extensionName, $jsContent) {
+    // Get list of @require function.
+    // Search for all "@require type > name" into script and add it to the output array.
+    preg_match_all("`@require\\s(.*)\\s>\\s(.*)\\s`", $jsContent, $results);
+    foreach ($results[0] as $key => $item) {
+      $this->extensionAddRequire($extensionType, $extensionName, trim($results[1][$key]), trim($results[2][$key]));
+    }
   }
 
   function renderJsCache() {

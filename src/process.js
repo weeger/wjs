@@ -17,9 +17,10 @@
    * @constructor
    */
   var WJSProcessProto = function (options) {
+    var self = this;
     options = options || {};
     // Default values
-    context.wjs.extendObject(this, {
+    context.wjs.extendObject(self, {
       /** @type {WJSProto} */
       wjs: context.wjs,
       /** @type {Object.Object} */
@@ -32,6 +33,7 @@
       loadingStarted: false,
       /** @type {Array.Object} */
       extRequests: [],
+      /** @type {boolean} */
       exclude: options.exclude,
       // Save which extension we should return at the end
       // of the process, even several content is returned into
@@ -42,7 +44,7 @@
       mainName: options.mainName
     });
     // Save it into w.
-    this.wjs.processes.push(this);
+    self.wjs.processes.push(self);
   };
 
   WJSProcessProto.prototype = {
@@ -69,14 +71,15 @@
     loadingStart: function () {
       var i, key,
         self = this,
+        wjs = self.wjs,
         requests = self.extRequests,
         request,
-        settings = self.wjs.settings,
+        settings = wjs.settings,
         serverRequest = {},
         responsePackage = {};
       self.loadingStarted = true;
       // Treat requests list.
-      for (i = 0; i < self.extRequests.length; i++) {
+      for (i = 0; i < requests.length; i++) {
         request = requests[i];
         switch (request.mode) {
           case 'server':
@@ -94,7 +97,7 @@
         }
       }
       // Do we need a server request.
-      if (!self.wjs.objectIsEmpty(serverRequest)) {
+      if (!wjs.objectIsEmpty(serverRequest)) {
         // Create exclusion vars.
         // Exclusions are considered as global
         // for the hole request.
@@ -110,16 +113,16 @@
           }
         }
         // Launch AJAX call.
-        self.wjs.ajax({
+        wjs.ajax({
           url: settings.responsePath + '?' +
-            self.wjs.param(serverRequest) +
+            wjs.param(serverRequest) +
             settings.paramExtra,
           method: 'GET',
           async: self.async,
           success: function (data) {
             // Add retrieved data to response package.
-            self.wjs.extendObject(responsePackage,
-              JSON.parse(data.responseText));
+            wjs.extendObject(responsePackage,
+              JSON.parse(data.responseText), true);
             // We parse response as json in all cases.
             self.responseParse(responsePackage);
           }
@@ -168,35 +171,35 @@
     responseParse: function (response) {
       var self = this;
       // Add data to parse queue.
-      self.wjs.extendObject(self.parseQ, response);
-      // Launch first item parsing.
-      self.responseParseNext();
+      self.wjs.extendObject(self.parseQ, response, true);
+      // Search once more for loaders.
+      self.wjs.loadersExists(Object.keys(self.parseQ), function () {
+        // Launch first item parsing.
+        self.responseParseNext();
+      });
     },
 
     /**
      * Launch parsing of next item in the parse queue.
      */
     responseParseNext: function () {
-      var self = this,
-        queue = self.parseQ,
-        queueKeys = Object.keys(queue),
-        queueItemsKeys;
-      // Take first item.
-      // Type must also exists in registered loaders.
-      if (queueKeys[0] && self.wjs.loaders[queueKeys[0]]) {
-        queueItemsKeys = Object.keys(queue[queueKeys[0]]);
-        if (queueItemsKeys[0]) {
-          self.responseParseItem(queueKeys[0], queueItemsKeys[0]);
+      var self = this, wjs = self.wjs, extNext;
+      while (extNext = wjs.queueNext(self.parseQ)) {
+        if (!wjs.get(extNext.type, extNext.name)) {
+          self.responseParseItem(extNext.type, extNext.name);
           // We stop to the first matched item.
           // Next treatment should be launched by parsing function.
           // It allows to treat asynchronous parsing, like files.
           return;
         }
+        else {
+          wjs.queueRem(self.parseQ, extNext.type, extNext.name);
+        }
       }
       // At the end of loading, queue must be empty.
       // If not, may be an unknown script is present in
       // the returned package.
-      if (queueKeys.length > 0) {
+      if (Object.keys(self.parseQ).length > 0) {
         self.wjs.err('Parse queue not empty.');
       }
       self.loadingComplete();
@@ -209,22 +212,68 @@
      * @param {string} extensionName
      */
     responseParseItem: function (extensionType, extensionName, callback) {
-      var self = this, queueItem = self.parseQ[extensionType][extensionName];
+      var self = this, wjs = self.wjs,
+        output, require, requireKey = '#require',
+        extensionData = self.parseQ[extensionType][extensionName];
       // parseQ contains a editable object, we use it to store
-      // callbacks, they will wait for parse complete event requirements exists.
+      // callbacks, they will wait for parse complete.
       // These callbacks are different from request callbacks,
       // they are executed at the end of parsing only and are
       // used internally to manage requests queues an dependencies.
       if (callback) {
-        queueItem['#callbacks'] = queueItem['#callbacks'] || [];
-        queueItem['#callbacks'].push(callback);
+        extensionData['#callbacks'] = extensionData['#callbacks'] || [];
+        extensionData['#callbacks'].push(callback);
       }
-      // Parse using according loader.
-      self.wjs.loaders[extensionType]
-        .responseParseItem(
-          extensionName,
-          queueItem,
-          self);
+      // Load required elements first.
+      if (extensionData[requireKey] !== undefined) {
+        // Save requirements, it allows to delete
+        // dependencies on object destroy.
+        wjs.extRequire[extensionType][extensionName] =
+          wjs.extRequire[extensionType][extensionName] || {};
+        wjs.extendObject(
+          wjs.extRequire[extensionType][extensionName],
+          extensionData[requireKey]);
+        // Requirement may be already parsed before this item.
+        if (self.requireMissing(extensionData[requireKey])) {
+          // Local save.
+          require = extensionData[requireKey];
+          // Delete requirement for further loop.
+          extensionData[requireKey] = undefined;
+          // Missing loaders are retrieved by process
+          // before starting parsing, we just hav to
+          // load missing requirements.
+          wjs.use(require, function () {
+            self.responseParseItem(extensionType, extensionName);
+          });
+          // Stop parsing at this point,
+          // item has not been marked as complete,
+          // so it will be parsed again on next iteration,
+          // until all requirements are parsed.
+          return;
+        }
+      }
+      // By default save raw data.
+      output = self.wjs.loaders[extensionType].parse(extensionName, extensionData['#data'], self);
+      if (output !== false) {
+        self.parseItemComplete(extensionType, extensionName, output);
+      }
+    },
+
+    /**
+     * Return true if a requested extension is not loaded.
+     * @param {Object} requireList
+     * @return {boolean}
+     */
+    requireMissing: function (requireList) {
+      var i, j, keys = Object.keys(requireList);
+      for (i = 0; i < keys.length; i++) {
+        for (j = 0; j < requireList[keys[i]].length; j++) {
+          if (this.wjs.get(keys[i], requireList[keys[i]][j]) === false) {
+            return true;
+          }
+        }
+      }
+      return false;
     },
 
     /**
@@ -233,18 +282,18 @@
      * @param {?} saveData
      */
     parseItemComplete: function (extensionType, extensionName, saveData) {
-      var self = this, queueItem = self.parseQ[extensionType];
+      var self = this, callback = self.parseQ[extensionType][extensionName]['#callbacks'];
       // Save.
       self.wjs.extLoaded[extensionType][extensionName] = saveData;
-      if (queueItem[extensionName]['#callbacks']) {
-        self.wjs.callbacks(queueItem[extensionName]['#callbacks']);
-      }
       // Remove from queue.
-      delete queueItem[extensionName];
-      if (self.wjs.objectIsEmpty(self.parseQ[extensionType])) {
-        delete self.parseQ[extensionType];
+      self.wjs.queueRem(self.parseQ, extensionType, extensionName);
+      if (callback) {
+        self.wjs.callbacks(callback);
       }
-      self.responseParseNext();
+      else {
+        // Go to next item.
+        self.responseParseNext();
+      }
     }
   };
   // We save reference to prototype into wjs.

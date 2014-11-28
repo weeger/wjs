@@ -4,19 +4,19 @@
   context.wjs.loaderAdd('JsLink', {
     processType: 'parse',
 
-    extDestroy: function (name, data) {
+    destroy: function (name, data) {
       // Remove child from dom.
       data.parentNode.removeChild(data);
+      return true;
     },
 
-    parseJsLink: function (name, value, process) {
+    parse: function (name, value, process) {
       var self = this,
         type = this.type,
         domScript = self.wjs.document.createElement('script');
-      // Wait complete loading.
-      domScript.onload = function () {
+      self.wjs.onload(domScript, function () {
         process.parseItemComplete(type, name, domScript);
-      };
+      });
       // We don't specify type as it is not required in HTML5.
       domScript.setAttribute('src', value);
       self.wjs.document.head.appendChild(domScript);

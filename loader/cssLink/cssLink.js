@@ -4,29 +4,20 @@
   context.wjs.loaderAdd('CssLink', {
     processType: 'parse',
 
-    extDestroy: function (name, data) {
+    destroy: function (name, data) {
       // Remove child from dom.
       data.parentNode.removeChild(data);
+      return true;
     },
 
-    parseCssLink: function (name, value, process) {
+    parse: function (name, value, process) {
       var self = this,
         type = this.type,
-        domLink = self.wjs.document.createElement('link');
-      // onload event do not exists on firefox for link tags,
-      // We use it instead, but we use a timeout in cas of
-      // onload is not fired.
-      domLink.onload = function () {
+        domLink = self.wjs.document.createElement('link'),
+        loaded = false;
+      self.wjs.onload(domLink, function () {
         process.parseItemComplete(type, name, domLink);
-      };
-      // Timeout, with a reasonable delay.
-      self.wjs.window.setTimeout(function () {
-        // If extension has not been loaded, a problem happens.
-        // So we make it complete instead.
-        if (!self.wjs.get(type, name)) {
-          process.parseItemComplete(type, name, domLink);
-        }
-      }, 200);
+      });
       // Set attributes.
       domLink.setAttribute('rel', 'stylesheet');
       domLink.setAttribute('href', name);

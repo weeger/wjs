@@ -1,3 +1,23 @@
+WJS - 3.3.0 - 2014-11-26
+------------------------
+- Loaders
+-   > Group Loader
+-   > htmlDoc Loader
+-   > Destroy queue
+-   > JsLinks @require works
+- Methods
+-   > eventTransitionName
+-   > localClass
+-   > cssVendorPrefix
+-   > cssListAnimationDelay
+- Advanced destroy management
+-   > Callbacks
+-   > Shared dependencies
+- Various debug
+-   > Loading processing
+-   > Reloads allowed
+- Code style
+
 WJS - 3.2.1 - 2014-11-08
 ------------------------
 - Remove loaders buffer

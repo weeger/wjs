@@ -9,7 +9,7 @@
      * @param {WJSProcessProto} process
      * @return {?}
      */
-    parseJsScript: function (name, value, process) {
+    parse: function (name, value, process) {
       // If value is not a function, it came from
       // the not cached json response, so
       // we are forced to evaluate it.

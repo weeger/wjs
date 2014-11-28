@@ -7,10 +7,11 @@
     methodAddLast: null,
     methodAddLastCallback: null,
 
-    extDestroy: function (name, data) {
+    destroy: function (name, data) {
       if (this.wjs.hasOwnProperty(name)) {
         delete this.wjs[name];
       }
+      return true;
     },
 
     /**
@@ -22,8 +23,8 @@
      * @param {WJSProcessProto} process
      * @return {?}
      */
-    parseJsMethod: function (name, value, process) {
-      this.parseJsScript(name, value, process);
+    parse: function (name, value, process) {
+      this.wjs.loaders.JsScript.parse.apply(this, [name, value, process]);
       // Return false stops parsing process.
       return false;
     },

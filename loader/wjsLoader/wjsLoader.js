@@ -11,17 +11,19 @@
       this.wjs.classMethods.WjsLoader.extRequestInit.apply(this, arguments);
     },
 
-    extDestroy: function (name) {
+    destroy: function (name) {
       var wjs = this.wjs;
+      wjs.loaders[name].__destruct();
       // Remove prototype.
       wjs.classProtoDestroy('WjsLoader' + name);
       delete wjs.loaders[name];
       delete wjs.extLoaded[name];
       delete wjs.extRequire[name];
+      return true;
     },
 
     // Loader is created by javascript.
-    parseWjsLoader: function (name, value, process) {
+    parse: function (name, value, process) {
       // If value is true,
       // Build loader with the default prototype,
       // no special action is defined for loading or parsing
@@ -30,7 +32,7 @@
         this.wjs.loaderAdd(name);
       }
       else {
-        return this.parseJsLink(name, value, process);
+        return this.wjs.loaders.JsLink.parse.apply(this, [name, value, process]);
       }
     }
   }, true);
