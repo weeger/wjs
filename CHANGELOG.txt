@@ -1,4 +1,14 @@
-WJS - 3.3.0 - 2014-11-26
+WJS - 3.3.2 - 2014-12-15
+------------------------
+- Cache for javascript data
+- Code comment and style
+- Output optimisation
+
+WJS - 3.3.1 - 2014-11-28
+------------------------
+- Readme changes
+
+WJS - 3.3.0 - 2014-11-27
 ------------------------
 - Loaders
 -   > Group Loader

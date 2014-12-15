@@ -23,6 +23,10 @@
         eval(value);
         return value;
       }
+      else {
+        value(this, name, process);
+        return value;
+      }
     }
   });
   // [-->

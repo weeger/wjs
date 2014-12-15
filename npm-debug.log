@@ -1,0 +1,136 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files (x86)\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'publish' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.33
+4 verbose node symlink C:\Program Files (x86)\nodejs\\node.exe
+5 verbose publish [ '.' ]
+6 verbose cache add [ '.', null ]
+7 verbose cache add name=undefined spec="." args=[".",null]
+8 verbose parsed url { protocol: null,
+8 verbose parsed url   slashes: null,
+8 verbose parsed url   auth: null,
+8 verbose parsed url   host: null,
+8 verbose parsed url   port: null,
+8 verbose parsed url   hostname: null,
+8 verbose parsed url   hash: null,
+8 verbose parsed url   search: null,
+8 verbose parsed url   query: null,
+8 verbose parsed url   pathname: '.',
+8 verbose parsed url   path: '.',
+8 verbose parsed url   href: '.' }
+9 silly lockFile 3a52ce78- .
+10 verbose lock . C:\Users\weeger\AppData\Roaming\npm-cache\3a52ce78-.lock
+11 verbose tar pack [ 'C:\\Users\\weeger\\AppData\\Roaming\\npm-cache\\wjs\\3.3.1\\package.tgz',
+11 verbose tar pack   '.' ]
+12 verbose tarball C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package.tgz
+13 verbose folder .
+14 info prepublish wjs@3.3.1
+15 silly lockFile 1f1177db-tar tar://.
+16 verbose lock tar://. C:\Users\weeger\AppData\Roaming\npm-cache\1f1177db-tar.lock
+17 silly lockFile 8045a927--npm-cache-wjs-3-3-1-package-tgz tar://C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package.tgz
+18 verbose lock tar://C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package.tgz C:\Users\weeger\AppData\Roaming\npm-cache\8045a927--npm-cache-wjs-3-3-1-package-tgz.lock
+19 silly lockFile 1f1177db-tar tar://.
+20 silly lockFile 1f1177db-tar tar://.
+21 silly lockFile 8045a927--npm-cache-wjs-3-3-1-package-tgz tar://C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package.tgz
+22 silly lockFile 8045a927--npm-cache-wjs-3-3-1-package-tgz tar://C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package.tgz
+23 silly lockFile 269198c4-ming-npm-cache-wjs-3-3-1-package C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package
+24 verbose lock C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package C:\Users\weeger\AppData\Roaming\npm-cache\269198c4-ming-npm-cache-wjs-3-3-1-package.lock
+25 silly lockFile 269198c4-ming-npm-cache-wjs-3-3-1-package C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package
+26 silly lockFile 269198c4-ming-npm-cache-wjs-3-3-1-package C:\Users\weeger\AppData\Roaming\npm-cache\wjs\3.3.1\package
+27 silly lockFile 3a52ce78- .
+28 silly lockFile 3a52ce78- .
+29 silly publish { name: 'wjs',
+29 silly publish   description: 'An assets loader for clients browsers.',
+29 silly publish   version: '3.3.1',
+29 silly publish   homepage: 'https://github.com/weeger/wjs',
+29 silly publish   keywords:
+29 silly publish    [ 'wjs',
+29 silly publish      'extension',
+29 silly publish      'extensions',
+29 silly publish      'module',
+29 silly publish      'modules',
+29 silly publish      'asset',
+29 silly publish      'assets',
+29 silly publish      'loader',
+29 silly publish      'loaders',
+29 silly publish      'dependence',
+29 silly publish      'dependency',
+29 silly publish      'dependencies',
+29 silly publish      'require',
+29 silly publish      'requirements',
+29 silly publish      'prototyping',
+29 silly publish      'ajax',
+29 silly publish      'xhr',
+29 silly publish      'retrieve',
+29 silly publish      'custom',
+29 silly publish      'jquery',
+29 silly publish      'jquery-plugin' ],
+29 silly publish   repository: { type: 'git', url: 'https://github.com/weeger/wjs.git' },
+29 silly publish   bugs: { url: 'https://github.com/weeger/wjs/issues' },
+29 silly publish   author:
+29 silly publish    { name: 'Romain Weeger',
+29 silly publish      email: 'romain.weeger@gmail.com',
+29 silly publish      url: 'http://www.wexample.com/' },
+29 silly publish   contributors:
+29 silly publish    [ { name: 'Romain Weeger',
+29 silly publish        email: 'romain.weeger@gmail.com',
+29 silly publish        url: 'http://www.wexample.com/' } ],
+29 silly publish   licenses:
+29 silly publish    { type: 'MIT',
+29 silly publish      url: 'https://github.com/weeger/wjs/blob/master/LICENCE.txt' },
+29 silly publish   main: 'wjs.min.js',
+29 silly publish   dependencies: {},
+29 silly publish   readme: '\r\n\r\n\r\n\r\nCopyright\r\n---------\r\nCopyright Romain WEEGER 2010 / 2014  \nhttp://www.wexample.com  \n  \nLicensed under the MIT and GPL licenses :  \n  \n - http://www.opensource.org/licenses/mit-license.php  \n - http://www.gnu.org/licenses/gpl.html\r\n\r\nThanks\r\n------\r\nI would like to thanks all people who have trusted an encouraged me, consciously or not. They are not many. Like all of my projects, this program is the result of a lot of questions, doubts, pain, but joy and love too. I sincerely hope you\'ll enjoy it. Thanks to Carole for her incredible Love.\r\n\r\n',
+29 silly publish   readmeFilename: 'README.md',
+29 silly publish   _id: 'wjs@3.3.1',
+29 silly publish   scripts: {},
+29 silly publish   _shasum: 'd3950023d21cebc327b91ce20e99807b1a849492',
+29 silly publish   _from: '.' }
+30 verbose request where is /wjs
+31 verbose request registry https://registry.npmjs.org/
+32 verbose request id 7006eef22d7cbc25
+33 verbose url raw /wjs
+34 verbose url resolving [ 'https://registry.npmjs.org/', './wjs' ]
+35 verbose url resolved https://registry.npmjs.org/wjs
+36 verbose request where is https://registry.npmjs.org/wjs
+37 info trying registry request attempt 1 at 15:39:58
+38 http PUT https://registry.npmjs.org/wjs
+39 http 403 https://registry.npmjs.org/wjs
+40 verbose headers { date: 'Mon, 15 Dec 2014 14:40:02 GMT',
+40 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+40 verbose headers   'content-type': 'application/json',
+40 verbose headers   'cache-control': 'max-age=60',
+40 verbose headers   'content-length': '3601',
+40 verbose headers   'accept-ranges': 'bytes',
+40 verbose headers   via: '1.1 varnish',
+40 verbose headers   'x-served-by': 'cache-fra1247-FRA',
+40 verbose headers   'x-cache': 'MISS',
+40 verbose headers   'x-cache-hits': '0',
+40 verbose headers   'x-timer': 'S1418654401.052114,VS0,VE1168',
+40 verbose headers   'keep-alive': 'timeout=10, max=50',
+40 verbose headers   connection: 'Keep-Alive' }
+41 error publish Failed PUT 403
+42 error Error: forbidden cannot modify pre-existing version: 3.3.1
+42 error old={"name":"wjs","description":"An assets loader for clients browsers.","version":"3.3.1","homepage":"https://github.com/weeger/wjs","keywords":["wjs","extension","extensions","module","modules","asset","assets","loader","loaders","dependence","dependency","dependencies","require","requirements","prototyping","ajax","xhr","retrieve","custom","jquery","jquery-plugin"],"repository":{"type":"git","url":"https://github.com/weeger/wjs.git"},"bugs":{"url":"https://github.com/weeger/wjs/issues"},"author":{"name":"Romain Weeger","email":"romain.weeger@gmail.com","url":"http://www.wexample.com/"},"contributors":[{"name":"Romain Weeger","email":"romain.weeger@gmail.com","url":"http://www.wexample.com/"}],"licenses":{"type":"MIT","url":"https://github.com/weeger/wjs/blob/master/LICENCE.txt"},"main":"wjs.min.js","dependencies":{},"_id":"wjs@3.3.1","scripts":{},"_shasum":"dff20cfa1861799214d55621dc8ff016e6a9d961","_from":".","_npmVersion":"1.4.28","_npmUser":{"name":"weeger","email":"romain.weeger@gmail.com"},"maintainers":[{"name":"weeger","email":"romain.weeger@gmail.com"}],"dist":{"shasum":"dff20cfa1861799214d55621dc8ff016e6a9d961","tarball":"http://registry.npmjs.org/wjs/-/wjs-3.3.1.tgz"}}
+42 error new={"name":"wjs","description":"An assets loader for clients browsers.","version":"3.3.1","homepage":"https://github.com/weeger/wjs","keywords":["wjs","extension","extensions","module","modules","asset","assets","loader","loaders","dependence","dependency","dependencies","require","requirements","prototyping","ajax","xhr","retrieve","custom","jquery","jquery-plugin"],"repository":{"type":"git","url":"https://github.com/weeger/wjs.git"},"bugs":{"url":"https://github.com/weeger/wjs/issues"},"author":{"name":"Romain Weeger","email":"romain.weeger@gmail.com","url":"http://www.wexample.com/"},"contributors":[{"name":"Romain Weeger","email":"romain.weeger@gmail.com","url":"http://www.wexample.com/"}],"licenses":{"type":"MIT","url":"https://github.com/weeger/wjs/blob/master/LICENCE.txt"},"main":"wjs.min.js","dependencies":{},"readme":"\u000d\u000a\u000d\u000a\u000d\u000a\u000d\u000aCopyright\u000d\u000a---------\u000d\u000aCopyright Romain WEEGER 2010 / 2014  \u000ahttp://www.wexample.com  \u000a  \u000aLicensed under the MIT and GPL licenses :  \u000a  \u000a - http://www.opensource.org/licenses/mit-license.php  \u000a - http://www.gnu.org/licenses/gpl.html\u000d\u000a\u000d\u000aThanks\u000d\u000a------\u000d\u000aI would like to thanks all people who have trusted an encouraged me, consciously or not. They are not many. Like all of my projects, this program is the result of a lot of questions, doubts, pain, but joy and love too. I sincerely hope you'll enjoy it. Thanks to Carole for her incredible Love.\u000d\u000a\u000d\u000a","readmeFilename":"README.md","_id":"wjs@3.3.1","scripts":{},"_shasum":"d3950023d21cebc327b91ce20e99807b1a849492","_from":".","_npmVersion":"1.4.28","_npmUser":{"name":"weeger","email":"romain.weeger@gmail.com"},"maintainers":[{"name":"weeger","email":"romain.weeger@gmail.com"}],"dist":{"shasum":"d3950023d21cebc327b91ce20e99807b1a849492","tarball":"http://registry.npmjs.org/wjs/-/wjs-3.3.1.tgz"}}: wjs
+42 error     at RegClient.<anonymous> (C:\Program Files (x86)\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:308:14)
+42 error     at Request._callback (C:\Program Files (x86)\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:246:65)
+42 error     at Request.self.callback (C:\Program Files (x86)\nodejs\node_modules\npm\node_modules\request\request.js:236:22)
+42 error     at Request.emit (events.js:98:17)
+42 error     at Request.<anonymous> (C:\Program Files (x86)\nodejs\node_modules\npm\node_modules\request\request.js:1142:14)
+42 error     at Request.emit (events.js:117:20)
+42 error     at IncomingMessage.<anonymous> (C:\Program Files (x86)\nodejs\node_modules\npm\node_modules\request\request.js:1096:12)
+42 error     at IncomingMessage.emit (events.js:117:20)
+42 error     at _stream_readable.js:943:16
+42 error     at process._tickCallback (node.js:419:13)
+43 error If you need help, you may report this *entire* log,
+43 error including the npm and node versions, at:
+43 error     <http://github.com/npm/npm/issues>
+44 error System Windows_NT 6.1.7601
+45 error command "C:\\Program Files (x86)\\nodejs\\\\node.exe" "C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
+46 error cwd C:\WEEGER\WEB\_LOCALHOST\wexample\output.wexample.com\wjs\wjs-3.3.2
+47 error node -v v0.10.33
+48 error npm -v 1.4.28
+49 verbose exit [ 1, true ]
