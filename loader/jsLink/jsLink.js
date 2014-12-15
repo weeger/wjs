@@ -14,6 +14,9 @@
       var self = this,
         type = this.type,
         domScript = self.wjs.document.createElement('script');
+      // Url can be sent from server as a key name
+      // or from client as a url name.
+      value = value || name;
       self.wjs.onload(domScript, function () {
         process.parseItemComplete(type, name, domScript);
       });

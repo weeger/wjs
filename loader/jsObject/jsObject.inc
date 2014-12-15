@@ -8,4 +8,5 @@ use \Wjs\Loader;
  * Transmit an array to a JS object.
  */
 class JsObject extends Loader {
+  var $allowJsCache = TRUE;
 }

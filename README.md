@@ -38,24 +38,32 @@ $wjs = new \Wjs(array(
   'server' => array(
     // Path to wjs is used by wjs to retrieve
     // core scripts and internal library.
-    'wjs'       => $pathToWjsLibrary,
+    'wjs'              => $pathToWjsLibrary,
     // If you want to use cache, you have
-    // to specify route for the local js file,
-    // it will be filled by all aggregated javascript.
-    // One file may be generated for each page,
-    // wjs do not manage files names changes or cache control.
-    'cacheFile' => $yourCustomCachePath
+    // to specify route for the local directory,
+    // it will be filled by all aggregated javascript and responses.
+    'cacheDir'         => $yourCustomCacheDirectory,
+    // Optionally you can specify a file for
+    // main javascript file for complete page.
+    'cacheFileStartup' => $yourCustomCacheFileStartup
   ),
   'client' => array(
     // This path is not required, but recommended,
     // It is for example used to generate proper based paths
     // on using the jsFiles() method.
-    'wjs'          => $pathToWjsFromClientSide,
+    'wjs'              => $pathToWjsFromClientSide,
     // Response path define the URL used by AJAX
     // to retrieve extensions on your server, you
     // obviously need to handle the path on server
     // side, see bellow.
-    'responsePath' => $yourCustomResponsePath
+    'responsePath'     => $yourCustomResponsePath,
+    // If you want to use cache, you have
+    // to specify route for the local directory,
+    // it will be filled by all aggregated javascript and responses.
+    'cacheDir'         => $yourCustomCacheDirectory,
+    // Optionally you can specify a file for
+    // main javascript file for complete page.
+    'cacheFileStartup' => $yourCustomCacheFileStartup
   )
   // Optional, by default use "master" version (minified),
   // Accepts also "jQuery" or "source" for debug mode.
@@ -176,7 +184,9 @@ $wjs->extensionAdd('JsObject', 'testObject', array(
 ```
 On client side : 
 ```javascript
-wjs.use('JsObject', 'testObject');
+wjs.use('JsObject', 'testObject', function () {
+  continueCallback();
+});
 ```
 
 
@@ -197,7 +207,9 @@ $wjs->extensionAdd('JsArray', 'testArray', array(
 On client side : 
 ```javascript
 // Will return : ["ATest", "AnOtherTest", 123, Array[1]]
-wjs.use('JsArray', 'testArray');
+wjs.use('JsArray', 'testArray', function (arrayContent) {
+  continueYourScript(arrayContent);
+});
 ```
 
 
@@ -222,9 +234,10 @@ On client side :
 wjs.use('JsScript', 'testScriptFile', function () {
   console.log(window.jsScriptFileLoaded); // true
   // Inline script will be executed as well.
-  wjs.use('JsScript', 'testScriptInline');
-  console.log(window.jsScriptInlineLoaded); // true
-  continueYourScript();
+  wjs.use('JsScript', 'testScriptInline', function () {
+    console.log(window.jsScriptInlineLoaded); // true
+    continueYourScript();
+  });
 });
 ```
 
@@ -318,11 +331,10 @@ On client side :
 // If several links are declared from an array,
 // All links are loaded, in order. Each link wait for
 // the previous one to be loaded.
-wjs.use({JsLink:
-  [
-    pathToYourJsFile2,
-    pathToYourJsFile3
-  ]
+wjs.use({JsLink: [
+  pathToYourJsFile2,
+  pathToYourJsFile3
+]
 }, yourCustomCallback2);
 ```
 
@@ -383,28 +395,34 @@ On client side :
 // this action is also for example,
 // in real life, wjs make this action
 // automatically when pull a script.
-wjs.use('WjsLoader', 'JsArray');
-// Then we load script.
-wjs.use('JsArray', 'testArray');
+wjs.use('WjsLoader', 'JsArray', function () {
+  // Then we load script.
+  wjs.use('JsArray', 'testArray', continueCallback);
+});
 ```
 Obviously you should declare your loader into a separated javascript file. See into wjs core for more info.
 
-Group
------
+Web components
+--------------
 
-###MISSING###
+The WebComp type allow to retrieve basic web components, composed by CSS, HTML, and Javascript.
+
+Web pages
+---------
+
+The WebPage type is a subclass of WebComp, designed to update page URL automatically on load.
+
+Groups
+------
+
+Group take an array as argument, containing a list of extensions from all other types.
+
+Cache links
+-----------
+
+Cache links are core JsLinks which can not be excluded from requests.
 
 JsClass
--------
-
-###MISSING###
-
-WebComp
--------
-
-###MISSING###
-
-WebPage
 -------
 
 ###MISSING###
@@ -438,7 +456,8 @@ On client side :
 ```javascript
 // We don't want any dependency.
 object = wjs.use('JsObject', 'testObject', {
-  exclude: true
+  exclude: true,
+  complete: continueCallback
 });
 ```
 
@@ -450,7 +469,8 @@ object = wjs.use('JsObject', 'testObject', {
   exclude: {
     JsObject: ['testObject2'],
     JsArray: ['testArray2']
-  }
+  },
+  complete: continueCallback
 });
 ```
 

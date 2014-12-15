@@ -7,7 +7,7 @@ namespace Wjs;
  * and parse extensions from server side to client site
  * depending from extension type.
  */
-class Loader extends Router {
+abstract class Loader extends Router {
   /**
    * @var string $type
    */
@@ -29,6 +29,13 @@ class Loader extends Router {
   var $extensionsPushed = array();
   var $extensionsRequire = array();
   var $lineage = array();
+  /**
+   * Defines if content can be exported to
+   * external cache files. It is mainly used
+   * to execute javascript without eval method.
+   * @var bool
+   */
+  var $allowJsCache = FALSE;
 
   function __construct($routes, \Wjs $wjs) {
     parent::__construct($routes);
@@ -55,10 +62,24 @@ class Loader extends Router {
     }
   }
 
+  /**
+   * Register new extension.
+   *
+   * @param $name
+   * @param $data
+   */
   function extensionAdd($name, $data) {
     $this->extensions[$name] = $data;
   }
 
+  /**
+   * Link extension to another one,
+   * When pushed both extensions will be pushed.
+   *
+   * @param $name
+   * @param $requireType
+   * @param $requireName
+   */
   function extensionAddRequire($name, $requireType, $requireName) {
     // Core loaders requirement is assumed.
     if ($requireType !== 'WjsLoader' || ($requireName !== 'WjsLoader' && $requireName !== 'JsLink')) {
@@ -96,8 +117,15 @@ class Loader extends Router {
     $package = array(
       '#data' => $value,
     );
+    // Cache links can't be excluded.
+    if ($excludeRequire === TRUE) {
+      $excludeRequire = $this->extensionsRequire[$name];
+      if (isset($excludeRequire['CacheLink'])) {
+        unset($excludeRequire['CacheLink']);
+      }
+    }
     // Get dependencies.
-    if (isset($this->extensionsRequire[$name]) && $excludeRequire !== TRUE) {
+    if (isset($this->extensionsRequire[$name])) {
       $require = $this->extensionsRequire[$name];
       // Var can be false at this point.
       if (is_array($excludeRequire)) {
@@ -121,5 +149,19 @@ class Loader extends Router {
       }
     }
     return $package;
+  }
+
+  /**
+   * Used when cacheJs is enabled,
+   * basically used to define how to manage script,
+   * they may be converted from string to pure js
+   * in order to avoid usage of eval method.
+   *
+   * @param $data
+   *
+   * @return string
+   */
+  function cacheJsEncode($data) {
+    return json_encode($data);
   }
 }
