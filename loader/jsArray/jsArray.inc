@@ -8,7 +8,6 @@ use \Wjs\Loader;
  * Transmit an array to a JS array.
  */
 class JsArray extends Loader {
-  var $allowJsCache = TRUE;
   /**
    * Append object to the output array.
    */

@@ -88,7 +88,9 @@
             serverRequest[key] = serverRequest[key] ? serverRequest[key] + ',' + request.name : request.name;
             break;
           case 'parse':
-            responsePackage[request.type] = responsePackage[request.type] || {};
+            if (responsePackage[request.type] === undefined) {
+              responsePackage[request.type] = {};
+            }
             responsePackage[request.type][request.name] =
             {'#data': request.data};
             break;
@@ -135,7 +137,7 @@
      * Callback when all request complete,
      * only one complete callback after start.
      *
-     * @param {boolean} silent Set to true avoid callbacks calls.
+     * @param silent Set to true avoid callbacks calls.
      */
     loadingComplete: function (silent) {
       var self = this, arg;
@@ -211,19 +213,16 @@
      */
     responseParseItem: function (extensionType, extensionName, callback) {
       var self = this, wjs = self.wjs,
-        output, require,
-        requireKey = '#require',
-        callbackKey = '#callbacks',
-        extensionData = self.parseQ[extensionType][extensionName],
-        url;
+        output, require, requireKey = '#require',
+        extensionData = self.parseQ[extensionType][extensionName];
       // parseQ contains a editable object, we use it to store
       // callbacks, they will wait for parse complete.
       // These callbacks are different from request callbacks,
       // they are executed at the end of parsing only and are
       // used internally to manage requests queues an dependencies.
       if (callback) {
-        extensionData[callbackKey] = extensionData[callbackKey] || [];
-        extensionData[callbackKey].push(callback);
+        extensionData['#callbacks'] = extensionData['#callbacks'] || [];
+        extensionData['#callbacks'].push(callback);
       }
       // Load required elements first.
       if (extensionData[requireKey] !== undefined) {
@@ -253,50 +252,8 @@
           return;
         }
       }
-      // This is a cached content.
-      if (typeof extensionData['#data'] === 'string' &&
-        extensionData['#data'].indexOf('cache://') === 0) {
-        // Go to search if cached data have been stored
-        // into buffer, before to parse this extension.
-        if (wjs.cacheBuffer[extensionType] && wjs.cacheBuffer[extensionType][extensionName]) {
-          self.cacheHandle(extensionType, extensionName, wjs.cacheBuffer[extensionType][extensionName]);
-        }
-        else {
-          // If not, cache file have not been already loaded,
-          // so we wait for load, it will execute cacheHandle.
-          // It will need to access to this process, using cacheHandler.
-          wjs.loaders[extensionType].cacheHandler[extensionName] = self;
-        }
-        return;
-      }
-      // If data is not cached.
-      self.cacheHandle(extensionType, extensionName, extensionData['#data']);
-    },
-
-    cacheHandle: function (extensionType, extensionName, data) {
-      var self = this,
-        wjs = self.wjs,
-      // Local copy prevent global loader deletion
-      // before the end on this script.
-        loader = wjs.loaders[extensionType],
-        buffer = wjs.cacheBuffer[extensionType],
-        handler = loader.cacheHandler,
       // By default save raw data.
-        output = loader.parse(extensionName, data, self);
-      // Manage cache.
-      // Remove handler for this extension.
-      if (handler[extensionName]) {
-        delete handler[extensionName];
-      }
-      // Cleanup buffer.
-      if (buffer && buffer[extensionName]) {
-        delete buffer[extensionName];
-        if (wjs.objectIsEmpty(buffer)) {
-          delete wjs.cacheBuffer[extensionType];
-        }
-      }
-      // If loader parsing returns false, complete will
-      // be handled by it, maybe asynchronously.
+      output = self.wjs.loaders[extensionType].parse(extensionName, extensionData['#data'], self);
       if (output !== false) {
         self.parseItemComplete(extensionType, extensionName, output);
       }

@@ -11,7 +11,7 @@
   // <--]
   /** @constructor */
   context.wjs.classExtend('WjsLoader', {
-    type: '',
+    type: 'undefined',
     preventReload: true,
     processType: 'server',
 
@@ -20,9 +20,7 @@
      * @private
      */
     __construct: function () {
-      // Store links to processes, in order
-      // to handle javascript cached responses.
-      this.cacheHandler = {};
+      var self = this;
       // Launch init function for subclasses
       this.init();
     },
@@ -58,8 +56,8 @@
      * Launched on extension use request,
      * by default iterates over the names
      * of asked extensions.
-     * @param {string} names
-     * @param {WJSProcessProto} process
+     * @param names
+     * @param process
      */
     extRequestInit: function (names, process) {
       for (var i = 0; i < names.length; i++) {

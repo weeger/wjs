@@ -1,8 +1,8 @@
-// wJs v3.3.2 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.3.0 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.3.2', WJSProto;
+  var wjsVersion = '3.3.0', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -45,8 +45,6 @@
       classMethods: {},
       /** @type {Object.Object} */
       destroyQ: [],
-      /** @type {Object.Object} */
-      cacheBuffer: {},
       /** @type {Object} */
       settings: null
     });
@@ -94,7 +92,7 @@
     ready: function (callback) {
       if (this.readyComplete === true) {
         // Execute callback asynchronously.
-        this.window.setTimeout(callback);
+        setTimeout(callback);
       }
       else {
         this.readyCallbacks.push(callback);
@@ -103,8 +101,8 @@
 
     /**
      * Execute an array of callbacks functions.
-     * @param {Array} callbacksArray
-     * @param {Array} args
+     * @param callbacksArray
+     * @param args
      */
     callbacks: function (callbacksArray, args) {
       for (var i = 0; i < callbacksArray.length; i++) {
@@ -150,13 +148,13 @@
     /**
      * Returns a boolean if a loader exists.
      * If not, it try to download it.
-     * @param {Array} types
-     * @param {Function} complete
-     * @return {*}
+     * @param types
+     * @param complete
+     * @returns {*}
      */
     loadersExists: function (types, complete) {
       types = Array.isArray(types) ? types : [types];
-      var self = this, i, use = [];
+      var self = this, i, exists = [], use = [];
       // Search for existing loaders.
       for (i = 0; i < types.length; i++) {
         if (!self.loaders[types[i]]) {
@@ -224,8 +222,7 @@
             }
             // Destroy item if reload asked.
             if (options.reload === true || self.loaders[type].preventReload === false) {
-              // Destroy also dependencies.
-              self.destroy(type, name, true);
+              self.destroy(type, name);
             }
             extensionData = self.get(type, name);
             // Check if data is missing.
@@ -300,10 +297,9 @@
 
     /**
      * Add extension to the destroy queue.
-     * @param {Object} queue
-     * @param {string} type
-     * @param {string} name
-     * @param {boolean} withDependencies
+     * @param type
+     * @param name
+     * @param withDependencies
      */
     destroyEnqueue: function (queue, type, name, withDependencies) {
       var self = this;
@@ -331,19 +327,19 @@
               }
             }
           }
+          // Remove requirements data.
+          delete self.extRequire[type][name];
         }
-        // Remove requirements data.
-        delete self.extRequire[type][name];
       }
     },
 
     /**
      * Return true if a extension is required by another one.
-     * @param {string} type
-     * @param {string} name
-     * @param {string} requireType
-     * @param {string} requireName
-     * @return {boolean}
+     * @param type
+     * @param name
+     * @param requireType
+     * @param requireName
+     * @returns {boolean}
      */
     requireShared: function (type, name, requireType, requireName) {
       var keys2 = Object.keys(this.extRequire), keys3, k, l;
@@ -365,7 +361,6 @@
 
     /**
      * Launch destruction of the next item from destroy queue.
-     * @param {Object} queue
      */
     destroyNext: function (queue) {
       var self = this,
@@ -389,10 +384,6 @@
       }
     },
 
-    /**
-     * Called when the item is destroyed.
-     * @param {Object} queue
-     */
     destroyNextComplete: function (queue) {
       var self = this,
         loaded = self.extLoaded,
@@ -406,9 +397,9 @@
 
     /**
      * Remove item from given queue.
-     * @param {Object} queue
-     * @param {string} type
-     * @param {string} name
+     * @param queue
+     * @param type
+     * @param name
      */
     queueRem: function (queue, type, name) {
       delete queue[type][name];
@@ -419,8 +410,8 @@
 
     /**
      * Get next item from queue.
-     * @param {Object} queue
-     * @return {*}
+     * @param queue
+     * @returns {*}
      */
     queueNext: function (queue) {
       var queueKey = Object.keys(queue)[0],
@@ -470,6 +461,7 @@
         xhr.setRequestHeader('Content-type',
           'application/x-www-form-urlencoded');
       }
+      this.trigger('wjsXhr');
       xhr.send(options.data ? self.param(options.data) : undefined);
     },
 
@@ -643,29 +635,21 @@
       }
     },
 
-    cacheHandle: function (extType, extName, data) {
-      var self = this,
-        handler = self.loaders[extType].cacheHandler[extName],
-        buffer = self.cacheBuffer;
-      // A cache link has called this method,
-      // before than a script asked for the extension.
-      // We store result for further use.
-      if (!handler) {
-        buffer[extType] = buffer[extType] || {};
-        buffer[extType][extName] = data;
-      }
-      // The extension has been asked,
-      // the process is waiting for the cache result.
-      else {
-        handler.cacheHandle(extType, extName, data);
-      }
+    /**
+     * Shorthand to dispatch an event.
+     * @param eventName
+     */
+    trigger: function (eventName) {
+      var event = this.document.createEvent('Event');
+      event.initEvent(eventName, true, true);
+      this.window.dispatchEvent(event);
     },
 
     /**
      * Listen for the load event, limited
      * by a timeout
-     * @param {object} dom
-     * @param {Function} callback
+     * @param dom
+     * @param callback
      */
     onload: function (dom, callback) {
       var loaded = false, callbackLauncher = function () {

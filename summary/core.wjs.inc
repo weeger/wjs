@@ -54,15 +54,6 @@ class WjsCoreSummary extends Summary {
           'js' => 'loader/JsLink/JsLink.min.js',
         ),
       ),
-      'CacheLink' => array(
-        'server' => array(
-          'class' => 'loader/CacheLink/CacheLink.inc',
-          'js'    => 'loader/CacheLink/CacheLink.min.js',
-        ),
-        'client' => array(
-          'js' => 'loader/CacheLink/CacheLink.min.js',
-        ),
-      ),
       'CssLink'   => array(
         'server' => array(
           'class' => 'loader/CssLink/CssLink.inc',
