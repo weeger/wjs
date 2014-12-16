@@ -62,7 +62,7 @@
         value.domDestination = this.wjs.window.document.querySelector(value.destination);
         value.domDestination.appendChild(value.dom);
         // Parse all node to search for
-        var i, href, domAll = value.domDestination.querySelectorAll('*[href]'), params;
+        var i, href, domAll = value.domDestination.querySelectorAll('*[href]');
         for (i = 0; i < domAll.length; i++) {
           if (domAll[i].hasAttribute('href')) {
             href = domAll[i].getAttribute('href');

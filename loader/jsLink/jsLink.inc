@@ -19,7 +19,7 @@ class JsLink extends Loader {
 
   function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
     $value = $value === NULL ? $this->extensions[$name] : $value;
-    if (is_array($value) && is_file($value['client'])) {
+    if (is_array($value) && isset($value['client'])) {
       $value = $value['client'];
     }
     return parent::extensionPush($name, $excludeRequire, $value);

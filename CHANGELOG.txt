@@ -1,3 +1,9 @@
+WJS - 3.3.3 - 2014-12-16
+------------------------
+- Drupal 6x 7x handler
+- Code cleanup
+- Added composer.json
+
 WJS - 3.3.2 - 2014-12-15
 ------------------------
 - Cache for javascript data

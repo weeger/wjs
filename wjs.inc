@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.3.2';
+const WJS_VERSION                    = '3.3.3';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_PUSH_WRONG_DATA_TYPE   = 'WJS_ERR_PUSH_WRONG_DATA_TYPE';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
@@ -489,7 +489,9 @@ class Wjs extends Router {
     foreach ($this->outputPackage as $type => $items) {
       $this->extensionPush('WjsLoader', $type);
     }
-    $output_json = array();
+    // Use path from route.
+    $this->settings['responsePath'] = $this->routeGet('client', 'responsePath');
+    $output_json                    = array();
     // Add settings.
     $output_json[] = '"settings":' . json_encode($this->settings);
     // Create a list of loaders who are added,
