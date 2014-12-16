@@ -1,5 +1,5 @@
 {
-  "name":"wjs",
+  "name":"weeger\/wjs",
   "type":"library",
   "description":"An assets loader from server to browser.",
   "version":"3.3.3",
