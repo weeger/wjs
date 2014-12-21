@@ -1,6 +1,6 @@
 <?php
 
-const WJS_VERSION                    = '3.3.3';
+const WJS_VERSION                    = '3.3.4';
 const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
 const WJS_ERR_PUSH_WRONG_DATA_TYPE   = 'WJS_ERR_PUSH_WRONG_DATA_TYPE';
 const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
@@ -96,6 +96,19 @@ class Wjs extends Router {
    * Initialize wjs.
    */
   function __construct($routes = array(), $jsCoreFilesVersion = 'master') {
+    // If routes variable is a string,
+    // we assume that it is the route from
+    // server and client locations.
+    if (is_string($routes)) {
+      $routes = array(
+        'server' => array(
+          'wjs' => $routes
+        ),
+        'client' => array(
+          'wjs' => $routes
+        )
+      );
+    }
     parent::__construct($routes);
     $this->jsCoreFilesVersion = $jsCoreFilesVersion;
     // Add core summary.
@@ -213,6 +226,15 @@ class Wjs extends Router {
     header('Content-Type: application/json');
     print $this->responsePackage();
     exit;
+  }
+
+  /**
+   * Run response only if ajax query is detected.
+   */
+  function ajax() {
+    if (isset($_GET) && isset($_GET[$this->settings['paramInc']])) {
+      $this->response($_GET);
+    }
   }
 
   /**
@@ -348,22 +370,6 @@ class Wjs extends Router {
       }
       $loader->extensionsPushed[$extensionName] =
       $this->outputPackage[$extensionType][$extensionName] = $extensionData;
-    }
-  }
-
-  /**
-   * Remove previously pushed extension.
-   *
-   * @param $extensionType
-   * @param $extensionName
-   */
-  function extensionPushRemove($extensionType, $extensionName) {
-    if (isset($this->outputPackage[$extensionType]) && isset($this->outputPackage[$extensionType][$extensionName])) {
-      unset($this->outputPackage[$extensionType][$extensionName]);
-      unset($this->loaderGet($extensionType)->extensionsPushed[$extensionName]);
-      if (empty($this->outputPackage[$extensionType])) {
-        unset($this->outputPackage[$extensionType]);
-      }
     }
   }
 

@@ -1,7 +1,7 @@
 {
   "name":"wjs",
-  "description":"An assets loader for clients browsers.",
-  "version":"3.3.3",
+  "description":"An assets loader from server to browser.",
+  "version":"3.3.4",
   "homepage":"",
   "keywords":[
     "wjs",

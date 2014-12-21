@@ -1,8 +1,8 @@
-// wJs v3.3.3 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.3.4 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.3.3', WJSProto;
+  var wjsVersion = '3.3.4', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -48,7 +48,9 @@
       /** @type {Object.Object} */
       cacheBuffer: {},
       /** @type {Object} */
-      settings: null
+      settings: null,
+      /** @type {RegExp} */
+      linkReg: new RegExp('^wjs://([a-zA-Z0-9]*):([a-zA-Z0-9]*)$')
     });
     // Add a global wjsContext, use
     // by scripts links to access to wjs.
@@ -70,6 +72,10 @@
         for (var i = 0; i < self.loadersBasic.length; i++) {
           self.loaderAdd(self.loadersBasic[i], undefined, true);
         }
+        // Append document parse function at ready end.
+        self.ready(function () {
+          self.linksInit(self.document.body);
+        });
         // Load all other scripts then run ready functions.
         // Execute startup functions.
         // Create a loading process to parse package content.
@@ -94,7 +100,10 @@
     ready: function (callback) {
       if (this.readyComplete === true) {
         // Execute callback asynchronously.
-        this.window.setTimeout(callback);
+        // IE need function wrap.
+        this.window.setTimeout(function () {
+          callback();
+        });
       }
       else {
         this.readyCallbacks.push(callback);
@@ -110,6 +119,39 @@
       for (var i = 0; i < callbacksArray.length; i++) {
         callbacksArray[i].apply(this, args);
       }
+    },
+
+    /**
+     * Search for links like wjs://extensionType:extensionName
+     * @param {Object} domElement
+     */
+    linksInit: function (domElement) {
+      // Search for html containing href="wjs://..."
+      var wjsLinks = domElement.querySelectorAll('a[href^="wjs://"]'),
+        i = 0, href, disable = function () {
+          return false;
+        };
+      for (; i < wjsLinks.length; i++) {
+        href = wjsLinks[i].getAttribute('href');
+        wjsLinks[i].setAttribute('href', '#');
+        // Firefox need to disable onclick for some links.
+        wjsLinks[i].onclick = disable;
+        wjsLinks[i].setAttribute('data-wjs-link', href);
+        wjsLinks[i].addEventListener('click', this.linksClick.bind(this));
+      }
+    },
+
+    /**
+     * Callback on click on wjs links.
+     * @param {Event} e
+     */
+    linksClick: function (e) {
+      var self = this,
+        link = e.target.getAttribute('data-wjs-link').match(self.linkReg);
+      self.loadersExists(link[1], function () {
+        self.loaders[link[1]].link(link[2]);
+      });
+      return false;
     },
 
     /**

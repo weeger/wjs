@@ -28,7 +28,7 @@
       /** @type {boolean} Async mode is specified for whole process. */
       async: options.async || false,
       /** @type {Function} */
-      completeCallbacks: options.complete,
+      callbacks: options.complete ? [options.complete] : [],
       /** @type {boolean} */
       loadingStarted: false,
       /** @type {Array.Object} */
@@ -138,12 +138,12 @@
      * @param {boolean} silent Set to true avoid callbacks calls.
      */
     loadingComplete: function (silent) {
-      var self = this, arg;
+      var self = this, wjs = self.wjs, arg;
       // Remove this element from processes.
-      self.wjs.processes.splice(self.wjs.processes.indexOf(self), 1);
+      wjs.processes.splice(wjs.processes.indexOf(self), 1);
       // Execute complete callback.
-      if (!silent && self.completeCallbacks) {
-        self.wjs.callbacks([self.completeCallbacks], [self.wjs.get(self.mainType, self.mainName)]);
+      if (!silent) {
+        wjs.callbacks(self.callbacks, [wjs.get(self.mainType, self.mainName)]);
       }
       // Protect against modification, object
       // should be eligible for garbage collection.

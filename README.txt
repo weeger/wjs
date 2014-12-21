@@ -4,13 +4,16 @@ Introduction
 ============
 
 ![Alt text](wjs-logo.png?raw=true "The discreet library")
+Would you like to visit first our <a target="_blank" href="http://wjs.wexample.com">demo website</a> ?
+Then maybe have a look to the <a target="_blank" href="http://wjs.wexample.com/quick_start/quick_start.zip">Quick Start ZIP file</a> ?
+
 Load everything you need as an extensions package. Wjs is an entry point to make your Javascript web app retrieve assets from your server, via AJAX, or not. Everything is an extension with wjs : script, image, html, etc..., and all extensions can load dependencies. This library is for you, if you want to :
 
 - Load complex packages from your PHP application to javascript, in a minimum of requests.
 - Lazy load all components of your pages (js methods, classes, images, links, etc...).
 - Instantiate javascript class objects. 
 
-It is really lightweight and infinitely extensible by your own application components. Obviously, it requires a minimum of configuration before.. View a demo on this <a target="_blank" href="http://wjs.wexample.com">demo website</a>.
+It is really lightweight and infinitely extensible by your own application components. Obviously, it requires a minimum of configuration before...
 
 Install
 =======
@@ -144,8 +147,6 @@ So you can filter and manage returned content.
 if (isset($_GET['wjs']['JsArray']) && $_GET['wjs']['JsArray'] === 'testArray') {
   // Manage which data to retrieve.
   $wjs->import('JsArray', 'testArray');
-  $wjs->extensionPushRemove('WjsLoader', 'JsArray');
-  $wjs->extensionPushRemove('WjsLoader', 'WjsLoader');
   // When response is ready to be sent,
   // this function will add json headers,
   // print package content, then exit.

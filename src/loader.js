@@ -23,25 +23,39 @@
       // Store links to processes, in order
       // to handle javascript cached responses.
       this.cacheHandler = {};
-      // Launch init function for subclasses
-      this.init();
     },
 
     __destruct: function () {
       // To override...
     },
 
+    /**
+     * Called once on loader creation.
+     */
     init: function () {
       // To override...
     },
 
+    /**
+     * Called after ajax call, ask loader
+     * to parse his own extension.
+     * @param extensionName
+     * @param output
+     * @param process
+     * @returns {*}
+     */
     parse: function (extensionName, output, process) {
       // To override...
       return output;
     },
 
-    query: function () {
+    /**
+     * Called when a user click on a link
+     * containing a wjs://type:name data link.
+     */
+    link: function (name) {
       // To override...
+      this.wjs.use(this.type, name);
     },
 
     /**

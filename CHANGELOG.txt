@@ -1,4 +1,16 @@
-WJS - 3.3.3 - 2014-12-16
+WJS - 3.3.4 - 2014-12-17
+------------------------
+- Scan folder method for webcomp
+- Allow wjs://type:name links
+- Shorthand functions
+-   ajax()
+-   scanFolder
+- construct arguments
+- Various debug 
+- Code style and comments
+- Browsers checks
+
+WJS - 3.3.3 - 2014-12-17
 ------------------------
 - Drupal 6x 7x handler
 - Code cleanup
@@ -183,7 +195,7 @@ WJS - 2.5.48 - 2014-04-08
 -------------------------
 - Save global version / subversion 
 - names in server side.
-- Improve transcode managment and init process.
+- Improve transcode management and init process.
 - Remove jQuery dependency
 - Keep internal w reference into loader / processes
 - Import function inheritance management

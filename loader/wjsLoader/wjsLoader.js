@@ -24,6 +24,10 @@
 
     // Loader is created by javascript.
     parse: function (name, value, process) {
+      var wjs = this.wjs;
+      process.callbacks.push(function () {
+        wjs.loaders[name].init();
+      });
       // If value is true,
       // Build loader with the default prototype,
       // no special action is defined for loading or parsing
