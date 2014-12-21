@@ -5,7 +5,7 @@ Introduction
 
 ![Alt text](wjs-logo.png?raw=true "The discreet library")
 Would you like to visit first our <a target="_blank" href="http://wjs.wexample.com">demo website</a> ?
-Then maybe have a look to the <a target="_blank" href="http://wjs.wexample.com/quick_start/quick_start.zip">Quick Start ZIP file</a> ?
+Then maybe have a look to the <a target="_blank" href="http://wjs.wexample.com/wjs-quick_start.zip">Quick Start ZIP file</a> ?
 
 Load everything you need as an extensions package. Wjs is an entry point to make your Javascript web app retrieve assets from your server, via AJAX, or not. Everything is an extension with wjs : script, image, html, etc..., and all extensions can load dependencies. This library is for you, if you want to :
 
