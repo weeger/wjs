@@ -54,11 +54,10 @@ class WebComp extends Loader {
           // so we have to remove manually
           else {
             $dom->loadHTML($wrapped);
+            // Remove doctype.
             $dom->removeChild($dom->doctype);
-          }
-          // Search for our div through html / body tags.
-          if (!$php54) {
-            $domSave = $dom->firstChild->firstChild->firstChild;
+            // Search for our div through html / body tags.
+            $dom->replaceChild($dom->firstChild->firstChild->firstChild, $dom->firstChild);
           }
           // Replace images src.
           $images = $dom->getElementsByTagName('img');
@@ -71,7 +70,7 @@ class WebComp extends Loader {
             }
           }
           // Convert to text.
-          $data['html'] = $dom->saveHTML($domSave);
+          $data['html'] = $dom->saveHTML();
           // Remove the temporary wrapper.
           $data['html'] = trim(preg_replace('!^<div>([\s\S]*?)</div>$!i', '$1', $data['html']));
         }
