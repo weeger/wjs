@@ -535,7 +535,7 @@ var instance = (new wjs.classProto("className"))(arguments);
 
 Copyright
 ---------
-Copyright Romain WEEGER 2010 / 2014
+Copyright Romain WEEGER 2010 / 2015
 http://www.wexample.com
 
 Licensed under the MIT and GPL licenses :

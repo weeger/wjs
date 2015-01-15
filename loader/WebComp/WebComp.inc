@@ -43,7 +43,23 @@ class WebComp extends Loader {
           // Remove errors like parsing non encoded question marks in urls.
           libxml_use_internal_errors(TRUE);
           // We need to add main wrappers around our document content.
-          $dom->loadHTML('<div>' . $data['html'] . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+          $wrapped = '<div>' . $data['html'] . '</div>';
+          $domSave = NULL;
+          // Load depending of PHP version.
+          $php54 = (version_compare(PHP_VERSION, '5.4.0') >= 0);
+          if ($php54) {
+            $dom->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+          }
+          // Version under PHP 5.4 do not support second argument in loadHTML,
+          // so we have to remove manually
+          else {
+            $dom->loadHTML($wrapped);
+            $dom->removeChild($dom->doctype);
+          }
+          // Search for our div through html / body tags.
+          if (!$php54) {
+            $domSave = $dom->firstChild->firstChild->firstChild;
+          }
           // Replace images src.
           $images = $dom->getElementsByTagName('img');
           /** @var \DOMElement $image */
@@ -55,7 +71,7 @@ class WebComp extends Loader {
             }
           }
           // Convert to text.
-          $data['html'] = $dom->saveHTML($dom->firstChild);
+          $data['html'] = $dom->saveHTML($domSave);
           // Remove the temporary wrapper.
           $data['html'] = trim(preg_replace('!^<div>([\s\S]*?)</div>$!i', '$1', $data['html']));
         }
