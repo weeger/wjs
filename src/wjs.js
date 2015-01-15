@@ -1,8 +1,8 @@
-// wJs v3.3.4 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
+// wJs v3.3.5 - (c) Romain WEEGER 2010 / 2014 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.3.4', WJSProto;
+  var wjsVersion = '3.3.5', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -19,7 +19,7 @@
       document: context.document || window.document,
       /** @type {string} */
       version: wjsVersion,
-      /** @type Array.Function */
+      /** @type {Array.Function} */
       readyCallbacks: [],
       /** @type {boolean} */
       readyComplete: false,
@@ -39,14 +39,20 @@
       processProto: null,
       /** @type {Array.WJSProcessProto} */
       processes: [],
+      /** @type {Number} */
+      processCounter: 0,
+      /** @type {Array} */
+      processStack: [],
+      /** @type {Array} */
+      processParent: undefined,
       /** @type {Object.Function} */
       classProtos: {},
       /** @type {Object.Object} */
       classMethods: {},
       /** @type {Object.Object} */
-      destroyQ: [],
-      /** @type {Object.Object} */
       cacheBuffer: {},
+      /** @type {Object.string} Store names of CacheLinks */
+      cacheReg: {},
       /** @type {Object} */
       settings: null,
       /** @type {RegExp} */
@@ -79,7 +85,7 @@
         // Load all other scripts then run ready functions.
         // Execute startup functions.
         // Create a loading process to parse package content.
-        new self.processProto({
+        new self.processProto(null, {
           complete: function () {
             delete self.packageDefault;
             // Mark as readyComplete, further ready functions
@@ -148,7 +154,7 @@
     linksClick: function (e) {
       var self = this,
         link = e.target.getAttribute('data-wjs-link').match(self.linkReg);
-      self.loadersExists(link[1], function () {
+      self.loadersExists([link[1]], function () {
         self.loaders[link[1]].link(link[2]);
       });
       return false;
@@ -190,28 +196,48 @@
     },
 
     /**
-     * Returns a boolean if a loader exists.
-     * If not, it try to download it.
+     * Try to download all given loaders.
      * @param {Array} types
      * @param {Function} complete
      * @return {*}
      */
     loadersExists: function (types, complete) {
-      types = Array.isArray(types) ? types : [types];
-      var self = this, i, use = [];
+      var self = this, i = 0, use = [];
       // Search for existing loaders.
-      for (i = 0; i < types.length; i++) {
+      for (; i < types.length; i++) {
         if (!self.loaders[types[i]]) {
-          if (self.loadersExtra.indexOf(types[i])) {
-            use.push(types[i]);
-          }
-          else {
-            // One loader do not exists at all.
-            return false;
+          // If no active process found
+          // we will make a new use process.
+          use.push(types[i]);
+        }
+      }
+      return (use.length > 0) ?
+        // Create a new process.
+        new (self.processProto)({WjsLoader: use}, {
+          stacked: false,
+          complete: complete
+        }) :
+        // Or execute callback.
+        complete();
+    },
+
+    /**
+     * Return process currently working
+     * on the specified extension type.
+     * @param {string} type
+     * @param {string} name
+     * @return {*}
+     */
+    processFor: function (type, name) {
+      var self = this, i = 0, j;
+      for (i = 0; i < self.processes.length; i++) {
+        for (j = 0; j < self.processes[i].extRequests.length; j++) {
+          if (self.processes[i].extRequests[j].type === type && self.processes[i].extRequests[j].name === name) {
+            // We no longer check other types.
+            return self.processes[i];
           }
         }
       }
-      return (use.length > 0) ? this.use({WjsLoader: use}, complete) : complete();
     },
 
     /**
@@ -225,88 +251,19 @@
      */
     use: function (request, options) {
       var self = this;
-      // Treat if request is just two strings.
+      // Handle if request is just two strings.
       if (typeof request === 'string') {
         // Transform request to a multi request.
         var multiple = {};
         // User request as type, options as name.
         multiple[request] = [options];
-        options = self.extendOptions(arguments[2], {
-          mainType: request,
-          mainName: options
-        });
-        // And maybe option exists as a third argument.
-        return self.use(multiple, options);
+        // Merge options.
+        options = arguments[2];
+        // Replace default var.
+        request = multiple;
       }
-      // Make first a specific verification for loaders,
-      // Use them if needed, loaders can't have
-      return self.loadersExists(Object.keys(request), function () {
-        // Loader exists, we can search for asked extension.
-        // Transform callback to object, if not already one.
-        options = self.extendOptions(options);
-        var i, j, k, destroyQIndex, type, name, use, processQueued, types = Object.keys(request),
-          process = new (self.processProto)(options),
-          extensionData;
-        // Iterates over requested types.
-        for (i = 0; i < types.length; i++) {
-          type = types[i];
-          // Contain list of really missing extensions to retrieve.
-          use = [];
-          // Iterates over items
-          for (j = 0; j < request[type].length; j++) {
-            name = request[type][j];
-            for (destroyQIndex = 0; destroyQIndex < self.destroyQ.length; destroyQIndex++) {
-              if (self.destroyQ[destroyQIndex]['#items'][type] && self.destroyQ[destroyQIndex]['#items'][type][name]) {
-                self.destroyQ[destroyQIndex]['#callbacks'].push(function () {
-                  // Launch request again.
-                  return self.use(request, options);
-                });
-                return;
-              }
-            }
-            // Destroy item if reload asked.
-            if (options.reload === true || self.loaders[type].preventReload === false) {
-              // Destroy also dependencies.
-              self.destroy(type, name, true);
-            }
-            extensionData = self.get(type, name);
-            // Check if data is missing.
-            if (!extensionData) {
-              // Search if a process is not currently
-              // waiting to be parsed, and containing requested data,
-              // in this case, current process will be delayed again.
-              for (k = 0; k < self.processes.length; k++) {
-                processQueued = self.processes[k];
-                if (processQueued.parseQ[type] &&
-                  processQueued.parseQ[type][name]) {
-                  // We have found a non terminated process, we shut down this one.
-                  process.loadingComplete(true);
-                  // A process is about to parse requested extension,
-                  // We enforce process to parse it now.
-                  return processQueued.responseParseItem(type, name, function () {
-                    // Launch request again.
-                    return self.use(request, options);
-                  });
-                }
-              }
-              // Item not found, we need to retrieve it.
-              use.push(name);
-            }
-          }
-          // We hook loaders to add request(s).
-          self.loaders[type].extRequestInit(use, process, options);
-        }
-        // We start process.
-        process.loadingStart();
-        if (options.mainType) {
-          // Return data if exists,
-          // If only async process and parsing as been asked
-          // and retrieved, or if extension have been already loaded,
-          // there is a chance that content can be return, otherwise
-          // user should have conscience of type of content he manipulates.
-          return self.get(options.mainType, options.mainName);
-        }
-      });
+      // Create a new process.
+      return new (self.processProto)(request, options);
     },
 
     /**
@@ -329,53 +286,66 @@
      * be asynchronous if loader ask for.
      * @param {string} type
      * @param {string} name
-     * @param {boolean=} withDependencies
+     * @param {?} options
      */
-    destroy: function (type, name, withDependencies) {
-      var queue = {'#items': {}, '#callbacks': []};
-      this.destroyQ.push(queue);
-      // Add item to destroy queue.
-      this.destroyEnqueue(queue, type, name, withDependencies);
-      // Launch process.
-      this.destroyNext(queue);
+    destroy: function (type, name, options) {
+      var self = this, request = {};
+      request[type] = [name];
+      // Handle async destroy option.
+      if (options && options.async) {
+        delete options.async;
+        self.window.setTimeout(function () {
+          self.destroy(type, name, options);
+        });
+        return;
+      }
+      // Accept simple boolean value.
+      options = typeof options === 'boolean' ? {dependencies: options} : options;
+      // Convert callback to options object.
+      options = self.extendOptions(options, {
+        destroy: true
+      });
+      // Create a new process.
+      return new (self.processProto)(request, options);
     },
 
     /**
-     * Add extension to the destroy queue.
-     * @param {Object} queue
+     * Build destroy request with dependencies.
+     * Avoid to delete core extensions.
+     * @param {Object} request
      * @param {string} type
      * @param {string} name
-     * @param {boolean} withDependencies
+     * @param {Object} options
      */
-    destroyEnqueue: function (queue, type, name, withDependencies) {
+    destroyRequest: function (request, type, name, options) {
       var self = this;
-      if (self.get(type, name) &&
-        // Avoid to delete core and basics loaders.
-        (type !== 'WjsLoader' ||
-          (name !== 'WjsLoader' &&
-            name !== 'JsLink' &&
-            self.loadersBasic.indexOf(name) === -1))) {
-        var requirementType, i, j, k , l, keys, keys2, keys3, shared,
-          extRequire = self.extRequire,
-          require = extRequire[type][name];
+      if ((type !== 'WjsLoader' ||
+        (name !== 'WjsLoader' &&
+          name !== 'JsLink' &&
+          self.loadersBasic.indexOf(name) === -1))) {
+        var require = self.extRequire[type] ? self.extRequire[type][name] : null,
+          cacheRegName = type + '::' + name,
+          cacheLink = self.cacheReg[cacheRegName];
         // Create queue entry if not exists.
-        queue['#items'][type] = queue['#items'][type] || {};
+        request[type] = request[type] || [];
         // Add item to destroy queue.
-        queue['#items'][type][name] = true;
-        // Add requirements.
-        if (require && withDependencies) {
-          keys = Object.keys(require);
-          for (i = 0; i < keys.length; i++) {
-            for (j = 0; j < require[keys[i]].length; j++) {
-              // Prevent to delete shared dependencies.
-              if (!this.requireShared(type, name, keys[i], require[keys[i]][j])) {
-                this.destroyEnqueue(queue, keys[i], require[keys[i]][j], withDependencies);
-              }
-            }
-          }
+        request[type].push(name);
+        // Remove cache response if exists.
+        if (cacheLink) {
+          // Add link to destroyed extensions.
+          self.destroyRequest(request, 'CacheLink', cacheLink, options);
+          // Remove entry.
+          delete self.cacheReg[cacheRegName];
         }
-        // Remove requirements data.
-        delete self.extRequire[type][name];
+        // Add requirements.
+        if (require && options.dependencies) {
+          self.regEach(require, function (requireType, requireName) {
+            // Prevent to delete shared dependencies.
+            if (!self.requireShared(type, name, requireType, requireName)) {
+              self.destroyRequest(request, requireType, requireName, options);
+            }
+          });
+        }
       }
     },
 
@@ -406,78 +376,55 @@
     },
 
     /**
-     * Launch destruction of the next item from destroy queue.
-     * @param {Object} queue
+     * Iterates over the given objects list.
+     * @param {object} registry
+     * @param {Function} callback
+     * @return {boolean}
      */
-    destroyNext: function (queue) {
-      var self = this,
-        loaded = self.extLoaded,
-        itemNext = this.queueNext(queue['#items']),
-        type = itemNext.type,
-        name = itemNext.name,
-        output;
-      if (itemNext) {
-        // Hook loader.
-        output = self.loaders[type].destroy(name, loaded[type][name], queue);
-        // Pass to next item if allowed.
-        if (output) {
-          this.destroyNextComplete(queue);
+    regEach: function (registry, callback) {
+      var self = this, i = 0, j, types = Object.keys(registry), result;
+      for (; i < types.length; i++) {
+        for (j = 0; j < registry[types[i]].length; j++) {
+          if (callback.call(this, types[i], registry[types[i]][j]) === false) {
+            return false;
+          }
         }
       }
-      else {
-        // Queue is complete.
-        this.destroyQ.splice(this.destroyQ.indexOf(queue), 1);
-        this.callbacks(queue['#callbacks']);
-      }
+      return true;
     },
 
     /**
-     * Called when the item is destroyed.
-     * @param {Object} queue
-     */
-    destroyNextComplete: function (queue) {
-      var self = this,
-        loaded = self.extLoaded,
-        itemNext = this.queueNext(queue['#items']);
-      // Remove item from queue.
-      this.queueRem(queue['#items'], itemNext.type, itemNext.name);
-      // Remove entry.
-      delete loaded[itemNext.type][itemNext.name];
-      this.destroyNext(queue);
-    },
-
-    /**
-     * Remove item from given queue.
-     * @param {Object} queue
+     * Remove item from given registry object list.
+     * @param {Object} registry
      * @param {string} type
      * @param {string} name
      */
-    queueRem: function (queue, type, name) {
-      delete queue[type][name];
-      if (this.objectIsEmpty(queue[type])) {
-        delete queue[type];
+    regRem: function (registry, type, name) {
+      delete registry[type][name];
+      if (this.objectIsEmpty(registry[type])) {
+        delete registry[type];
       }
     },
 
     /**
-     * Get next item from queue.
-     * @param {Object} queue
+     * Get next item from registry object list.
+     * @param {Object} registry
      * @return {*}
      */
-    queueNext: function (queue) {
-      var queueKey = Object.keys(queue)[0],
-        queueItemsKey;
+    regNext: function (registry) {
+      var registryKey = Object.keys(registry)[0],
+        registryItemsKey;
       // Take first existing item.
-      if (queueKey) {
+      if (registryKey) {
         // Content can be an array of names,
         // or an object with names as indexes.
-        queueItemsKey = Object.keys(queue[queueKey])[0];
-        if (queueItemsKey) {
+        registryItemsKey = Object.keys(registry[registryKey])[0];
+        if (registryItemsKey) {
           // Return the type / name pair.
           return {
-            type: queueKey,
-            name: queueItemsKey,
-            data: queue[queueKey][queueItemsKey]
+            type: registryKey,
+            name: registryItemsKey,
+            data: registry[registryKey][registryItemsKey]
           };
         }
       }
@@ -705,7 +652,8 @@
 
     /**
      * Listen for the load event, limited
-     * by a timeout
+     * by a timeout, used to add callbacks to
+     * dynamically added links like js and css.
      * @param {object} dom
      * @param {Function} callback
      */
@@ -730,12 +678,12 @@
      * @param {boolean=} fatal
      */
     err: function (message, fatal) {
-      var errorPrefix = '[wjs error] : ';
-      if (!fatal && this.window.console) {
-        this.window.console.error(errorPrefix + message);
+      var self = this, errorPrefix = '[wjs error] : ';
+      if (!fatal && self.window.console) {
+        self.window.console.error(errorPrefix + message);
       }
       else {
-        throw new Error(errorPrefix + message);
+        throw new self.window.Error(errorPrefix + message);
       }
     }
   };

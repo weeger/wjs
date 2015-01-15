@@ -4,8 +4,8 @@
   context.wjs.loaderAdd('JsMethod', {
     // Extends full named loader class.
     classExtends: 'WjsLoaderJsScript',
-    methodAddLast: null,
-    methodAddLastCallback: null,
+    addLastComp: null,
+    addLastCompCallback: null,
 
     destroy: function (name, data) {
       if (this.wjs.hasOwnProperty(name)) {
@@ -17,7 +17,7 @@
     /**
      * Treat returned content as normal javascript.
      * Extra javascript is added from server side to
-     * manage handling with methodAdd.
+     * manage handling with addJsMethod.
      * @param {string} name
      * @param {string} value
      * @param {WJSProcessProto} process
@@ -31,14 +31,18 @@
 
     /**
      * Shortcut function to handle method declaration.
-     * methodAdd and methodAddComplete are called
+     * addJsMethod and addJsMethodComplete are called
      * in the same process.
      * @param {string} name
      * @param {Function} callback
      */
-    methodAdd: function (name, callback) {
-      this.methodAddLast = name;
-      this.methodAddLastCallback = callback;
+    addJsMethod: function (name, callback) {
+      this.addLastCompSave(name, callback);
+    },
+
+    addLastCompSave: function (name, callback) {
+      this.addLastComp = name;
+      this.addLastCompData = callback;
     },
 
     /**
@@ -48,16 +52,21 @@
      * @param {string} name
      * @param {WJSProcessProto} process
      */
-    methodAddedComplete: function (name, process) {
+    loadCompleteJsMethod: function (name, process) {
       var self = this;
-      if (!self.wjs.hasOwnProperty(name)) {
-        self.wjs[name] = self.methodAddLastCallback;
+      if (self.addLastComp !== null) {
+        if (!self.wjs.hasOwnProperty(name)) {
+          self.wjs[name] = self.addLastCompData;
+        }
+        process.itemParseComplete(
+          self.type,
+          self.addLastComp,
+          self.addLastCompData
+        );
+        // Reset temp variables.
+        self.addLastComp =
+          self.addLastCompData = null;
       }
-      process.parseItemComplete(
-        self.type,
-        self.methodAddLast,
-        self.methodAddLastCallback
-      );
     }
   });
   // [-->

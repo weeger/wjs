@@ -23,33 +23,58 @@ class WebComp extends Loader {
   }
 
   function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
-    $value = $value === NULL ? $this->extensions[$name] : $value;
-    $data  = '';
-    if (is_dir($value['server'])) {
-      $data = array(
-        // By default destination is the page body.
-        'destination' => isset($value['destination']) ? $value['destination'] : 'body',
-        // If no html file defined, use an empty string.
-        'html'        => (is_file($value['server'] . $name . '.html')) ? file_get_contents($value['server'] . $name . '.html') : '',
-        // Define if url query strings are updated on WebComp load.
-        'urlUpdate'   => isset($value['urlUpdate']) ? $value['urlUpdate'] : FALSE,
-        // We can choose to display only one WebComp of each group at a time.
-        'group'       => isset($value['group']) ? $value['group'] : FALSE,
-      );
-      if (is_file($value['server'] . $name . '.css')) {
-        $LinkName = $value['client'] . $name . '.css';
-        $this->wjs->extensionAdd('CssLink', $LinkName, $LinkName);
-        $this->wjs->extensionAddRequire($this->type, $name, 'CssLink', $LinkName);
+    $value = $this->valuePush($name, $value);
+    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION) {
+      $data = '';
+      if (is_dir($value['server'])) {
+        $data = array(
+          // By default destination is not defined.
+          'destination' => isset($value['destination']) ? $value['destination'] : FALSE,
+          // If no html file defined, use an empty string.
+          'html'        => (is_file($value['server'] . $name . '.html')) ? file_get_contents($value['server'] . $name . '.html') : '',
+          // Define if url query strings are updated on WebComp load.
+          'urlUpdate'   => isset($value['urlUpdate']) ? $value['urlUpdate'] : FALSE,
+          // We can choose to display only one WebComp of each group at a time.
+          'group'       => isset($value['group']) ? $value['group'] : FALSE,
+        );
+        if ($data['html'] !== '') {
+          // Parse with native PHP dom parser.
+          $dom = new \DOMDocument;
+          // Remove errors like parsing non encoded question marks in urls.
+          libxml_use_internal_errors(TRUE);
+          // We need to add main wrappers around our document content.
+          $dom->loadHTML('<div>' . $data['html'] . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+          // Replace images src.
+          $images = $dom->getElementsByTagName('img');
+          /** @var \DOMElement $image */
+          foreach ($images as $image) {
+            $src = $image->getAttribute('src');
+            // Relocate images from extensions location.
+            if (substr($src, 0, 4) !== 'http') {
+              $image->setAttribute('src', $value['client'] . $image->getAttribute('src'));
+            }
+          }
+          // Convert to text.
+          $data['html'] = $dom->saveHTML($dom->firstChild);
+          // Remove the temporary wrapper.
+          $data['html'] = trim(preg_replace('!^<div>([\s\S]*?)</div>$!i', '$1', $data['html']));
+        }
+        if (is_file($value['server'] . $name . '.css')) {
+          $LinkName = $value['client'] . $name . '.css';
+          $this->wjs->extensionAdd('CssLink', $LinkName, $LinkName);
+          $this->wjs->extensionAddRequire($this->type, $name, 'CssLink', $LinkName);
+        }
+        if (is_file($value['server'] . $name . '.js')) {
+          $LinkName = $value['client'] . $name . '.js';
+          $this->wjs->extensionAdd('JsLink', $LinkName, $LinkName);
+          $this->wjs->extensionAddRequire($this->type, $name, 'JsLink', $LinkName);
+          $this->wjs->jsParseRequire($this->type, $name, file_get_contents($value['server'] . $name . '.js'));
+        }
       }
-      if (is_file($value['server'] . $name . '.js')) {
-        $LinkName = $value['client'] . $name . '.js';
-        $this->wjs->extensionAdd('JsLink', $LinkName, $LinkName);
-        $this->wjs->extensionAddRequire($this->type, $name, 'JsLink', $LinkName);
-        $this->wjs->jsParseRequire($this->type, $name, file_get_contents($value['server'] . $name . '.js'));
-      }
+      $value = $data;
     }
     // Save value as true.
-    return parent::extensionPush($name, $excludeRequire, $data);
+    return parent::extensionPush($name, $excludeRequire, $value);
   }
 
   function dataBuild($name, $data) {

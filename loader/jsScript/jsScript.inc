@@ -14,16 +14,21 @@ class JsScript extends Loader {
    * Append object to the output array.
    */
   function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
-    $value = $value === NULL ? $this->extensions[$name] : $value;
-    if (is_file($value)) {
-      $value = file_get_contents($value);
-      $this->wjs->jsParseRequire($this->type, $name, $value);
+    $value = $this->valuePush($name, $value);
+    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION) {
+      if (is_file($value)) {
+        $value = file_get_contents($value);
+        $this->wjs->jsParseRequire($this->type, $name, $value);
+      }
+      $output = parent::extensionPush($name, $excludeRequire, $value);
+      if ($this->wjs->cacheEnabled === FALSE) {
+        $output['#data'] = 'var loader=this,name=arguments[0],process=arguments[2];' . $output['#data'];
+      }
+      return $output;
     }
-    $output = parent::extensionPush($name, $excludeRequire, $value);
-    if ($this->wjs->cacheEnabled === FALSE) {
-      $output['#data'] = 'var loader=this,name=arguments[0],process=arguments[2];' . $output['#data'];
+    else {
+      return parent::extensionPush($name, $excludeRequire, $value);
     }
-    return $output;
   }
 
   function cacheJsEncode($data) {

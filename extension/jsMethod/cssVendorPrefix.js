@@ -3,7 +3,7 @@
   /**
    * Apply a animation delay for each items selected.
    */
-  loader.methodAdd('cssVendorPrefix', function (name, domStyle) {
+  loader.addJsMethod('cssVendorPrefix', function (name, domStyle) {
     // If property is not undefined, no prefix needed.
     if (domStyle && domStyle[name] !== undefined) {
       return name;

@@ -4,13 +4,19 @@ Introduction
 ============
 
 ![Alt text](wjs-logo.png?raw=true "The discreet library")
-Would you like to visit first our <a target="_blank" href="http://wjs.wexample.com">demo website</a> ?
-Then maybe have a look to the <a target="_blank" href="http://wjs.wexample.com/wjs-quick_start.zip">Quick Start ZIP file</a> ?
+Would not it be good to start to take a tour on our demo live sites : 
+
+- The standalone <a target="_blank" href="http://wjs.wexample.com">demo website</a>
+- The <a target="_blank" href="http://drupal6.wexample.com">Drupal demo website</a>
+- The <a target="_blank" href="http://wjs.wexample.com/quick_start/">Quick Start site</a>
+- Download <a target="_blank" href="http://wjs.wexample.com/wjs-quick_start.zip">Quick Start ZIP file</a>
+- The <a target="_blank" href="https://www.drupal.org/sandbox/weeger/2393707">Drupal Sandbox</a>
+- The <a target="_blank" href="http://wemplate.wexample.com?p=1C2A8&changes=1">Wemplate project</a> which wjs is a part of.
 
 Load everything you need as an extensions package. Wjs is an entry point to make your Javascript web app retrieve assets from your server, via AJAX, or not. Everything is an extension with wjs : script, image, html, etc..., and all extensions can load dependencies. This library is for you, if you want to :
 
+- Create little lightweight one page sites with full lazy loading (js methods, classes, images, links, etc...).
 - Load complex packages from your PHP application to javascript, in a minimum of requests.
-- Lazy load all components of your pages (js methods, classes, images, links, etc...).
 - Instantiate javascript class objects. 
 
 It is really lightweight and infinitely extensible by your own application components. Obviously, it requires a minimum of configuration before...
@@ -33,7 +39,14 @@ After downloading and installing wjs into your library folder, there is still th
 Create a Wjs instance
 ---------------------
 
-Wjs takes one arguments defining routes for both client and server paths.
+The quickest method to start is to instantiate wjs with no arguments.
+
+On server side : 
+```php
+$wjs = new \Wjs();
+```
+
+Otherwise you can define more configuration settings.
 
 On server side : 
 ```php
@@ -46,13 +59,17 @@ $wjs = new \Wjs(array(
     // to specify route for the local directory,
     // it will be filled by all aggregated javascript and responses.
     'cacheDir'         => $yourCustomCacheDirectory,
-    // Optionally you can specify a file for
-    // main javascript file for complete page.
-    'cacheFileStartup' => $yourCustomCacheFileStartup
+    // You can specify a file for main
+    // javascript file for complete page.
+    'cacheFileStartup' => $yourCustomCacheFileStartup,
+    // You can also specify a extra string
+    // for cache files naming. Useful to enforce
+    // to flush browsers caches.
+    'cacheToken'       => $yourCustomCacheToken,
   ),
   'client' => array(
-    // This path is not required, but recommended,
-    // It is for example used to generate proper based paths
+    // Path to wjs directory from client side.
+    // Used to generate proper based paths
     // on using the jsFiles() method.
     'wjs'              => $pathToWjsFromClientSide,
     // Response path define the URL used by AJAX
@@ -60,13 +77,10 @@ $wjs = new \Wjs(array(
     // obviously need to handle the path on server
     // side, see bellow.
     'responsePath'     => $yourCustomResponsePath,
-    // If you want to use cache, you have
-    // to specify route for the local directory,
-    // it will be filled by all aggregated javascript and responses.
+    // If you want to use cache, you should also
+    // specify paths from client side.
     'cacheDir'         => $yourCustomCacheDirectory,
-    // Optionally you can specify a file for
-    // main javascript file for complete page.
-    'cacheFileStartup' => $yourCustomCacheFileStartup
+    'cacheFileStartup' => $yourCustomCacheFileStartup,
   )
   // Optional, by default use "master" version (minified),
   // Accepts also "jQuery" or "source" for debug mode.
@@ -264,7 +278,7 @@ Your Js file must also be wrapped, it allows wjs to catch it :
    * @param {Object} object
    * @return {number}
    */
-  loader.methodAdd('testMethod', function (object) {
+  loader.addJsMethod('testMethod', function (object) {
     var size = 0, key;
     for (key in object) {
       if (object.hasOwnProperty(key)) {
@@ -281,8 +295,9 @@ Your Js file must also be wrapped, it allows wjs to catch it :
 On client side : 
 ```javascript
 // The retrieved method will return the length of an object.
-var length = wjs.use('JsMethod', 'testMethod', function (method) {
+var length = wjs.use('JsMethod', 'testMethod', function (reg) {
   var length;
+  var method = reg.JsMethod.testMethod;
   var testObject = {
     'lorem': 'ipsum',
     'dolor': 'sit',
@@ -426,7 +441,12 @@ Cache links are core JsLinks which can not be excluded from requests.
 JsClass
 -------
 
-###MISSING###
+Used to retrieve javascript objects class, currently in work in progress.
+
+JsClass
+-------
+
+Static class are instantiated only once per page. This is a handy way to define group of function grouped inside one class instance.
 
 
 

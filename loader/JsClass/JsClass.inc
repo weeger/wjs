@@ -5,8 +5,8 @@ namespace Wjs\Loader;
 use \Wjs\Loader;
 
 /**
- * Transmit a javascript class method.
+ * Transmit a javascript class object.
  */
-class JsClass extends JsScript {
+class JsClass extends JsMethod {
   var $allowJsCache = TRUE;
 }

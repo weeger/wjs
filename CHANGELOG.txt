@@ -1,4 +1,15 @@
-WJS - 3.3.4 - 2014-12-17
+WJS - 3.3.5 - 2015-01-15
+------------------------
+- Process stack improvement
+- Quick instantiate mode
+- Lazy load class
+- Improve stack processing
+- Inheritance optimization
+- Errors management
+- Various refactoring
+- Doc update
+
+WJS - 3.3.4 - 2014-12-21
 ------------------------
 - Scan folder method for webcomp
 - Allow wjs://type:name links

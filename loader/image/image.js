@@ -18,7 +18,7 @@
         type = self.type,
         loaded = true;
       self.wjs.onload(image, function () {
-        process.parseItemComplete(type, name, image);
+        process.itemParseComplete(type, name, image);
       });
       // This launch image load process.
       image.src = name;

@@ -1,5 +1,8 @@
 /**
- * @require JsMethod > localClass
+ * @require WjsLoader > JsMethod
+ * @require WjsLoader > CssLink
+ * @require WjsLoader > JsLink
+ * @require JsMethod > staticClass
  * @require JsMethod > objectToArray
  * @require JsMethod > urlQueryParse
  * @require JsMethod > urlQueryBuild
@@ -10,7 +13,7 @@
   /**
    * Base class for WebComp elements.
    */
-  context.wjs.classExtend('WjsWebCompLocalClass', {
+  context.wjs.classExtend('WjsWebCompStaticClass', {
     init: function () {
       // To override...
       return true;
@@ -25,48 +28,40 @@
   });
 
   context.wjs.loaderAdd('WebComp', {
-    localClasses: {},
+    staticClasses: {},
 
     __construct: function () {
-      var self = this, i, param = self.wjs.urlQueryParse();
+      var self = this, i;
       // Create a shortcut in wjs for external scripts handling.
       self.wjs['ready' + self.type] = self.readyWebComp.bind(self);
-      self.wjs['localClass' + self.type] = self.localClassWebComp.bind(self);
+      self.wjs['staticClass' + self.type] = self.staticClassWebComp.bind(self);
       // List of callbacks.
       self.readyCallbacks = {};
       self.wjs.classMethods.WjsLoader.__construct.apply(self, arguments);
-      this.initParam = self.wjs.urlQueryParse();
     },
 
     __destruct: function () {
       delete this.wjs['ready' + this.type];
-      delete this.wjs['localClass' + this.type];
-      delete this.wjs.classMethods.WjsWebCompLocalClass;
-    },
-
-    init: function () {
-      var self = this, i = 0, param = this.initParam, keys;
-      // Load items presents into URL query string.
-      if (param[self.type]) {
-        keys = Object.keys(param[self.type]);
-        for (; i < keys.length; i++) {
-          self.wjs.use(this.type, param[self.type][keys[i]]);
-        }
-      }
+      delete this.wjs['staticClass' + this.type];
+      delete this.wjs.classMethods.WjsWebCompStaticClass;
     },
 
     parse: function (name, value, process) {
-      var self = this, params;
+      var self = this, wjs = this.wjs, params, destination = process.options.destination || value.destination;
       // Create dom component.
-      value.dom = this.wjs.document.createElement('div');
+      value.dom = wjs.document.createElement('div');
       value.dom.innerHTML = value.html;
-      value.dom.setAttribute('id', this.type + '-' + name);
+      value.dom.classList.add(self.type + '-' + name);
       // Append it if query selector specified.
-      if (value.destination) {
-        value.domDestination = this.wjs.window.document.querySelector(value.destination);
+      if (destination) {
+        // Destination may be a query selector string
+        // or a direct reference to a dom component.
+        value.domDestination =
+          typeof destination === 'string' ?
+            wjs.window.document.querySelector(destination) : destination;
         value.domDestination.appendChild(value.dom);
         // Parse all node to search for wjs links.
-        this.wjs.linksInit(value.domDestination);
+        wjs.linksInit(value.domDestination);
       }
       // Save status to URL if asked.
       if (value.urlUpdate) {
@@ -75,7 +70,7 @@
         params[self.type] = params[self.type] || [];
         if (value.group) {
           if (params[self.type][value.group]) {
-            this.wjs.destroy(this.type, params[self.type][value.group], true);
+            wjs.destroy(this.type, params[self.type][value.group], true);
           }
           params[self.type][value.group] = name;
         }
@@ -87,38 +82,40 @@
       }
       // Execute init function if a local class
       // has been defined for this page.
-      if (this.localClasses[name] && this.localClasses[name].init) {
-        this.wjs.extendObject(this.localClasses[name], value);
-        this.localClasses[name].init(value);
+      if (this.staticClasses[name] && this.staticClasses[name].init) {
+        wjs.extendObject(this.staticClasses[name], value);
+        this.staticClasses[name].init(value);
       }
       return value;
     },
 
-    destroy: function (name, value, queue) {
+    destroy: function (name, value, process) {
       var self = this, remove = true, params, itemsSaved, index;
-      if (this.localClasses[name] && this.localClasses[name].exit) {
-        remove = this.localClasses[name].exit(value, queue);
-      }
-      if (remove) {
-        value.dom.parentNode.removeChild(value.dom);
-      }
-      // Remove item from url history.
-      if (value.urlUpdate) {
-        params = self.wjs.urlQueryParse();
-        if (params[self.type]) {
-          if (value.group) {
-            index = params[self.type][value.group] ? value.group : -1;
-            delete params[self.type][value.group];
-          }
-          else {
-            // Remove all instance of item.
-            index = params[self.type].indexOf(name);
-            while (index !== -1) {
-              params[self.type].splice(index, 1);
-              index = params[self.type].indexOf(name);
+      if (!(value instanceof self.wjs.window.Error)) {
+        if (this.staticClasses[name] && this.staticClasses[name].exit) {
+          remove = this.staticClasses[name].exit(self.type, name, value, process);
+        }
+        if (remove && value.dom.parentNode) {
+          value.dom.parentNode.removeChild(value.dom);
+        }
+        // Remove item from url history.
+        if (value.urlUpdate) {
+          params = self.wjs.urlQueryParse();
+          if (params[self.type]) {
+            if (value.group) {
+              index = params[self.type][value.group] ? value.group : -1;
+              delete params[self.type][value.group];
             }
+            else {
+              // Remove all instance of item.
+              index = params[self.type].indexOf(name);
+              while (index !== -1) {
+                params[self.type].splice(index, 1);
+                index = params[self.type].indexOf(name);
+              }
+            }
+            self.wjs.window.history.replaceState(null, null, '?' + self.wjs.urlQueryBuild(params));
           }
-          self.wjs.window.history.replaceState(null, null, '?' + self.wjs.urlQueryBuild(params));
         }
       }
       return remove;
@@ -128,10 +125,10 @@
       this.readyCallbacks[docName] = callback.bind(wjs);
     },
 
-    localClassWebComp: function (name, proto) {
+    staticClassWebComp: function (name, proto) {
       // It must be an instance of special class.
-      proto.classExtends = proto.classExtends || 'WjsWebCompLocalClass';
-      this.localClasses[name] = this.wjs.localClass('WjsWebCompLocalClass' + name, proto);
+      proto.classExtends = proto.classExtends || 'WjsWebCompStaticClass';
+      this.staticClasses[name] = this.wjs.staticClass('WjsWebCompStaticClass' + name, proto);
     }
   });
   // [-->

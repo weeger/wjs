@@ -6,28 +6,23 @@
     classExtends: 'WjsLoaderJsLink',
     processType: 'server',
 
-    extRequestInit: function () {
-      // We use base extLoad, a single process to server.
-      this.wjs.classMethods.WjsLoader.extRequestInit.apply(this, arguments);
-    },
-
     destroy: function (name) {
       var wjs = this.wjs;
-      wjs.loaders[name].__destruct();
-      // Remove prototype.
-      wjs.classProtoDestroy('WjsLoader' + name);
-      delete wjs.loaders[name];
-      delete wjs.extLoaded[name];
-      delete wjs.extRequire[name];
+      // Handle missing loaders.
+      if (wjs.loaders[name]) {
+        wjs.loaders[name].__destruct();
+        // Remove prototype.
+        wjs.classProtoDestroy('WjsLoader' + name);
+        delete wjs.loaders[name];
+        delete wjs.extLoaded[name];
+        delete wjs.extRequire[name];
+      }
       return true;
     },
 
     // Loader is created by javascript.
     parse: function (name, value, process) {
       var wjs = this.wjs;
-      process.callbacks.push(function () {
-        wjs.loaders[name].init();
-      });
       // If value is true,
       // Build loader with the default prototype,
       // no special action is defined for loading or parsing

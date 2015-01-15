@@ -3,7 +3,7 @@
   /**
    * Convert a query string to a key / value object.
    */
-  loader.methodAdd('urlQueryParse', function (search) {
+  loader.addJsMethod('urlQueryParse', function (search) {
     var output = {}, i, split, key, value,
       regex = new RegExp('^[a-zA-Z0-9]*\\[([a-zA-Z0-9]*)\\]$'),
       regexNum = new RegExp('^([0-9])*$'),

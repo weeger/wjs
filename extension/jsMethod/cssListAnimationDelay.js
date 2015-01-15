@@ -6,7 +6,7 @@
   /**
    * Apply a animation delay for each items selected.
    */
-  loader.methodAdd('cssListAnimationDelay', function (domContainer, querySelector, timeOffset) {
+  loader.addJsMethod('cssListAnimationDelay', function (domContainer, querySelector, timeOffset) {
     var i, j, items = domContainer.querySelectorAll(querySelector), localTimeOffset = [];
     timeOffset = typeof timeOffset === 'number' || timeOffset.indexOf(',') === -1 ? [timeOffset] : timeOffset.split(',');
     for (i = 0; i < items.length; i++) {

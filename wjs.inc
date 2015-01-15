@@ -1,16 +1,16 @@
 <?php
 
-const WJS_VERSION                    = '3.3.4';
-const WJS_ERR_PUSH_MISSING_EXTENSION = 'WJS_ERR_PUSH_MISSING_EXTENSION';
-const WJS_ERR_PUSH_WRONG_DATA_TYPE   = 'WJS_ERR_PUSH_WRONG_DATA_TYPE';
-const WJS_ERR_MISSING_LOADER         = 'WJS_ERR_MISSING_LOADER';
+define('WJS_VERSION', '3.3.5');
+define('WJS_PATH_ROOT', dirname(__FILE__) . '/');
+define('WJS_ERR_PUSH_UNDEFINED_EXTENSION', 'WJS_ERR_PUSH_UNDEFINED_EXTENSION');
+define('WJS_ERR_PUSH_UNDEFINED_DATA_TYPE', 'WJS_ERR_PUSH_UNDEFINED_DATA_TYPE');
 
-require_once 'class/router.inc';
-require_once 'class/loader.inc';
-require_once 'class/summary.inc';
-require_once 'loader/JsLink/JsLink.inc';
-require_once 'loader/WjsLoader/WjsLoader.inc';
-require_once 'summary/core.wjs.inc';
+require_once WJS_PATH_ROOT . 'class/router.inc';
+require_once WJS_PATH_ROOT . 'class/loader.inc';
+require_once WJS_PATH_ROOT . 'class/summary.inc';
+require_once WJS_PATH_ROOT . 'loader/JsLink/JsLink.inc';
+require_once WJS_PATH_ROOT . 'loader/WjsLoader/WjsLoader.inc';
+require_once WJS_PATH_ROOT . 'summary/core.wjs.inc';
 
 use \Wjs\Router;
 
@@ -75,7 +75,7 @@ class Wjs extends Router {
     'paramExtra'   => '',
     'paramInc'     => 'wjs',
     'paramExc'     => 'wjs-exc',
-    'avoidEval'    => FALSE,
+    'paramToken'   => 'wjs-tok',
     'cacheDir'     => FALSE
   );
   /**
@@ -96,6 +96,11 @@ class Wjs extends Router {
    * Initialize wjs.
    */
   function __construct($routes = array(), $jsCoreFilesVersion = 'master') {
+    // If no arguments, try to detect path
+    // from current working directory.
+    if (func_num_args() === 0) {
+      $routes = $this->pathCleanupSlashes($this->pathSubtract(getcwd() . '/', dirname(__FILE__))) . '/';
+    }
     // If routes variable is a string,
     // we assume that it is the route from
     // server and client locations.
@@ -108,6 +113,10 @@ class Wjs extends Router {
           'wjs' => $routes
         )
       );
+    }
+    // If token sent in URL, use it as cacheToken.
+    if (isset($_GET[$this->settings['paramToken']])) {
+      $routes['server']['cacheToken'] = $_GET[$this->settings['paramToken']];
     }
     parent::__construct($routes);
     $this->jsCoreFilesVersion = $jsCoreFilesVersion;
@@ -152,11 +161,8 @@ class Wjs extends Router {
         }
       }
     }
-    if ($this->jsCoreFilesVersion === 'source') {
-      foreach ($summary->extensions['JsMethod'] as $methodName => $path) {
-        $summary->extensions['JsMethod'][$methodName] = str_replace('.min.js', '.js', $summary->extensions['JsMethod'][$methodName]);
-      }
-    }
+    // Change path to core summary.
+    $this->summaryCoreRelocate($summary, 'JsClassStatic');
     $this->summaryCoreRelocate($summary, 'JsMethod');
     // Add core wjs loaders manually,
     // This order has an impact on the order
@@ -176,6 +182,11 @@ class Wjs extends Router {
    * @param $name
    */
   function summaryCoreRelocate($summary, $name) {
+    if ($this->jsCoreFilesVersion === 'source') {
+      foreach ($summary->extensions[$name] as $methodName => $path) {
+        $summary->extensions[$name][$methodName] = str_replace('.min.js', '.js', $summary->extensions[$name][$methodName]);
+      }
+    }
     foreach ($summary->extensions[$name] as $extensionName => $extensionValue) {
       $summary->extensions[$name][$extensionName] = $this->routeGet('server', 'wjs') . $extensionValue;
     }
@@ -351,7 +362,7 @@ class Wjs extends Router {
         // Build output package.
         $extensionData = $loader->extensionPush($extensionName, $excludeRequire);
         // Avoid missing extensions errors.
-        if ($extensionData !== WJS_ERR_PUSH_MISSING_EXTENSION) {
+        if ($extensionData !== WJS_ERR_PUSH_UNDEFINED_EXTENSION) {
           // Recreate cache file.
           if ($this->cacheFlush === TRUE || !is_file($pathCacheServer)) {
             // Create directory.
@@ -368,9 +379,12 @@ class Wjs extends Router {
         // Build output package.
         $extensionData = $loader->extensionPush($extensionName, $excludeRequire);
       }
-      $loader->extensionsPushed[$extensionName] =
-      $this->outputPackage[$extensionType][$extensionName] = $extensionData;
     }
+    else {
+      $extensionData = WJS_ERR_PUSH_UNDEFINED_DATA_TYPE;
+    }
+    $loader->extensionsPushed[$extensionName] =
+    $this->outputPackage[$extensionType][$extensionName] = $extensionData;
   }
 
   /**
@@ -438,7 +452,7 @@ class Wjs extends Router {
    */
   function cacheExtensionPath($extensionType, $extensionName) {
     $pieces = $this->cacheExtensionInfo($extensionType, $extensionName);
-    return implode($pieces) . $extensionName . '.js';
+    return implode($pieces) . $extensionName . $this->routeGet('server', 'cacheToken') . '.js';
   }
 
   /**
@@ -497,7 +511,11 @@ class Wjs extends Router {
     }
     // Use path from route.
     $this->settings['responsePath'] = $this->routeGet('client', 'responsePath');
-    $output_json                    = array();
+    // Send cache token, it will be added
+    // to ajax calls, in order to avoid to regenerate
+    // a new token for the same session.
+    $this->settings['cacheToken'] = $this->routeGet('server', 'cacheToken');
+    $output_json                  = array();
     // Add settings.
     $output_json[] = '"settings":' . json_encode($this->settings);
     // Create a list of loaders who are added,
@@ -584,12 +602,13 @@ class Wjs extends Router {
     $indent = $indentLength === 0 ? '' : "\n" . str_repeat(' ', $indentLength);
     // In case of cache we aggregate files in one.
     if ($this->cacheEnabled) {
+      $cacheStartupFileName = 'startup' . $this->routeGet('server', 'cacheToken') . '.js';
       // Get paths from server side.
       $cacheFileStartupServer = $this->routeGet('server', 'cacheFileStartup');
-      $cacheFileStartupServer = ($cacheFileStartupServer) ? $cacheFileStartupServer : $this->routeGet('server', 'cacheDir') . 'startup.js';
+      $cacheFileStartupServer = ($cacheFileStartupServer) ? $cacheFileStartupServer : $this->routeGet('server', 'cacheDir') . $cacheStartupFileName;
       // Get paths from client side.
       $cacheFileStartupClient = $this->routeGet('client', 'cacheFileStartup');
-      $cacheFileStartupClient = ($cacheFileStartupClient) ? $cacheFileStartupClient : $this->routeGet('client', 'cacheDir') . 'startup.js';
+      $cacheFileStartupClient = ($cacheFileStartupClient) ? $cacheFileStartupClient : $this->routeGet('client', 'cacheDir') . $cacheStartupFileName;
       // Create file on server.
       file_put_contents($cacheFileStartupServer, $this->renderJsCache());
       // Add link from client.
@@ -621,16 +640,6 @@ class Wjs extends Router {
    * @return string
    */
   function renderJsUnpacker() {
-    // In handler mode, all library is always pushed,
-    // remote loading is disabled, wjs is only the global
-    // handler of all items.
-    if ($this->jsCoreFilesVersion === 'handler') {
-      foreach ($this->loaders as $extensionType => $loader) {
-        foreach ($loader->extensions as $extensionName => $data) {
-          $this->extensionPush($extensionType, $extensionName);
-        }
-      }
-    }
     return ($this->jsCoreFilesVersion === 'jQuery' ? 'jQuery' : 'window') . '.wjs.init(' . $this->initPackage() . ');';
   }
 

@@ -3,7 +3,7 @@
   /**
    * Convert a key / value object to a query string.
    */
-  loader.methodAdd('urlQueryBuild', function (object) {
+  loader.addJsMethod('urlQueryBuild', function (object) {
     var output = [], i = 0, j, keys = Object.keys(object), keysParam;
     for (; i < keys.length; i++) {
       if (typeof object[keys[i]] === 'object') {

@@ -18,7 +18,7 @@ class WjsLoader extends jsLink {
         'client' => array()
       );
       // Search for a js file.
-      $js   = $data . $name . '.js';
+      $js = $data . $name . '.js';
       if (is_file($js)) {
         $dataDetected['client']['js'] =
         $dataDetected['server']['js'] = $js;
@@ -30,9 +30,9 @@ class WjsLoader extends jsLink {
     require_once $data['server']['class'];
     $class_name                = '\Wjs\Loader\\' . $name;
     $this->wjs->loaders[$name] = new $class_name($data, $this->wjs);
-    // Add requirement according saved lineage.
-    foreach ($this->wjs->loaders[$name]->lineage as $loader) {
-      $this->wjs->extensionAddRequire('WjsLoader', $name, 'WjsLoader', $loader);
+    // Add requirement according to parent class.
+    if ($this->wjs->loaders[$name]->parentClass) {
+      $this->wjs->extensionAddRequire('WjsLoader', $name, 'WjsLoader', $this->wjs->loaders[$name]->parentClass);
     }
     // Exported data is file URL.
     $path = $this->wjs->loaderGet($name)->routeGet('client', 'js');
@@ -60,5 +60,6 @@ class WjsLoader extends jsLink {
       // a basic loader (no js).
       return parent::extensionPush($name, $excludeRequire, $value);
     }
+    return NULL;
   }
 }

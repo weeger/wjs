@@ -1,8 +1,8 @@
 {
   "name":"wjs",
   "description":"An assets loader from server to browser.",
-  "version":"3.3.4",
-  "homepage":"",
+  "version":"3.3.5",
+  "homepage":"http:\/\/wjs.wexample.com",
   "keywords":[
     "wjs",
     "extension",

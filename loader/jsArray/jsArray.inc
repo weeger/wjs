@@ -13,10 +13,13 @@ class JsArray extends Loader {
    * Append object to the output array.
    */
   function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
-    $value  = $value === NULL ? $this->extensions[$name] : $value;
+    $value = $this->valuePush($name, $value);
     if (is_array($value)) {
-      return parent::extensionPush($name, $excludeRequire, array_values($value));
+      $array = array_values($value);
     }
-    return WJS_ERR_PUSH_WRONG_DATA_TYPE;
+    else {
+      $array = WJS_ERR_PUSH_UNDEFINED_EXTENSION;
+    }
+    return parent::extensionPush($name, $excludeRequire, $array);
   }
 }

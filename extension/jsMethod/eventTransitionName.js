@@ -4,7 +4,7 @@
    * Returns name of css transition event,
    * used to detect when a CSS animation ends.
    */
-  loader.methodAdd('eventTransitionName', function (name, proto) {
+  loader.addJsMethod('eventTransitionName', function (name, proto) {
     var t,
       fakeElement = this.window.document.createElement('fakeElement'),
       transitions = {

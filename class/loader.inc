@@ -36,6 +36,7 @@ abstract class Loader extends Router {
    * @var bool
    */
   var $allowJsCache = FALSE;
+  var $parentClass = FALSE;
 
   function __construct($routes, \Wjs $wjs) {
     parent::__construct($routes);
@@ -46,19 +47,10 @@ abstract class Loader extends Router {
     $this->pathJsFile    = $this->pathPhpFile . $this->type . '.js';
     $this->pathJsFile    = file_exists($this->pathJsFile) ? $this->pathJsFile : FALSE;
     $this->pathJsFileRel = $this->pathSubtract($this->pathCleanupSlashes(realpath($this->wjs->routeGet('server', 'wjs'))) . '/', $this->pathJsFile);
-    // Get inheritance linage,
-    // for extension load dependencies.
     /** @var \ReflectionClass $class */
-    $class         = $reflector;
-    $this->lineage = array();
-    while ($class = $class->getParentClass()) {
-      $parent = $class->getName();
-      if ($parent !== 'Wjs\Loader') {
-        $this->lineage[] = $class->getShortName();
-      }
-      else {
-        break;
-      }
+    $parent = $reflector->getParentClass();
+    if ($parent && $parent->getName() !== 'Wjs\Loader') {
+      $this->parentClass = $parent->getShortName();
     }
   }
 
@@ -110,7 +102,7 @@ abstract class Loader extends Router {
         $value = $this->extensions[$name];
       }
       else {
-        return WJS_ERR_PUSH_MISSING_EXTENSION;
+        $value = WJS_ERR_PUSH_UNDEFINED_EXTENSION;
       }
     }
     // Package base.
@@ -163,5 +155,25 @@ abstract class Loader extends Router {
    */
   function cacheJsEncode($data) {
     return json_encode($data);
+  }
+
+  /**
+   * Return write value data,
+   * from internal save or argument,
+   * and manage error.
+   *
+   * @param $name
+   * @param $value
+   *
+   * @return mixed
+   */
+  function valuePush($name, $value) {
+    if ($value === NULL) {
+      if (!isset($this->extensions[$name])) {
+        return WJS_ERR_PUSH_UNDEFINED_EXTENSION;
+      }
+      return $this->extensions[$name];
+    }
+    return $value;
   }
 }

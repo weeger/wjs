@@ -16,7 +16,7 @@
         domLink = self.wjs.document.createElement('link'),
         loaded = false;
       self.wjs.onload(domLink, function () {
-        process.parseItemComplete(type, name, domLink);
+        process.itemParseComplete(type, name, domLink);
       });
       // Set attributes.
       domLink.setAttribute('rel', 'stylesheet');

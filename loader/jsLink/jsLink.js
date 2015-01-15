@@ -17,13 +17,15 @@
       // Url can be sent from server as a key name
       // or from client as a url name.
       value = value || name;
-      self.wjs.onload(domScript, function () {
-        process.parseItemComplete(type, name, domScript);
-      });
-      // We don't specify type as it is not required in HTML5.
-      domScript.setAttribute('src', value);
-      self.wjs.document.head.appendChild(domScript);
-      return false;
+      if (!(value instanceof self.wjs.window.Error)) {
+        self.wjs.onload(domScript, function () {
+          process.itemParseComplete(type, name, domScript);
+        });
+        // We don't specify type as it is not required in HTML5.
+        domScript.setAttribute('src', value);
+        self.wjs.document.head.appendChild(domScript);
+        return false;
+      }
     }
   }, true);
   // [-->

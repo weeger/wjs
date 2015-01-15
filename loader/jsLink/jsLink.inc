@@ -18,8 +18,8 @@ class JsLink extends Loader {
   }
 
   function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
-    $value = $value === NULL ? $this->extensions[$name] : $value;
-    if (is_array($value) && isset($value['client'])) {
+    $value = $this->valuePush($name, $value);
+    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION && is_array($value) && isset($value['client'])) {
       $value = $value['client'];
     }
     return parent::extensionPush($name, $excludeRequire, $value);

@@ -70,19 +70,30 @@
 
     /**
      * Launched on extension use request,
-     * by default iterates over the names
-     * of asked extensions.
-     * @param {string} names
+     * create data for process.
+     * @param {string} name
      * @param {WJSProcessProto} process
      */
-    extRequestInit: function (names, process) {
-      for (var i = 0; i < names.length; i++) {
-        process.extRequestAdd({
-          mode: this.processType,
-          type: this.type,
-          name: names[i]
-        });
-      }
+    extRequestUse: function (name, process) {
+      return {
+        mode: this.processType,
+        type: this.type,
+        name: name
+      };
+    },
+
+    /**
+     * Launched on extension use request,
+     * create data for process.
+     * @param {string} name
+     * @param {WJSProcessProto} process
+     */
+    extRequestDestroy: function (name, process) {
+      return {
+        mode: 'parse',
+        type: this.type,
+        name: name
+      };
     }
   });
   // [-->
