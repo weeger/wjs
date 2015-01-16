@@ -16,7 +16,7 @@
         domScript = self.wjs.document.createElement('script');
       // Url can be sent from server as a key name
       // or from client as a url name.
-      value = value || name;
+      value = self.wjs.urlToken(value || name);
       if (!(value instanceof self.wjs.window.Error)) {
         self.wjs.onload(domScript, function () {
           process.itemParseComplete(type, name, domScript);

@@ -14,13 +14,14 @@
       var self = this,
         type = this.type,
         domLink = self.wjs.document.createElement('link'),
-        loaded = false;
+        loaded = false,
+        url = self.wjs.urlToken(name);
       self.wjs.onload(domLink, function () {
         process.itemParseComplete(type, name, domLink);
       });
       // Set attributes.
       domLink.setAttribute('rel', 'stylesheet');
-      domLink.setAttribute('href', name);
+      domLink.setAttribute('href', url);
       self.wjs.document.head.appendChild(domLink);
       // False stops parsing.
       return false;

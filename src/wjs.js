@@ -1,8 +1,8 @@
-// wJs v3.3.6 - (c) Romain WEEGER 2010 / 2015 - www.wexample.com | MIT and GPL licenses
+// wJs v3.3.7 - (c) Romain WEEGER 2010 / 2015 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.3.6', WJSProto;
+  var wjsVersion = '3.3.7', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -158,6 +158,21 @@
         self.loaders[link[1]].link(link[2]);
       });
       return false;
+    },
+
+    /**
+     * Append cache token to url.
+     * @param url
+     * @returns {*}
+     */
+    urlToken: function (url) {
+      var self = this;
+      if (self.settings.cacheToken) {
+        // Append ?
+        url = url.indexOf('?') === -1 ? url + '?' : url;
+        return url + '&' + self.settings.cacheToken;
+      }
+      return url;
     },
 
     /**
