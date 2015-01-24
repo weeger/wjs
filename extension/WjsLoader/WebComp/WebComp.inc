@@ -31,7 +31,7 @@ class WebComp extends Loader {
     if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION) {
       $data = '';
       if (is_dir($value['server'])) {
-        $data = array(
+        $data            = array(
           // By default destination is not defined.
           'destination' => isset($value['destination']) ? $value['destination'] : FALSE,
           // If no html file defined, use an empty string.
@@ -41,6 +41,7 @@ class WebComp extends Loader {
           // We can choose to display only one WebComp of each group at a time.
           'group'       => isset($value['group']) ? $value['group'] : FALSE,
         );
+        $value['client'] = isset($value['client']) ? $value['client'] : $this->wjs->pathClientRelative($value['server']);
         if ($data['html'] !== '') {
           // Parse with native PHP dom parser.
           $dom = new \DOMDocument;
@@ -96,19 +97,12 @@ class WebComp extends Loader {
     return parent::extensionPush($name, $excludeRequire, $value);
   }
 
-  function dataBuild($name, $data) {
+  function dataBuild($name, $data, $dataExtra = NULL) {
     static $cache = array();
     if (!isset($cache[$name])) {
-      // Array are data.
-      if (is_array($data)) {
-        if (!isset($data['client'])) {
-          $data['client'] = $data['server'];
-        }
-        $cache[$name] = $data;
-      }
       // If data is only string it's should be the path of
       // server folder, who contains a .conf ini file.
-      else {
+      if (!is_array($data)) {
         // Search for a json file.
         $json = $data . $name . '.json';
         if (is_file($json)) {
@@ -119,11 +113,18 @@ class WebComp extends Loader {
         else {
           $conf = array(
             'server' => $data,
-            'client' => $this->wjs->pathClientRelative($data),
           );
         }
-        $cache[$name] = $conf;
+        $data = $conf;
       }
+      if (!isset($data['client'])) {
+        $data['client'] = $this->wjs->pathClientRelative($data['server']);
+      }
+      $cache[$name] = $data;
+    }
+    // Append extra data.
+    if ($dataExtra) {
+      $cache[$name] = array_merge($cache[$name], $dataExtra);
     }
     return $cache[$name];
   }
@@ -134,7 +135,7 @@ class WebComp extends Loader {
   function scanFolderItem($directory, $item, $globalData) {
     if (is_dir($directory . $item)) {
       // Append global data.
-      $data = array_merge($this->dataBuild($item, $directory . $item . '/'), $globalData);
+      $data = $this->dataBuild($item, $directory . $item . '/', $globalData);
       $this->wjs->register($this->type, $item, $data);
     }
   }

@@ -1,3 +1,7 @@
+WJS - 3.3.10 - 2015-01-24
+-------------------------
+- WebComp and WebPage improvment
+
 WJS - 3.3.9 - 2015-01-24
 ------------------------
 - Move jsCoreFilesVersion arg
@@ -7,6 +11,7 @@ WJS - 3.3.9 - 2015-01-24
 - Move core loader extensions
 - Remove auto links init
 - Integrates ready() into "use" and "destroy"
+- WebComp 
 
 WJS - 3.3.8 - 2015-01-22
 ------------------------

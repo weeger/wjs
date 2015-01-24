@@ -1,6 +1,6 @@
 <?php
 
-define('WJS_VERSION', '3.3.9');
+define('WJS_VERSION', '3.3.10');
 define('WJS_PATH_ROOT', str_replace('\\', '/', dirname(__FILE__)) . '/');
 define('WJS_ERR_PUSH_UNDEFINED_EXTENSION', 'WJS_ERR_PUSH_UNDEFINED_EXTENSION');
 define('WJS_ERR_PUSH_UNDEFINED_DATA_TYPE', 'WJS_ERR_PUSH_UNDEFINED_DATA_TYPE');

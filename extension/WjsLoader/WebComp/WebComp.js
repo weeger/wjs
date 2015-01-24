@@ -32,7 +32,8 @@
     },
 
     parse: function (name, value, process) {
-      var self = this, wjs = this.wjs, params, destination = process.options.destination || value.destination;
+      var self = this, wjs = this.wjs, params,
+        destination = process.options.destination || value.destination;
       // Create dom component.
       value.dom = wjs.document.createElement('div');
       value.dom.innerHTML = value.html;
@@ -56,7 +57,7 @@
         params = self.wjs.urlQueryParse();
         params[self.type] = params[self.type] || [];
         if (value.group) {
-          if (params[self.type][value.group]) {
+          if (params[self.type][value.group] && params[self.type][value.group] !== name) {
             wjs.destroy(this.type, params[self.type][value.group], true);
           }
           params[self.type][value.group] = name;
