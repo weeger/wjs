@@ -13,8 +13,7 @@
     },
 
     addJsClassStatic: function (name, proto) {
-      this.wjs.staticClass(name, proto);
-      this.addLastCompSave(name, proto);
+      this.addLastCompSave(name, this.wjs.staticClass(name, proto));
     },
 
     loadCompleteJsClassStatic: function (name, process) {

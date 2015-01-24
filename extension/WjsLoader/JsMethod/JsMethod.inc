@@ -16,4 +16,11 @@ class JsMethod extends JsScript {
     }
     return $output;
   }
+
+  function scanFolderItem($directory, $item, $globalData) {
+    if (is_file($directory . $item)) {
+      $info = pathinfo($directory . $item);
+      $this->wjs->extensionAdd($this->type, $info['filename'], $directory . $item);
+    }
+  }
 }

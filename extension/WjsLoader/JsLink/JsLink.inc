@@ -9,6 +9,18 @@ use \Wjs\Loader;
  */
 class JsLink extends Loader {
   function extensionAdd($name, $value) {
+    // Use minified files for master versions.
+    if ($this->wjs->jsCoreFilesVersion !== 'source' && isset($value['server'])) {
+      // Get minified path.
+      $minJs = $this->wjs->jsPathMin($value['server']);
+      // Minified file must exists.
+      if (is_file($minJs)) {
+        $value['server'] = $this->wjs->jsPathMin($value['server']);
+        if (isset($value['client'])) {
+          $value['client'] = $this->wjs->jsPathMin($value['client']);
+        }
+      }
+    }
     parent::extensionAdd($name, $value);
     // Try to load file content,
     // and search for @require declarations.

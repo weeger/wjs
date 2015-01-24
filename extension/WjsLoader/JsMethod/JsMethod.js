@@ -36,13 +36,13 @@
      * @param {string} name
      * @param {Function} callback
      */
-    addJsMethod: function (name, callback) {
-      this.addLastCompSave(name, callback);
+    addJsMethod: function (name, data) {
+      this.addLastCompSave(name, data);
     },
 
-    addLastCompSave: function (name, callback) {
+    addLastCompSave: function (name, data) {
       this.addLastComp = name;
-      this.addLastCompData = callback;
+      this.addLastCompData = data;
     },
 
     /**

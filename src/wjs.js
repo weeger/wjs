@@ -1,8 +1,8 @@
-// wJs v3.3.7 - (c) Romain WEEGER 2010 / 2015 - www.wexample.com | MIT and GPL licenses
+// wJs v3.3.9 - (c) Romain WEEGER 2010 / 2015 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.3.7', WJSProto;
+  var wjsVersion = '3.3.9', WJSProto;
   // Protect against multiple declaration.
   // Only one instance of this object is created per page.
   // Contain global javascript tools and helpers functions.
@@ -54,9 +54,7 @@
       /** @type {Object.string} Store names of CacheLinks */
       cacheReg: {},
       /** @type {Object} */
-      settings: null,
-      /** @type {RegExp} */
-      linkReg: new RegExp('^wjs://([a-zA-Z0-9]*):([a-zA-Z0-9]*)$')
+      settings: null
     });
     // Add a global wjsContext, use
     // by scripts links to access to wjs.
@@ -71,26 +69,21 @@
      */
     init: function (options) {
       var self = this;
-      this.window.addEventListener('load', function () {
+      self.window.addEventListener('load', function () {
         // Apply options.
         self.extendObject(self, options);
         // Create basic loaders who are required by package.
         for (var i = 0; i < self.loadersBasic.length; i++) {
           self.loaderAdd(self.loadersBasic[i], undefined, true);
         }
-        // Append document parse function at ready end.
-        self.ready(function () {
-          self.linksInit(self.document.body);
-        });
+        // Mark as readyComplete, further ready functions
+        // will be executed directly.
+        self.readyComplete = true;
         // Load all other scripts then run ready functions.
-        // Execute startup functions.
         // Create a loading process to parse package content.
         new self.processProto(null, {
           complete: function () {
             delete self.packageDefault;
-            // Mark as readyComplete, further ready functions
-            // will be executed directly.
-            self.readyComplete = true;
             self.callbacks(self.readyCallbacks);
           }
           // Directly treat object as response.
@@ -117,6 +110,23 @@
     },
 
     /**
+     * Place a call to a method after wjs ready.
+     * @param method
+     * @param args
+     * @returns {boolean}
+     */
+    readyDelay: function (method, args) {
+      var self = this;
+      if (self.readyComplete !== true) {
+        self.ready(function () {
+          self[method].apply(self, args);
+        });
+        return true;
+      }
+      return false;
+    },
+
+    /**
      * Execute an array of callbacks functions.
      * @param {Array} callbacksArray
      * @param {Array} args
@@ -125,39 +135,6 @@
       for (var i = 0; i < callbacksArray.length; i++) {
         callbacksArray[i].apply(this, args);
       }
-    },
-
-    /**
-     * Search for links like wjs://extensionType:extensionName
-     * @param {Object} domElement
-     */
-    linksInit: function (domElement) {
-      // Search for html containing href="wjs://..."
-      var wjsLinks = domElement.querySelectorAll('a[href^="wjs://"]'),
-        i = 0, href, disable = function () {
-          return false;
-        };
-      for (; i < wjsLinks.length; i++) {
-        href = wjsLinks[i].getAttribute('href');
-        wjsLinks[i].setAttribute('href', '#');
-        // Firefox need to disable onclick for some links.
-        wjsLinks[i].onclick = disable;
-        wjsLinks[i].setAttribute('data-wjs-link', href);
-        wjsLinks[i].addEventListener('click', this.linksClick.bind(this));
-      }
-    },
-
-    /**
-     * Callback on click on wjs links.
-     * @param {Event} e
-     */
-    linksClick: function (e) {
-      var self = this,
-        link = e.target.getAttribute('data-wjs-link').match(self.linkReg);
-      self.loadersExists([link[1]], function () {
-        self.loaders[link[1]].link(link[2]);
-      });
-      return false;
     },
 
     /**
@@ -266,6 +243,9 @@
      */
     use: function (request, options) {
       var self = this;
+      if (this.readyDelay('use', arguments)) {
+        return;
+      }
       // Handle if request is just two strings.
       if (typeof request === 'string') {
         // Transform request to a multi request.
@@ -305,6 +285,9 @@
      */
     destroy: function (type, name, options) {
       var self = this, request = {};
+      if (this.readyDelay('destroy', arguments)) {
+        return;
+      }
       request[type] = [name];
       // Handle async destroy option.
       if (options && options.async) {
@@ -356,7 +339,7 @@
         if (require && options.dependencies) {
           self.regEach(require, function (requireType, requireName) {
             // Prevent to delete shared dependencies.
-            if (!self.requireShared(type, name, requireType, requireName)) {
+            if (!self.requireShared(type, name, requireType, requireName, request)) {
               self.destroyRequest(request, requireType, requireName, options);
             }
           });
@@ -372,22 +355,23 @@
      * @param {string} requireName
      * @return {boolean}
      */
-    requireShared: function (type, name, requireType, requireName) {
-      var keys2 = Object.keys(this.extRequire), keys3, k, l;
-      // Search for shared dependencies.
-      for (k = 0; k < keys2.length; k++) {
-        keys3 = Object.keys(this.extRequire[keys2[k]]);
-        for (l = 0; l < keys3.length; l++) {
-          if (
-          // Type is another one of enqueue arguments
-            keys2[k] !== type && keys3[l] !== name &&
-              // It contains the same dependency.
-              this.extRequire[keys2[k]][keys3[l]][requireType] && this.extRequire[keys2[k]][keys3[l]][requireType].indexOf(requireName) !== -1) {
-            return true;
-          }
+    requireShared: function (baseType, baseName, requireType, requireName, except) {
+      var self = this, shared = false;
+      self.regEach(self.extRequire, function (type, name) {
+        var require = self.extRequire[type][name];
+        // Type is another one of sent arguments
+        if (type !== baseType && name !== baseName &&
+          // It contains the same dependency.
+          require[requireType] && require[requireType].indexOf(requireName) !== -1 &&
+          // It is not placed into exceptions.
+          (!except || !except[type] || except[type].indexOf(name) === -1)) {
+          // Save as shared.
+          shared = true;
+          // Stops iteration.
+          return false;
         }
-      }
-      return false;
+      });
+      return shared;
     },
 
     /**
@@ -397,10 +381,11 @@
      * @return {boolean}
      */
     regEach: function (registry, callback) {
-      var self = this, i = 0, j, types = Object.keys(registry), result;
+      var self = this, i = 0, j, types = Object.keys(registry), names, result;
       for (; i < types.length; i++) {
-        for (j = 0; j < registry[types[i]].length; j++) {
-          if (callback.call(this, types[i], registry[types[i]][j]) === false) {
+        names = Array.isArray(registry[types[i]]) ? registry[types[i]] : Object.keys(registry[types[i]]);
+        for (j = 0; j < names.length; j++) {
+          if (callback.call(self, types[i], names[j]) === false) {
             return false;
           }
         }
@@ -618,7 +603,7 @@
         self.extendObject(WJSClassProto.prototype, {
           constructor: base,
           className: name,
-          wjs: this
+          wjs: self
         });
       }
       // Add extra method even constructor exists,

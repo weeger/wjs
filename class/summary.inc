@@ -12,11 +12,6 @@ namespace Wjs;
  */
 class Summary {
   /**
-   * Url of current inc file.
-   * @var string $pathPhpFile
-   */
-  var $pathPhpFile;
-  /**
    * Extensions loaders as array[loaderName] => loaderDirectory.
    * Loaders declared here are appended to the page startup package,
    * you can also add optional loaders as extensions.
@@ -32,5 +27,23 @@ class Summary {
   function __construct() {
     $reflector         = new \ReflectionClass(get_class($this));
     $this->pathPhpFile = dirname($reflector->getFileName()) . '/';
+  }
+
+  function add(\Wjs $wjs) {
+    // To override.
+  }
+
+  /**
+   * Retrieve extensions, called by wjs.
+   * Allow to build paths dynamically,
+   * wjs instance is also passed as argument,
+   * and let user to build paths accordingly.
+   *
+   * @param \Wjs $wjs
+   *
+   * @return array
+   */
+  function getExtensions(\Wjs $wjs) {
+    return array();
   }
 }

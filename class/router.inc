@@ -90,9 +90,82 @@ class Router {
   }
 
   /**
-   * Return relative path from a given path.
+   * Subtract base path from full path.
    */
   function pathSubtract($basePath, $fromFullPath) {
     return trim(substr($fromFullPath, strlen($basePath)));
+  }
+
+  /**
+   * Return relative path from a file to another.
+   *
+   * @param $from
+   * @param $to
+   *
+   * @return string
+   */
+  function pathRelative($from, $to) {
+    // some compatibility fixes for Windows paths.
+    $from    = is_dir($from) ? rtrim($from, '\/') . '/' : $from;
+    $to      = is_dir($to) ? rtrim($to, '\/') . '/' : $to;
+    $from    = $this->pathCleanupSlashes($from);
+    $to      = $this->pathCleanupSlashes($to);
+    $from    = explode('/', $from);
+    $to      = explode('/', $to);
+    $relPath = $to;
+    foreach ($from as $depth => $dir) {
+      // find first non-matching dir
+      if ($dir === $to[$depth]) {
+        // ignore this directory
+        array_shift($relPath);
+      }
+      else {
+        // get number of remaining dirs to $from
+        $remaining = count($from) - $depth;
+        if ($remaining > 1) {
+          // add traversals up to first matching dir
+          $padLength = (count($relPath) + $remaining - 1) * -1;
+          $relPath   = array_pad($relPath, $padLength, '..');
+          break;
+        }
+        else {
+          $relPath[0] = './' . $relPath[0];
+        }
+      }
+    }
+    return implode('/', $relPath);
+  }
+
+  /**
+   * Transform a path like :
+   *   ../a/b/c/../d/
+   * Into :
+   *   ../a/b/d
+   *
+   * @param $path
+   *
+   * @return string
+   */
+  function pathNormalize($path) {
+    $path = $this->pathCleanupSlashes($path);
+    $root = ($path[0] === '/') ? '/' : '';
+
+    $segments = explode('/', trim($path, '/'));
+    $ret      = array();
+    $relBase = TRUE;
+    foreach ($segments as $segment) {
+      if ($segment !== '.' && !empty($segment)) {
+        if ($segment == '..' && !$relBase) {
+          array_pop($ret);
+        }
+        else {
+          if ($segment !== '..') {
+            $relBase = FALSE;
+          }
+          array_push($ret, $segment);
+        }
+      }
+    }
+    return $root . implode('/', $ret);
   }
 }

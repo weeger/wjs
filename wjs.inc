@@ -1,15 +1,15 @@
 <?php
 
-define('WJS_VERSION', '3.3.7');
-define('WJS_PATH_ROOT', dirname(__FILE__) . '/');
+define('WJS_VERSION', '3.3.9');
+define('WJS_PATH_ROOT', str_replace('\\', '/', dirname(__FILE__)) . '/');
 define('WJS_ERR_PUSH_UNDEFINED_EXTENSION', 'WJS_ERR_PUSH_UNDEFINED_EXTENSION');
 define('WJS_ERR_PUSH_UNDEFINED_DATA_TYPE', 'WJS_ERR_PUSH_UNDEFINED_DATA_TYPE');
 
 require_once WJS_PATH_ROOT . 'class/router.inc';
 require_once WJS_PATH_ROOT . 'class/loader.inc';
 require_once WJS_PATH_ROOT . 'class/summary.inc';
-require_once WJS_PATH_ROOT . 'loader/JsLink/JsLink.inc';
-require_once WJS_PATH_ROOT . 'loader/WjsLoader/WjsLoader.inc';
+require_once WJS_PATH_ROOT . 'extension/WjsLoader/JsLink/JsLink.inc';
+require_once WJS_PATH_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.inc';
 require_once WJS_PATH_ROOT . 'summary/core.wjs.inc';
 
 use \Wjs\Router;
@@ -57,8 +57,8 @@ class Wjs extends Router {
       'src/wjs.js',
       'src/loader.js',
       'src/process.js',
-      'loader/JsLink/JsLink.js',
-      'loader/WjsLoader/WjsLoader.js',
+      'extension/WjsLoader/JsLink/JsLink.js',
+      'extension/WjsLoader/WjsLoader/WjsLoader.js',
     ),
   );
   /**
@@ -95,7 +95,7 @@ class Wjs extends Router {
   /**
    * Initialize wjs.
    */
-  function __construct($routes = array(), $jsCoreFilesVersion = 'master') {
+  function __construct($routes = array()) {
     // If no arguments, try to detect path
     // from current working directory.
     if (func_num_args() === 0) {
@@ -119,9 +119,10 @@ class Wjs extends Router {
       $routes['server']['cacheToken'] = $_GET[$this->settings['paramToken']];
     }
     parent::__construct($routes);
-    $this->jsCoreFilesVersion = $jsCoreFilesVersion;
+    // Define core version.
+    $this->jsCoreFilesVersion = isset($routes['server']['jsCoreFilesVersion']) ? $routes['server']['jsCoreFilesVersion'] : 'master';
     // Add core summary.
-    $this->summaryCoreLoad();
+    $this->summaryAdd(new \Wjs\WjsCoreSummary());
     // Enable caching if folder is set.
     $cacheDir = $this->routeGet('server', 'cacheDir');
     if ($cacheDir) {
@@ -138,57 +139,6 @@ class Wjs extends Router {
         $this->settings['cacheDir'] = $this->routeGet('client', 'cacheDir');
         $this->extensionPush('WjsLoader', 'CacheLink');
       }
-    }
-  }
-
-  /**
-   * Load core summary and relocate files,
-   * according the wjs root path.
-   */
-  function summaryCoreLoad() {
-    // Load core summary,
-    $summary = new \Wjs\WjsCoreSummary();
-    // paths defined must be relocated accordingly to wjs.
-    foreach ($summary->extensions['WjsLoader'] as $loaderName => $routesList) {
-      foreach ($routesList as $side => $routes) {
-        foreach ($routes as $name => $route) {
-          // Non-source versions uses loader.min.js instead loader.js.
-          if ($this->jsCoreFilesVersion === 'source' && $name === 'js') {
-            // Remove .min.js
-            $summary->extensions['WjsLoader'][$loaderName][$side][$name] = str_replace('.min.js', '.js', $summary->extensions['WjsLoader'][$loaderName][$side][$name]);
-          }
-          $summary->extensions['WjsLoader'][$loaderName][$side][$name] = $this->routeGet($side, 'wjs') . $summary->extensions['WjsLoader'][$loaderName][$side][$name];
-        }
-      }
-    }
-    // Change path to core summary.
-    $this->summaryCoreRelocate($summary, 'JsClassStatic');
-    $this->summaryCoreRelocate($summary, 'JsMethod');
-    // Add core wjs loaders manually,
-    // This order has an impact on the order
-    // of rendering header links (based on loaders var).
-    $this->loaders['WjsLoader']                          = new \Wjs\Loader\WjsLoader($summary->extensions['WjsLoader']['WjsLoader'], $this);
-    $this->loaders['WjsLoader']->extensions['WjsLoader'] = $summary->extensions['WjsLoader']['WjsLoader'];
-    unset($summary->extensions['WjsLoader']['WjsLoader']);
-    // Add default loaders.
-    $this->summaryAdd($summary);
-  }
-
-  /**
-   * Rewrite summary paths according to
-   * wjs current folder.
-   *
-   * @param $summary
-   * @param $name
-   */
-  function summaryCoreRelocate($summary, $name) {
-    if ($this->jsCoreFilesVersion === 'source') {
-      foreach ($summary->extensions[$name] as $methodName => $path) {
-        $summary->extensions[$name][$methodName] = str_replace('.min.js', '.js', $summary->extensions[$name][$methodName]);
-      }
-    }
-    foreach ($summary->extensions[$name] as $extensionName => $extensionValue) {
-      $summary->extensions[$name][$extensionName] = $this->routeGet('server', 'wjs') . $extensionValue;
     }
   }
 
@@ -256,7 +206,7 @@ class Wjs extends Router {
    * @return \Wjs\Loader
    */
   function loaderGet($name) {
-    return $this->loaders[$name];
+    return isset($this->loaders[$name]) ? $this->loaders[$name] : FALSE;
   }
 
   /**
@@ -266,6 +216,7 @@ class Wjs extends Router {
    */
   function summaryAdd(\Wjs\Summary $summary) {
     $this->summaries[get_class($summary)] = $summary;
+    $summary->add($this);
     $this->summaryImportExtensions($summary);
   }
 
@@ -275,7 +226,8 @@ class Wjs extends Router {
    * @param \Wjs\Summary $summary
    */
   function summaryImportExtensions(\Wjs\Summary $summary) {
-    foreach ($summary->extensions as $type => $items) {
+    $extensions = array_merge($summary->extensions, $summary->getExtensions($this));
+    foreach ($extensions as $type => $items) {
       foreach ($items as $name => $data) {
         $this->extensionAdd($type, $name, $data);
       }
@@ -562,6 +514,16 @@ class Wjs extends Router {
   }
 
   /**
+   * Convert a path.js to path.min.js.
+   * @param $path
+   *
+   * @return string
+   */
+  function jsPathMin($path) {
+    return substr($path, 0, -strlen('.js')) . '.min.js';
+  }
+
+  /**
    * Get list of @require declarations into the given source.
    *
    * @param $extensionType
@@ -641,6 +603,40 @@ class Wjs extends Router {
    */
   function renderJsUnpacker() {
     return ($this->jsCoreFilesVersion === 'jQuery' ? 'jQuery' : 'window') . '.wjs.init(' . $this->initPackage() . ');';
+  }
+
+  /**
+   * Return a client path from a server location
+   * compared by the actual wjs server and client paths.
+   *
+   * @param $pathServer
+   *
+   * @return string
+   */
+  function pathClientRelative($pathServer) {
+    // Get path from summary to wjs.
+    $pathClientRelative = $this->pathRelative(realpath($this->routeGet('server', 'wjs')), realpath($pathServer));
+    // Adjust path from wjs client path.
+    return $this->pathNormalize($this->routeGet('client', 'wjs') . $pathClientRelative) .
+    (is_dir($pathServer) ? '/' : '');
+  }
+
+  function scanFolderExtensions($directory, $globalData = array(), $order = array()) {
+    $directory = $this->pathNormalize($directory) . '/';
+    $scan      = $this->scanOrdered($directory, array_keys($order));
+    foreach ($scan as $item) {
+      if ($this->loaderGet($item)) {
+        // Get item specific params.
+        $itemGlobalData = isset($globalData[$item]) ? $globalData[$item] : array();
+        $itemOrder      = isset($order[$item]) ? $order[$item] : array();
+        $this->loaderGet($item)->scanFolder($directory . $item . '/', $itemGlobalData, $itemOrder);
+      }
+    }
+  }
+
+  function scanOrdered($directory, $order) {
+    $scan = scandir($directory);
+    return array_merge($order, array_diff($scan, $order));
   }
 
   /**

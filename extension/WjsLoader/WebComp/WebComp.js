@@ -2,31 +2,16 @@
  * @require WjsLoader > JsMethod
  * @require WjsLoader > CssLink
  * @require WjsLoader > JsLink
+ * @require WjsLoader > JsClass
  * @require JsMethod > staticClass
  * @require JsMethod > objectToArray
  * @require JsMethod > urlQueryParse
  * @require JsMethod > urlQueryBuild
+ * @require JsClass > WjsWebCompBaseClass
  */
 (function (context) {
   'use strict';
   // <--]
-  /**
-   * Base class for WebComp elements.
-   */
-  context.wjs.classExtend('WjsWebCompStaticClass', {
-    init: function () {
-      // To override...
-      return true;
-    },
-    exit: function () {
-      // To override...
-      return true;
-    },
-    webCompRemove: function () {
-      this.dom.parentNode.removeChild(this.dom);
-    }
-  });
-
   context.wjs.loaderAdd('WebComp', {
     staticClasses: {},
 
@@ -43,7 +28,7 @@
     __destruct: function () {
       delete this.wjs['ready' + this.type];
       delete this.wjs['staticClass' + this.type];
-      delete this.wjs.classMethods.WjsWebCompStaticClass;
+      delete this.wjs.classMethods.WjsWebCompBaseClass;
     },
 
     parse: function (name, value, process) {
@@ -60,8 +45,10 @@
           typeof destination === 'string' ?
             wjs.window.document.querySelector(destination) : destination;
         value.domDestination.appendChild(value.dom);
-        // Parse all node to search for wjs links.
-        wjs.linksInit(value.domDestination);
+        if (wjs.wjsHref) {
+          // Parse all node to search for wjs links.
+          wjs.wjsHref.linksInit(value.domDestination);
+        }
       }
       // Save status to URL if asked.
       if (value.urlUpdate) {
@@ -127,8 +114,8 @@
 
     staticClassWebComp: function (name, proto) {
       // It must be an instance of special class.
-      proto.classExtends = proto.classExtends || 'WjsWebCompStaticClass';
-      this.staticClasses[name] = this.wjs.staticClass('WjsWebCompStaticClass' + name, proto);
+      proto.classExtends = proto.classExtends || 'WjsWebCompBaseClass';
+      this.staticClasses[name] = this.wjs.staticClass('WjsWebCompBaseClass' + name, proto);
     }
   });
   // [-->

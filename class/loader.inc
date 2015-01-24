@@ -17,11 +17,6 @@ abstract class Loader extends Router {
    */
   var $wjs;
   /**
-   * Url of current inc file.
-   * @var string $pathPhpFile
-   */
-  var $pathPhpFile = NULL;
-  /**
    * Contain list of registered items.
    * @var array
    */
@@ -40,13 +35,11 @@ abstract class Loader extends Router {
 
   function __construct($routes, \Wjs $wjs) {
     parent::__construct($routes);
-    $reflector           = new \ReflectionClass($this);
-    $this->type          = $reflector->getShortName();
-    $this->wjs           = $wjs;
-    $this->pathPhpFile   = $this->pathCleanupSlashes(dirname($reflector->getFileName()) . '/');
-    $this->pathJsFile    = $this->pathPhpFile . $this->type . '.js';
-    $this->pathJsFile    = file_exists($this->pathJsFile) ? $this->pathJsFile : FALSE;
-    $this->pathJsFileRel = $this->pathSubtract($this->pathCleanupSlashes(realpath($this->wjs->routeGet('server', 'wjs'))) . '/', $this->pathJsFile);
+    $reflector        = new \ReflectionClass($this);
+    $this->type       = $reflector->getShortName();
+    $this->wjs        = $wjs;
+    $this->pathJsFile = $this->routeGet('server', 'js');
+    $this->pathJsFile = file_exists($this->pathJsFile) ? $this->pathJsFile : FALSE;
     /** @var \ReflectionClass $class */
     $parent = $reflector->getParentClass();
     if ($parent && $parent->getName() !== 'Wjs\Loader') {
@@ -175,5 +168,28 @@ abstract class Loader extends Router {
       return $this->extensions[$name];
     }
     return $value;
+  }
+
+  /**
+   * Register WebComp from a folder content.
+   * Each subdirectory is considered as a WebComp.
+   *
+   * @param string $directory The directory to scan with a trailing slash
+   * @param array  $globalData
+   * @param array  $order
+   */
+  function scanFolder($directory, $globalData = array(), $order = array()) {
+    // Get items ordered.
+    $scan = $this->wjs->scanOrdered($directory, $order);
+    foreach ($scan as $item) {
+      // Avoid all special folders.
+      if ($item{0} !== '.') {
+        $this->scanFolderItem($directory, $item, $globalData);
+      }
+    }
+  }
+
+  function scanFolderItem($directory, $item, $globalData) {
+    // To override...
   }
 }

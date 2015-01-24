@@ -11,12 +11,16 @@ class WebComp extends Loader {
 
   function extensionAdd($name, $data) {
     $require = FALSE;
-    $data    = $this->dataBuild($name, $data);
+    // Build data from json.
+    $data = $this->dataBuild($name, $data);
+    // Temporary disable requirements.
     if (isset($data['require'])) {
       $require = $data['require'];
       unset($data['require']);
     }
+    // Normal add.
     parent::extensionAdd($name, $data);
+    // Load requirements.
     if ($require) {
       $this->wjs->extensionAddRequireArray($this->type, $name, $require);
     }
@@ -94,54 +98,44 @@ class WebComp extends Loader {
 
   function dataBuild($name, $data) {
     static $cache = array();
-    // Array are data.
-    if (is_array($data)) {
-      if (!isset($data['client'])) {
-        $data['client'] = $data['server'];
+    if (!isset($cache[$name])) {
+      // Array are data.
+      if (is_array($data)) {
+        if (!isset($data['client'])) {
+          $data['client'] = $data['server'];
+        }
+        $cache[$name] = $data;
       }
-      $cache[$name] = $data;
-    }
-    // If data is only string it's should be the path of
-    // server folder, who contains a .conf ini file.
-    elseif (!isset($cache[$name])) {
-      // Search for a json file.
-      $json = $data . $name . '.json';
-      if (is_file($json)) {
-        $conf           = json_decode(file_get_contents($json), JSON_FORCE_OBJECT);
-        $conf['server'] = $data;
-      }
-      // We have to build configuration from path.
+      // If data is only string it's should be the path of
+      // server folder, who contains a .conf ini file.
       else {
-        $conf = array(
-          'server' => $data,
-          'client' => $data,
-        );
+        // Search for a json file.
+        $json = $data . $name . '.json';
+        if (is_file($json)) {
+          $conf           = json_decode(file_get_contents($json), JSON_FORCE_OBJECT);
+          $conf['server'] = $data;
+        }
+        // We have to build configuration from path.
+        else {
+          $conf = array(
+            'server' => $data,
+            'client' => $this->wjs->pathClientRelative($data),
+          );
+        }
+        $cache[$name] = $conf;
       }
-      $cache[$name] = $conf;
     }
     return $cache[$name];
   }
 
   /**
    * Register WebComp from a folder content.
-   * Each subdirectory is considered as a WebComp.
-   *
-   * @param string $directory The directory to scan with a trailing slash
-   * @param array  $globalData
-   * @param null   $order
    */
-  function scanFolder($directory, $globalData = array(), $order = NULL) {
-    $scan = scandir($directory);
-    if ($order) {
-      $scan = array_merge($order, array_diff($scan, $order));
-    }
-    foreach ($scan as $item) {
-      // Avoid all special folders.
-      if ($item{0} !== '.' && is_dir($directory . $item)) {
-        // Append global data.
-        $data = array_merge($this->dataBuild($item, $directory . $item . '/'), $globalData);
-        $this->wjs->register($this->type, $item, $data);
-      }
+  function scanFolderItem($directory, $item, $globalData) {
+    if (is_dir($directory . $item)) {
+      // Append global data.
+      $data = array_merge($this->dataBuild($item, $directory . $item . '/'), $globalData);
+      $this->wjs->register($this->type, $item, $data);
     }
   }
 
