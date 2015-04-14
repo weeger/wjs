@@ -1,4 +1,7 @@
+>> We are currently migrating all our sites on a new server, we will be back soon <<
+>> With WJS v4 ! <<
 
+Your visits, comments, shares are still truely appreciated.
 
 Introduction
 ============
