@@ -1,39 +1,55 @@
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('WjsLoader', {
+  WjsProto.register('WjsLoader', 'WjsLoader', {
     // Extends full named loader class.
-    classExtends: 'WjsLoaderJsLink',
+    loaderExtends: 'JsLink',
     processType: 'server',
 
-    destroy: function (name) {
-      var wjs = this.wjs;
+    destroy: function (name, data) {
+      var wjs = this.wjs, loaders = wjs.loaders;
       // Handle missing loaders.
-      if (wjs.loaders[name]) {
-        wjs.loaders[name].__destruct();
+      if (loaders[name]) {
+        loaders[name].__destruct();
         // Remove prototype.
         wjs.classProtoDestroy('WjsLoader' + name);
-        delete wjs.loaders[name];
+        delete loaders[name];
         delete wjs.extLoaded[name];
         delete wjs.extRequire[name];
       }
-      return true;
+      return loaders.JsLink.destroy.call(this, name, data);
     },
 
-    // Loader is created by javascript.
     parse: function (name, value, process) {
       var wjs = this.wjs;
-      // If value is true,
-      // Build loader with the default prototype,
-      // no special action is defined for loading or parsing
-      // retrieved content.
+      // If value is true, build loader
+      // with the default prototype.
       if (value === true) {
-        this.wjs.loaderAdd(name);
+        wjs.loaderAdd(name);
+        return true;
       }
       else {
-        return this.wjs.loaders.JsLink.parse.apply(this, [name, value, process]);
+        // Listen for item registry.
+        this.registerListen(this.type, name, process);
+        // De not return JsScript return.
+        wjs.loaders.JsLink.parse.call(this, name, value, process);
+        // Block process in all cases.
+        return false;
       }
+    },
+
+    parseLinkLoaded: function (name, domScript, process) {
+      // Disable parent behavior on link load.
+      // Complete is managed by register, not by onload event.
+    },
+
+    register: function (type, name, process) {
+      var proto = WjsProto.retrieve(this.type, name);
+      // Append loader for this wjs instance.
+      this.wjs.loaderAdd(name, proto);
+      // Continue parsing.
+      process.itemParseComplete(this.type, name, proto);
     }
-  }, true);
+  });
   // [-->
-}(wjsContext));
+}(WjsProto));

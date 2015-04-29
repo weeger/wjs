@@ -1,139 +1,123 @@
-// wJs v3.3.10 - (c) Romain WEEGER 2010 / 2015 - www.wexample.com | MIT and GPL licenses
 (function (context) {
   'use strict';
   // <--]
-  var wjsVersion = '3.3.10', WJSProto;
-  // Protect against multiple declaration.
-  // Only one instance of this object is created per page.
-  // Contain global javascript tools and helpers functions.
-  if (context.wjs !== undefined && context.wjs.version === wjsVersion) {
-    return;
-  }
+  var wjsVersion = '[$version]-headless', WjsProto;
+
+  // Add a global wjsContext, use
+  // by scripts links to access to wjs.
+  context.wjsContext = context;
 
   /** @constructor */
-  WJSProto = function () {
-    var self = this;
-    self.extendObject(self, {
-      context: context,
-      window: context.window || window,
-      document: context.document || window.document,
-      /** @type {string} */
-      version: wjsVersion,
-      /** @type {Array.Function} */
-      readyCallbacks: [],
-      /** @type {boolean} */
-      readyComplete: false,
-      /** @type {Object} */
-      packageDefault: null,
-      /** @type {Object.Object} */
-      loaders: {},
-      /** @type {Array.string} */
-      loadersExtra: [],
-      /** @type {Array.string} */
-      loadersBasic: [],
-      /** @type {Object.Object.?} */
-      extLoaded: {WjsLoader: {}},
-      /** @type {Object.Array.string} */
-      extRequire: {},
-      /** @type {WJSProcessProto} Reference to prototype */
-      processProto: null,
-      /** @type {Array.WJSProcessProto} */
-      processes: [],
-      /** @type {Number} */
-      processCounter: 0,
-      /** @type {Array} */
-      processStack: [],
-      /** @type {Array} */
-      processParent: undefined,
-      /** @type {Object.Function} */
-      classProtos: {},
-      /** @type {Object.Object} */
-      classMethods: {},
-      /** @type {Object.Object} */
-      cacheBuffer: {},
-      /** @type {Object.string} Store names of CacheLinks */
-      cacheReg: {},
-      /** @type {Object} */
-      settings: null
-    });
-    // Add a global wjsContext, use
-    // by scripts links to access to wjs.
-    self.context.wjsContext = context;
+  WjsProto = function (options) {
+    // Of only a function sent, convert it to options.
+    this.options = options = this.extendOptions(options);
+    // Save wjs instance as global object.
+    context[options.settings ? options.settings.clientName : 'wjs'] = this;
+    // Execute init now, document is already loaded.
+    if (context.window.document.readyState !== 'loading') {
+      this.init();
+    }
+    // Defer execution after page load.
+    else {
+      context.window.addEventListener('load', this.init.bind(this));
+    }
   };
 
-  WJSProto.prototype = {
+  WjsProto.prototype = {
 
     /**
      * Create basics elements to interact with the document.
      * Must be executed when document is ready.
      */
-    init: function (options) {
-      var self = this;
-      self.window.addEventListener('load', function () {
-        // Apply options.
-        self.extendObject(self, options);
-        // Create basic loaders who are required by package.
-        for (var i = 0; i < self.loadersBasic.length; i++) {
-          self.loaderAdd(self.loadersBasic[i], undefined, true);
+    init: function () {
+      var self = this,
+        WjsProtoLocal = WjsProto,
+        options = self.options;
+      // Create owned objects.
+      self.extendObject(self, {
+        context: context,
+        window: context.window || window,
+        document: context.document || window.document,
+        /** @type {string} Override headless version */
+        version: (options.settings ? options.settings.version : wjsVersion),
+        /** @type {boolean} */
+        readyComplete: false,
+        /** @type {Object} */
+        packageDefault: {},
+        /** @type {Object} */
+        loaders: {},
+        /** @type {Array} */
+        loadersExtra: [],
+        /** @type {Array} */
+        loadersBasic: [],
+        /** @type {Object} */
+        extLoaded: {WjsLoader: {}},
+        /** @type {Object} */
+        extRequire: {},
+        /** @type {Array} */
+        processes: [],
+        /** @type {Number} */
+        processCounter: 0,
+        /** @type {Array} */
+        processStack: [],
+        /** @type {Array} */
+        processParent: undefined,
+        /** @type {Object} */
+        classProtos: {},
+        /** @type {Object} */
+        classMethods: {},
+        /** @type {Object} Store names of CacheLinks */
+        cacheReg: {},
+        /** @type {Object} */
+        settings: {
+          clientName: '',
+          paramExtra: '',
+          paramInc: '',
+          paramExc: '',
+          paramToken: '',
+          pathResponse: '',
+          cacheToken: ''
         }
-        // Mark as readyComplete, further ready functions
-        // will be executed directly.
-        self.readyComplete = true;
-        // Load all other scripts then run ready functions.
-        // Create a loading process to parse package content.
-        new self.processProto(null, {
-          complete: function () {
-            delete self.packageDefault;
-            self.callbacks(self.readyCallbacks);
-          }
-          // Directly treat object as response.
-        }).responseParse(self.packageDefault);
       });
-    },
-
-    /**
-     * Because w must execute loading request on startup,
-     * he needs his own ready function.
-     * @param {function(...)} callback Function executed on loading complete.
-     */
-    ready: function (callback) {
-      if (this.readyComplete === true) {
-        // Execute callback asynchronously.
-        // IE need function wrap.
-        this.window.setTimeout(function () {
-          callback();
-        });
+      // Apply options.
+      self.extendObject(self, options);
+      // Create prototypes instances.
+      self.classExtend('WjsLoader', WjsProtoLocal.proto.Loader);
+      self.classExtend('WjsProcess', WjsProtoLocal.proto.Process);
+      // Create core loaders.
+      self.loaderAdd('JsLink', WjsProtoLocal.retrieve('WjsLoader', 'JsLink'), true);
+      self.loaderAdd('WjsLoader', WjsProtoLocal.retrieve('WjsLoader', 'WjsLoader'), true);
+      // Create basic loaders who are required by package.
+      for (var i = 0; i < self.loadersBasic.length; i++) {
+        self.loaderAdd(self.loadersBasic[i], undefined, true);
       }
-      else {
-        this.readyCallbacks.push(callback);
-      }
-    },
-
-    /**
-     * Place a call to a method after wjs ready.
-     * @param method
-     * @param args
-     * @returns {boolean}
-     */
-    readyDelay: function (method, args) {
-      var self = this;
-      if (self.readyComplete !== true) {
-        self.ready(function () {
-          self[method].apply(self, args);
-        });
-        return true;
-      }
-      return false;
+      // Load all other scripts then run ready functions.
+      // Create a loading process to parse package content.
+      self.process(null, {
+        complete: function () {
+          // Mark as readyComplete, further ready functions
+          // will be executed directly.
+          self.readyComplete = true;
+          if (options.complete) {
+            options.complete.call(self);
+          }
+          self.callbacks(WjsProtoLocal.readyCallbacks[self.settings.clientName] || []);
+        }
+        // Directly treat object as response.
+      }).responseParse(self.packageDefault);
     },
 
     /**
      * Execute an array of callbacks functions.
      * @param {Array} callbacksArray
-     * @param {Array} args
+     * @param {Array=} args
      */
     callbacks: function (callbacksArray, args) {
+      // Only use apply function in case of existing args,
+      // call function if faster than apply, event with argument check.
+      var method = args ? 'apply' : 'call';
       for (var i = 0; i < callbacksArray.length; i++) {
-        callbacksArray[i].apply(this, args);
+        callbacksArray[i][method](this, args);
       }
     },
 
@@ -143,11 +127,12 @@
      * @returns {*}
      */
     urlToken: function (url) {
-      var self = this;
-      if (self.settings.cacheToken) {
+      var cacheToken = this.settings.cacheToken;
+      if (cacheToken) {
         // Append ?
-        url = url.indexOf('?') === -1 ? url + '?' : url;
-        return url + '&' + self.settings.cacheToken;
+        return (url.indexOf('?') === -1 ? url + '?' : url)
+          // Add token.
+          + '&' + cacheToken;
       }
       return url;
     },
@@ -158,32 +143,56 @@
      * @param {string} name
      * @param {Object} methods
      * @param {boolean=} register True says to save as loaded extension.
+     * @param {Function=} callback
      */
-    loaderAdd: function (name, methods, register) {
-      var self = this;
+    loaderAdd: function (name, methods, register, callback) {
+      var self = this, className = 'WjsLoader' + name;
       // We can define loader with no specific method.
       methods = methods || {};
       if (!self.loaders[name]) {
-        var className = 'WjsLoader' + name;
         // Add name to prototype.
         methods.type = name;
         // Allow to use custom base class.
-        methods.classExtends = methods.classExtends || 'WjsLoader';
-        self.classExtend(className, methods);
-        self.loaders[name] = new (self.classProto(className))(name);
-        self.extRequire[name] = {};
-        // We have to deal between WjsLoader, instance of and jsLink,
-        // wjs.extLoaded.WjsLoader must exists to save jsLink loader,
-        // but jsLink loader is base constructor of WjsLoader, so it
-        // have to be created before jsLink. wjs.extLoaded.WjsLoader
-        // is present before WjsLoader creation.
-        self.extLoaded[name] = self.extLoaded[name] || {};
-        if (register) {
-          // If register is set to true, we save loader as extension,
-          // It is useful when loader is not created with WjsLoader,
-          // like WjsLoader itself and basics ones.
-          self.extLoaded.WjsLoader[name] = methods;
+        methods.classExtends = 'WjsLoader' + (methods.loaderExtends || '');
+        // In case of class extension we have to check
+        // if parent loader class exists.
+        if (methods.loaderExtends) {
+          self.loadersExists([methods.loaderExtends], function () {
+            self.loaderBuild(name, className, methods, register, callback);
+          });
+          return;
         }
+        self.loaderBuild(name, className, methods, register, callback);
+      }
+    },
+
+    /**
+     * Complete function for loaderAdd only.
+     * @param {string} name
+     * @param {string} className
+     * @param {Object} methods
+     * @param {boolean=} register True says to save as loaded extension.
+     * @param {Function=} callback
+     */
+    loaderBuild: function (name, className, methods, register, callback) {
+      this.classExtend(className, methods);
+      this.loaders[name] = new (this.classProto(className))(name);
+      this.extRequire[name] = {};
+      var extLoaded = this.extLoaded;
+      // We have to deal between WjsLoader, instance of and jsLink,
+      // wjs.extLoaded.WjsLoader must exists to save jsLink loader,
+      // but jsLink loader is base constructor of WjsLoader, so it
+      // have to be created before jsLink. wjs.extLoaded.WjsLoader
+      // is present before WjsLoader creation.
+      extLoaded[name] = extLoaded[name] || {};
+      if (register) {
+        // If register is set to true, we save loader as extension,
+        // It is useful when loader is not created with WjsLoader,
+        // asz normal extension, like WjsLoader itself and basics ones.
+        extLoaded.WjsLoader[name] = methods;
+      }
+      if (callback) {
+        callback();
       }
     },
 
@@ -194,23 +203,28 @@
      * @return {*}
      */
     loadersExists: function (types, complete) {
-      var self = this, i = 0, use = [];
+      var i = 0, use = [], type;
       // Search for existing loaders.
-      for (; i < types.length; i++) {
-        if (!self.loaders[types[i]]) {
-          // If no active process found
-          // we will make a new use process.
-          use.push(types[i]);
+      while (type = types[i++]) {
+        // Loader not found.
+        if (!this.loaders[type]) {
+          use.push(type);
         }
       }
       return (use.length > 0) ?
         // Create a new process.
-        new (self.processProto)({WjsLoader: use}, {
+        this.process({
+          WjsLoader: use
+        }, {
           stacked: false,
           complete: complete
         }) :
         // Or execute callback.
         complete();
+    },
+
+    process: function (request, options) {
+      return new (this.classProto('WjsProcess'))(request, options, this);
     },
 
     /**
@@ -221,12 +235,12 @@
      * @return {*}
      */
     processFor: function (type, name) {
-      var self = this, i = 0, j;
-      for (i = 0; i < self.processes.length; i++) {
-        for (j = 0; j < self.processes[i].extRequests.length; j++) {
-          if (self.processes[i].extRequests[j].type === type && self.processes[i].extRequests[j].name === name) {
+      var i = 0, process, j, request, processes = this.processes;
+      while (process = processes[i++]) {
+        for (j = 0; request = process.extRequests[j++];) {
+          if (request.type === type && request.name === name) {
             // We no longer check other types.
-            return self.processes[i];
+            return process;
           }
         }
       }
@@ -234,31 +248,14 @@
 
     /**
      * Load specified collection of specified type / name.
-     * During the whole process we try to return loaded data if
-     * no async method is launched.
-     * @param {string} type
-     * @param {string} name
+     * @param {Object} request
      * @param {Object|Function=} options
      * @return {?}
      */
     use: function (request, options) {
-      var self = this;
-      if (this.readyDelay('use', arguments)) {
-        return;
-      }
-      // Handle if request is just two strings.
-      if (typeof request === 'string') {
-        // Transform request to a multi request.
-        var multiple = {};
-        // User request as type, options as name.
-        multiple[request] = [options];
-        // Merge options.
-        options = arguments[2];
-        // Replace default var.
-        request = multiple;
-      }
+      var args = this.extendArgs(arguments);
       // Create a new process.
-      return new (self.processProto)(request, options);
+      return this.process(args[0], args[1]);
     },
 
     /**
@@ -270,7 +267,8 @@
     get: function (type, name) {
       var extList = this.extLoaded[type];
       // Return value if defined.
-      // Use hasOwnProperty allow to save "undefined" for not found ext.
+      // Use hasOwnProperty allow to save "undefined"
+      // for not found extensions.
       return (extList && extList.hasOwnProperty(name)) ? extList[name] : false;
     },
 
@@ -284,27 +282,27 @@
      * @param {?} options
      */
     destroy: function (type, name, options) {
-      var self = this, request = {};
-      if (this.readyDelay('destroy', arguments)) {
-        return;
-      }
-      request[type] = [name];
+      var self = this, args;
       // Handle async destroy option.
       if (options && options.async) {
         delete options.async;
         self.window.setTimeout(function () {
           self.destroy(type, name, options);
         });
-        return;
+        return null;
       }
+      args = self.extendArgs(arguments);
       // Accept simple boolean value.
-      options = typeof options === 'boolean' ? {dependencies: options} : options;
+      if (typeof args[1] === 'boolean') {
+        args[1] = {};
+      }
       // Convert callback to options object.
-      options = self.extendOptions(options, {
-        destroy: true
-      });
+      options = self.extendOptions({
+        destroy: true,
+        dependencies: (arguments[1] === true || arguments[2] === true)
+      }, args[1]);
       // Create a new process.
-      return new (self.processProto)(request, options);
+      return self.process(args[0], options);
     },
 
     /**
@@ -349,10 +347,11 @@
 
     /**
      * Return true if a extension is required by another one.
-     * @param {string} type
-     * @param {string} name
+     * @param {string} baseType
+     * @param {string} baseName
      * @param {string} requireType
      * @param {string} requireName
+     * @param {Object} except
      * @return {boolean}
      */
     requireShared: function (baseType, baseName, requireType, requireName, except) {
@@ -381,7 +380,7 @@
      * @return {boolean}
      */
     regEach: function (registry, callback) {
-      var self = this, i = 0, j, types = Object.keys(registry), names, result;
+      var self = this, i = 0, j, types = Object.keys(registry), names;
       for (; i < types.length; i++) {
         names = Array.isArray(registry[types[i]]) ? registry[types[i]] : Object.keys(registry[types[i]]);
         for (j = 0; j < names.length; j++) {
@@ -436,11 +435,17 @@
      * @param {Object} options Contain various ajax options.
      */
     ajax: function (options) {
-      options.method = options.method || 'GET';
-      options.async = options.async || false;
-      var self = this,
-        xhr = new self.window.XMLHttpRequest();
-      xhr.open(options.method, options.url, options.async);
+      var xhr = new this.window.XMLHttpRequest(),
+        data = options.data ? this.param(options.data) : undefined,
+        method = options.method || 'GET',
+        url = options.url;
+      // Create xhr.
+      xhr.open(method,
+        // On GET mode append data as query strings.
+        (method === 'GET' && data) ? url + '?' + data : url,
+        // Async by default.
+        options.async !== undefined ? options.async : true);
+      // Define callback.
       xhr.onreadystatechange = function () {
         // Process complete.
         if (xhr.readyState === 4) {
@@ -450,16 +455,18 @@
               options.success(xhr);
             }
           }
-          else {
+          else if (options.error) {
             options.error(xhr);
           }
         }
       };
-      if (options.method === 'POST') {
+      // Requested headers.
+      if (method === 'POST') {
         xhr.setRequestHeader('Content-type',
           'application/x-www-form-urlencoded');
       }
-      xhr.send(options.data ? self.param(options.data) : undefined);
+      // Lets go.
+      xhr.send(data);
     },
 
     /**
@@ -468,9 +475,9 @@
      * @return {string}
      */
     param: function (object) {
-      var i, query = [], keys = Object.keys(object);
-      for (i = 0; i < keys.length; i++) {
-        query.push(keys[i] + '=' + object[keys[i]]);
+      var i = 0, query = [], key, keys = Object.keys(object);
+      while (key = keys[i++]) {
+        query.push(key + '=' + object[key]);
       }
       return query.join('&');
     },
@@ -481,19 +488,40 @@
      * merge can be assigned, to merge objects only.
      */
     extendObject: function (object, add, mergeObjects) {
-      var i = 0, keys = Object.keys(add), key;
-      for (; i < keys.length; i++) {
-        key = keys[i];
-        if (!mergeObjects || typeof add[key] !== 'object') {
-          object[key] = add[key];
+      var i = 0, key, keys = Object.keys(add), addItem;
+      while (key = keys[i++]) {
+        addItem = add[key];
+        if (!mergeObjects || typeof addItem !== 'object' || addItem === null) {
+          object[key] = addItem;
         }
         else {
           // Create an empty entry if not exists.
-          object[key] = object[key] || {};
-          this.extendObject(object[key], add[key]);
+          object[key] = object[key] || (Array.isArray(addItem) ? [] : {});
+          this.extendObject(object[key], addItem);
         }
       }
       return object;
+    },
+
+    /**
+     * Transform arguments like (type, name, options)
+     * Into wjs request ({type:name}, options).
+     * @param args
+     * @returns {*[]}
+     */
+    extendArgs: function (args) {
+      var request = args[0], options = args[1], multiple = {};
+      // Handle if request is just two strings.
+      if (typeof request === 'string') {
+        // Transform request to a multi request.
+        // User request as type, options as name.
+        multiple[request] = [options];
+        // Replace default var.
+        request = multiple;
+        // Merge options.
+        options = args[2];
+      }
+      return [request, options];
     },
 
     /**
@@ -530,10 +558,10 @@
      * @return {*}
      */
     extendProto: function (object, add) {
-      var i, keys = Object.keys(add);
-      for (i = 0; i < keys.length; i++) {
-        Object.defineProperty(object, keys[i],
-          Object.getOwnPropertyDescriptor(add, keys[i]));
+      var i = 0, obj = Object, item, keys = obj.keys(add);
+      while (item = keys[i++]) {
+        obj.defineProperty(object, item,
+          obj.getOwnPropertyDescriptor(add, item));
       }
       return object;
     },
@@ -559,12 +587,12 @@
      * @param {Object} methods
      */
     classExtend: function (name, methods) {
-      var self = this;
-      if (self.classMethods[name]) {
-        self.extendProto(self.classMethods[name], methods);
+      var classMethods = this.classMethods;
+      if (classMethods[name]) {
+        this.extendProto(classMethods[name], methods);
       }
       else {
-        self.classMethods[name] = methods;
+        classMethods[name] = methods;
       }
     },
 
@@ -574,91 +602,83 @@
      * @return {Object} Prototype ready to be instantiated with "new".
      */
     classProto: function (name) {
-      var self = this;
+      var classProtos = this.classProtos,
+        classMethod = this.classMethods[name];
       // Base object is created once.
-      if (!self.classProtos[name]) {
+      if (!classProtos[name]) {
         // It may have base constructor send from server.
-        var classExtends = false,
+        var classExtends,
           WJSClassProto,
-          base = Object,
-          classMethod = self.classMethods[name];
+          base = Object;
         // Or is specified into prototype.
         classExtends = classMethod && classMethod.classExtends ?
-          classMethod.classExtends : classExtends;
+          classMethod.classExtends : false;
         if (classExtends) {
-          base = self.classProto(classExtends);
+          base = this.classProto(classExtends);
         }
         // Create base object.
         WJSClassProto =
           // keep a internal copy.
-          self.classProtos[name] = function () {
-            var self = this;
+          classProtos[name] = function () {
+            var construct = this.__construct;
             // All object generated by wjs has a constructor.
-            return (self.__construct) ?
-              self.__construct.apply(self, arguments) : null;
+            if (construct) {
+              // Save performance by using apply only if
+              // arguments are passed to constructor.
+              if (arguments.length) {
+                construct.apply(this, arguments);
+              }
+              else {
+                construct.call(this);
+              }
+            }
           };
         // Append base constructor.
         WJSClassProto.prototype = Object.create(base.prototype);
         // Adjust constructor to make instanceof works,
-        self.extendObject(WJSClassProto.prototype, {
+        this.extendObject(WJSClassProto.prototype, {
           constructor: base,
           className: name,
-          wjs: self
+          wjs: this
         });
       }
       // Add extra method even constructor exists,
       // in case of prototype have been extended
       // after first constructor creation.
-      if (self.classMethods[name]) {
-        self.extendProto(
-          self.classProtos[name].prototype,
-          self.classMethods[name]
+      if (classMethod) {
+        this.extendProto(
+          classProtos[name].prototype,
+          classMethod
         );
       }
-      return self.classProtos[name];
+      return classProtos[name];
     },
 
     /**
      * Remove prototype definition to wjs.
      * @param {string} name
+     * @param {boolean=} keepMethods
      */
-    classProtoDestroy: function (name) {
-      var self = this;
-      if (self.classProtos[name]) {
-        delete self.classProtos[name];
+    classProtoDestroy: function (name, keepMethods) {
+      var classProtos = this.classProtos,
+        classMethods = this.classMethods;
+      if (classProtos[name]) {
+        delete classProtos[name];
       }
-      if (self.classMethods[name]) {
-        delete self.classMethods[name];
-      }
-    },
-
-    cacheHandle: function (extType, extName, data) {
-      var self = this,
-        handler = self.loaders[extType].cacheHandler[extName],
-        buffer = self.cacheBuffer;
-      // A cache link has called this method,
-      // before than a script asked for the extension.
-      // We store result for further use.
-      if (!handler) {
-        buffer[extType] = buffer[extType] || {};
-        buffer[extType][extName] = data;
-      }
-      // The extension has been asked,
-      // the process is waiting for the cache result.
-      else {
-        handler.cacheHandle(extType, extName, data);
+      if (!keepMethods && classMethods[name]) {
+        delete classMethods[name];
       }
     },
 
     /**
-     * Listen for the load event, limited
-     * by a timeout, used to add callbacks to
-     * dynamically added links like js and css.
+     * Listen for the load event, limited by a timeout,
+     * used to add callbacks to dynamically added links
+     * like js and css.
      * @param {object} dom
      * @param {Function} callback
      */
     onload: function (dom, callback) {
-      var loaded = false, callbackLauncher = function () {
+      var loaded = false, callbackLauncher = function (e) {
         loaded = true;
         dom.removeEventListener('load', callbackLauncher);
         callback();
@@ -678,20 +698,129 @@
      * @param {boolean=} fatal
      */
     err: function (message, fatal) {
-      var self = this, errorPrefix = '[wjs error] : ';
-      if (!fatal && self.window.console) {
-        self.window.console.error(errorPrefix + message);
+      var console = this.window.console,
+        errorPrefix = '[' + this.settings.clientName + ' error] : ';
+      if (!fatal && console) {
+        console.error(errorPrefix + message);
       }
       else {
-        throw new self.window.Error(errorPrefix + message);
+        throw new this.window.Error(errorPrefix + message);
       }
     }
   };
-  // Create global instance, using version number.
-  context['wjs-' + wjsVersion] = new WJSProto();
-  // Add global wjs only once.
-  if (!context.wjs) {
-    context.wjs = context['wjs-' + wjsVersion];
-  }
+  // Handle core prototypes.
+  WjsProto.proto = {};
+  WjsProto.common = {};
+  WjsProto.WjsLoader = {};
+  WjsProto.readyCallbacks = {};
+  WjsProto.context = context;
+
+  /**
+   * Allow to store callback after page loads.
+   * @param {string|function} clientName
+   * @param {function=} callback Function executed on loading complete.
+   */
+  WjsProto.ready = function (clientName, callback) {
+    var readyCallbacks = this.readyCallbacks;
+    // Allow to store only callback.
+    if (typeof clientName === 'function') {
+      callback = clientName;
+      clientName = 'wjs';
+    }
+    if (context[clientName] && context[clientName].readyComplete === true) {
+      // Execute callback asynchronously.
+      // IE need function wrap.
+      context[clientName].window.setTimeout(function () {
+        callback();
+      });
+    }
+    else {
+      readyCallbacks[clientName] = readyCallbacks[clientName] || [];
+      readyCallbacks[clientName].push(callback);
+    }
+  };
+
+  /**
+   * Trigger a custom event on a dom element.
+   * Used by wjs to listen for extension loads,
+   * and javascript registering.
+   * @param name
+   * @param domElement
+   */
+  WjsProto.event = function (name, domElement) {
+    var event, doc = context.window.document;
+    if (doc.createEvent) {
+      event = doc.createEvent('HTMLEvents');
+      event.initEvent(name, true, true);
+      event.eventName = name;
+      domElement.dispatchEvent(event);
+    }
+    // IE
+    else {
+      event = doc.createEventObject();
+      event.eventType =
+        event.eventName = name;
+      domElement.fireEvent('on' + name, event);
+    }
+  };
+
+  /**
+   * Even registering elements has the same type / name
+   * keys as extensions, it can be used, for example, by
+   * an extension type to store various types / names
+   * couples of data.
+   */
+  WjsProto.register = function (type, name, data) {
+    var common = this.common;
+    common[type] = common[type] || {};
+    common[type][name] = data;
+    WjsProto.event('wjsRegister::' + type + '::' + name, context.window);
+  };
+
+  WjsProto.registerGet = function (type, name) {
+    var common = this.common;
+    if (common[type] && common[type][name]) {
+      return common[type][name];
+    }
+    return false;
+  };
+
+  /**
+   * Add a callback for given data registering.
+   * @param type
+   * @param name
+   * @param callback
+   */
+  WjsProto.registerListen = function (type, name, callback) {
+    var self = this, data = WjsProto.registerGet(type, name);
+    if (data) {
+      callback(data);
+    }
+    else {
+      var eventName = 'wjsRegister::' + type + '::' + name,
+        localCallback = function () {
+          context.window.removeEventListener(eventName, localCallback);
+          callback(self.common[type][name]);
+        };
+      context.window.addEventListener(eventName, localCallback);
+    }
+  };
+
+  /**
+   * Retrieve saved data.
+   */
+  WjsProto.retrieve = function (type, name) {
+    return this.common[type][name];
+  };
+
+  /**
+   * Store cached data.
+   */
+  WjsProto.cache = function (extType, extName, data) {
+    WjsProto.register('cache', extType + '/' + extName, data);
+  };
+
+  // Save global prototype.
+  context.WjsProto = WjsProto;
   // [-->
-}(window));
+}(this));

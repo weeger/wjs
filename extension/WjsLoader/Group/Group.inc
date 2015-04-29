@@ -8,9 +8,9 @@ use \Wjs\Loader;
  * @package Wjs\Loader
  */
 class Group extends Loader {
-  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+  function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
-    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION) {
+    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
       // Values are just requirements.
       foreach ($value as $group => $items) {
         foreach ($items as $item) {
@@ -20,6 +20,6 @@ class Group extends Loader {
       // Save value as true.
       $value = TRUE;
     }
-    return parent::extensionPush($name, $excludeRequire, $value);
+    return parent::extensionPush($name, $options, $value);
   }
 }

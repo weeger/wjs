@@ -1,30 +1,25 @@
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('JsClass', {
-    // Extends full named loader class.
-    classExtends: 'WjsLoaderJsMethod',
-    parse: function (name, data, process) {
-      return this.wjs.loaders.JsMethod.parse.apply(this, [name, data, process]);
-    },
+  WjsProto.register('WjsLoader', 'JsClass', {
+    loaderExtends: 'JsMethod',
+    wjsShortcuts: false,
 
     destroy: function (name, data, process) {
+      var wjs = this.wjs;
       // Remove prototype.
-      this.wjs.classProtoDestroy(name);
+      wjs.classProtoDestroy(name);
       // Remove method.
-      delete this.wjs.classMethods[name];
+      delete wjs.classMethods[name];
       // Remove JsMethod parts.
-      return this.wjs.loaders.JsMethod.destroy.apply(this, [name, data, process]);
+      return wjs.loaders.JsMethod.destroy.call(this, name, data, process);
     },
 
-    addJsClass: function (name, data) {
-      this.addLastCompSave(name, data);
-    },
-
-    loadCompleteJsClass: function (name, process) {
-      this.wjs.classExtend(name, this.addLastCompData);
-      return this.loadCompleteJsMethod(name, process);
+    register: function (type, name, process, value) {
+      var self = this;
+      self.wjs.classExtend(name, WjsProto.retrieve(self.type, name));
+      return self.wjs.loaders.JsMethod.register.call(self, type, name, process, value);
     }
   });
   // [-->
-}(wjsContext));
+}(WjsProto));

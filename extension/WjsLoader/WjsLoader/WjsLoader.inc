@@ -9,38 +9,48 @@ use \Wjs\Loader;
  */
 class WjsLoader extends JsLink {
 
-  function extensionAdd($name, $data) {
-    if (is_string($data)) {
-      $dataDetected = array(
-        'server' => array(
-          'class' => $data . $name . '.inc'
-        ),
-        'client' => array()
+  function extensionAdd($name, $value) {
+    $value = $this->valuePush($name, $value);
+    // Allow one string argument.
+    if (is_string($value)) {
+      $value = array(
+        'classFile' => $value
       );
-      // Search for a js file.
-      $js = $data . $name . '.js';
-      if (is_file($js)) {
-        $dataDetected['client']['js'] =
-        $dataDetected['server']['js'] = $js;
+    }
+    // Detect js file.
+    if (!isset($value['serverPathJs'])) {
+      $filePath = dirname($value['classFile']) . '/' . $name . '.js';
+      // Add data for js file if exists.
+      if (is_file($filePath)) {
+        // Scan return resolved links,
+        // so we have to locate loader,
+        // according to resolved path of wjs.
+        $value['serverPathJs'] = $filePath;
+
       }
-      $data = $dataDetected;
+    }
+    // If only server path to js is found,
+    // try to detect his path from client side.
+    if (isset($value['serverPathJs']) && !isset($value['clientPathJs'])) {
+      $value['clientPathJs'] = $this->wjs->pathClient(realpath($this->wjs->pathClient($value['serverPathJs'])));
     }
     // Load PHP class definition.
     // Data is a path pointing to the main folder.
-    require_once $data['server']['class'];
-    $class_name                = '\Wjs\Loader\\' . $name;
-    $this->wjs->loaders[$name] = new $class_name($data, $this->wjs);
+    require_once $value['classFile'];
+    $className = '\Wjs\Loader\\' . $name;
+    /* @var \Wjs\Loader $loader */
+    $this->wjs->loaders[$name] = $loader = new $className($value, $this->wjs);
     // Add requirement according to parent class.
     if ($this->wjs->loaders[$name]->parentClass) {
       $this->wjs->extensionAddRequire('WjsLoader', $name, 'WjsLoader', $this->wjs->loaders[$name]->parentClass);
     }
     // Exported data is file URL.
-    $path = $this->wjs->loaderGet($name)->routeGet('client', 'js');
+    $path = $loader->optionGet('clientPathJs');
     if ($path) {
       $path   = array(
         'client' => $path
       );
-      $server = $this->wjs->loaderGet($name)->routeGet('server', 'js');
+      $server = $loader->optionGet('serverPathJs');
       if ($server) {
         $path['server'] = $server;
       }
@@ -51,16 +61,27 @@ class WjsLoader extends JsLink {
     parent::extensionAdd($name, $path);
   }
 
-  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+  function extensionPush($name, $options = array(), $value = NULL) {
     // Avoid to add core loaders as extensions.
-    if ($name !== 'WjsLoader' && $name !== 'JsLink') {
+    if (!$this->wjs->isCoreExtension($this->type, $name)) {
       // WjsLoader value is a folder path,
       // expecting that a js file inside it exists,
       // It also can be equal to true if prototype is
       // a basic loader (no js).
-      return parent::extensionPush($name, $excludeRequire, $value);
+      return parent::extensionPush($name, $options, $value);
     }
     return NULL;
+  }
+
+  function headerFilesExtension($type, &$files, $side, $render = FALSE, $name) {
+    // Basic loaders has no js files and are "true".
+    if ($type === 'js' && is_string($this->extensions[$name][$side])) {
+      // Parent js links mark data as included.
+      parent::headerFilesExtension($type, $files, $side, $render, $name);
+      // Return client or server paths.
+      return $this->extensions[$name][$side];
+    }
+    return '';
   }
 
   /**
@@ -68,21 +89,16 @@ class WjsLoader extends JsLink {
    * Each subdirectory is considered as a WjsLoader.
    */
   function scanFolderItem($pathServer, $item, $globalData) {
-    if (is_dir($pathServer . $item)) {
-      // Get client base path.
-      $pathClientRelative = $this->wjs->pathClientRelative($pathServer);
-      $filePath           = realpath($pathServer . $item) . '/';
+    $dirPath = $pathServer . $item;
+    // Loaders are directories.
+    if (is_dir($dirPath)) {
+      // Get path to class.
+      $filePath = realpath($dirPath) . '/';
       // Append global data.
       $data = array_merge(array(
-        'server' => array(
-          'class' => $filePath . $item . '.inc',
-        ),
+        // Assume that php .inc file exists.
+        'classFile' => $filePath . $item . '.inc',
       ), $globalData);
-      // Add data for js file if exists.
-      if (is_file($filePath . $item . '.js')) {
-        $data['server']['js'] = $filePath . $item . '.js';
-        $data['client']['js'] = $this->wjs->pathNormalize($pathClientRelative . $item . '/' . $item . '.js');
-      }
       $this->wjs->extensionAdd($this->type, $item, $data);
     }
   }

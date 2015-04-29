@@ -1,9 +1,9 @@
-(function (loader) {
+(function (WjsProto) {
   'use strict';
   /**
    * Apply a animation delay for each items selected.
    */
-  loader.addJsMethod('cssVendorPrefix', function (name, domStyle) {
+  WjsProto.register('JsMethod', 'cssVendorPrefix', function (name, domStyle) {
     // If property is not undefined, no prefix needed.
     if (domStyle && domStyle[name] !== undefined) {
       return name;
@@ -19,4 +19,4 @@
     }
     return this._cssVendorPrefix + name.charAt(0).toUpperCase() + name.slice(1);
   });
-}(loader));
+}(WjsProto));

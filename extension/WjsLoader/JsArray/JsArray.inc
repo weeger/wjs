@@ -12,14 +12,14 @@ class JsArray extends Loader {
   /**
    * Append object to the output array.
    */
-  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+  function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
     if (is_array($value)) {
       $array = array_values($value);
     }
     else {
-      $array = WJS_ERR_PUSH_UNDEFINED_EXTENSION;
+      $array = WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME;
     }
-    return parent::extensionPush($name, $excludeRequire, $array);
+    return parent::extensionPush($name, $options, $array);
   }
 }

@@ -11,8 +11,8 @@ class Image extends Loader {
   /**
    * Append object to the output array.
    */
-  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+  function extensionPush($name, $options = array(), $value = NULL) {
     // There is no value for images, value = name = url.
-    return parent::extensionPush($name, $excludeRequire, $name);
+    return parent::extensionPush($name, $options, $name);
   }
 }

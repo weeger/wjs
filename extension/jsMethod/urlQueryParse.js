@@ -1,14 +1,13 @@
-(function (loader) {
+(function (WjsProto) {
   'use strict';
+  // Create regex once.
+  var regex = new RegExp('^[a-zA-Z0-9]*\\[([a-zA-Z0-9]*)\\]$'),
+    regexNum = new RegExp('^([0-9])*$');
   /**
    * Convert a query string to a key / value object.
    */
-  loader.addJsMethod('urlQueryParse', function (search) {
-    var output = {}, i, split, key, value,
-      regex = new RegExp('^[a-zA-Z0-9]*\\[([a-zA-Z0-9]*)\\]$'),
-      regexNum = new RegExp('^([0-9])*$'),
-      match,
-      result;
+  WjsProto.register('JsMethod', 'urlQueryParse', function (search) {
+    var output = {}, i, split, key, value, match;
     // If not specified, take the current search
     // value without leading "?".
     search = search || this.document.location.search.substr(1);
@@ -44,4 +43,4 @@
     }
     return output;
   });
-}(loader));
+}(WjsProto));

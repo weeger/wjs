@@ -1,8 +1,8 @@
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('CacheLink', {
-    classExtends: 'WjsLoaderJsLink',
-  }, true);
+  WjsProto.register('WjsLoader', 'CacheLink', {
+    loaderExtends: 'JsLink'
+  });
   // [-->
-}(wjsContext));
+}(WjsProto));

@@ -10,10 +10,30 @@ use \Wjs\Loader;
 class WebComp extends Loader {
 
   function extensionAdd($name, $data) {
+    // If data is only string it's should be the path of
+    // server folder, who contains a .conf ini file.
+    if (!is_array($data)) {
+      // Search for a json file.
+      $json = $data . $name . '.json';
+      if (is_file($json)) {
+        $conf           = json_decode(file_get_contents($json), JSON_FORCE_OBJECT);
+        $conf['server'] = $data;
+      }
+      // We have to build configuration from path.
+      else {
+        $conf = array(
+          'server' => $data,
+        );
+      }
+      $data = $conf;
+    }
+    if (!isset($data['client'])) {
+      // Define path according wjs, this path can be wrong
+      // if component is accessed into a rewritten client path.
+      $data['client'] = $this->wjs->pathClient(realpath($data['server']) . '/');
+    }
+    // Do not add requirements as part of data.
     $require = FALSE;
-    // Build data from json.
-    $data = $this->dataBuild($name, $data);
-    // Temporary disable requirements.
     if (isset($data['require'])) {
       $require = $data['require'];
       unset($data['require']);
@@ -26,107 +46,49 @@ class WebComp extends Loader {
     }
   }
 
-  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+  /**
+   * Get content of WebComp. HTML file is loaded,
+   * image links are parsed, CSS and JS requirements
+   * are added as normal extensions.
+   */
+  function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
-    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION) {
+    if (!$this->valueIsError($value)) {
       $data = '';
       if (is_dir($value['server'])) {
-        $data            = array(
+        $data = array(
           // By default destination is not defined.
           'destination' => isset($value['destination']) ? $value['destination'] : FALSE,
-          // If no html file defined, use an empty string.
-          'html'        => (is_file($value['server'] . $name . '.html')) ? file_get_contents($value['server'] . $name . '.html') : '',
+          // Html can come from outside.
+          'html'        => isset($value['html']) ? $value['html'] : FALSE,
           // Define if url query strings are updated on WebComp load.
           'urlUpdate'   => isset($value['urlUpdate']) ? $value['urlUpdate'] : FALSE,
           // We can choose to display only one WebComp of each group at a time.
           'group'       => isset($value['group']) ? $value['group'] : FALSE,
         );
-        $value['client'] = isset($value['client']) ? $value['client'] : $this->wjs->pathClientRelative($value['server']);
+        // Try to load html file if no content defined.
+        if (!$data['html']) {
+          $htmlFile = $value['server'] . $name . '.html';
+          if (is_file($htmlFile)) {
+            $data['html'] = file_get_contents($htmlFile);
+          }
+        }
+        // Html can be missing.
         if ($data['html'] !== '') {
-          // Parse with native PHP dom parser.
-          $dom = new \DOMDocument;
-          // Remove errors like parsing non encoded question marks in urls.
-          libxml_use_internal_errors(TRUE);
-          // We need to add main wrappers around our document content.
-          $wrapped = '<div>' . $data['html'] . '</div>';
-          $domSave = NULL;
-          // Load depending of PHP version.
-          $php54 = (version_compare(PHP_VERSION, '5.4.0') >= 0);
-          if ($php54) {
-            $dom->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-          }
-          // Version under PHP 5.4 do not support second argument in loadHTML,
-          // so we have to remove manually
-          else {
-            $dom->loadHTML($wrapped);
-            // Remove doctype.
-            $dom->removeChild($dom->doctype);
-            // Search for our div through html / body tags.
-            $dom->replaceChild($dom->firstChild->firstChild->firstChild, $dom->firstChild);
-          }
-          // Replace images src.
-          $images = $dom->getElementsByTagName('img');
-          /** @var \DOMElement $image */
-          foreach ($images as $image) {
-            $src = $image->getAttribute('src');
-            // Relocate images from extensions location.
-            if (substr($src, 0, 4) !== 'http') {
-              $image->setAttribute('src', $value['client'] . $image->getAttribute('src'));
-            }
-          }
-          // Convert to text.
-          $data['html'] = $dom->saveHTML();
-          // Remove the temporary wrapper.
-          $data['html'] = trim(preg_replace('!^<div>([\s\S]*?)</div>$!i', '$1', $data['html']));
+          // Rebase links / images to web component folder.
+          $data['html'] = $this->wjs->htmlRebase($data['html'], $value['client']);
+          $this->wjs->htmlParseIncludeRequire($data['html'], $this->type, $name);
         }
-        if (is_file($value['server'] . $name . '.css')) {
-          $LinkName = $value['client'] . $name . '.css';
-          $this->wjs->extensionAdd('CssLink', $LinkName, $LinkName);
-          $this->wjs->extensionAddRequire($this->type, $name, 'CssLink', $LinkName);
-        }
-        if (is_file($value['server'] . $name . '.js')) {
-          $LinkName = $value['client'] . $name . '.js';
-          $this->wjs->extensionAdd('JsLink', $LinkName, $LinkName);
-          $this->wjs->extensionAddRequire($this->type, $name, 'JsLink', $LinkName);
-          $this->wjs->jsParseRequire($this->type, $name, file_get_contents($value['server'] . $name . '.js'));
-        }
+        // Search for extra css file.
+        // Use final file path in place of html or tpl file.
+        $this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.css', 'css', $this->type, $name);
+        // Search for extra js file.
+        $this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.js', 'js', $this->type, $name);
       }
       $value = $data;
     }
     // Save value as true.
-    return parent::extensionPush($name, $excludeRequire, $value);
-  }
-
-  function dataBuild($name, $data, $dataExtra = NULL) {
-    static $cache = array();
-    if (!isset($cache[$name])) {
-      // If data is only string it's should be the path of
-      // server folder, who contains a .conf ini file.
-      if (!is_array($data)) {
-        // Search for a json file.
-        $json = $data . $name . '.json';
-        if (is_file($json)) {
-          $conf           = json_decode(file_get_contents($json), JSON_FORCE_OBJECT);
-          $conf['server'] = $data;
-        }
-        // We have to build configuration from path.
-        else {
-          $conf = array(
-            'server' => $data,
-          );
-        }
-        $data = $conf;
-      }
-      if (!isset($data['client'])) {
-        $data['client'] = $this->wjs->pathClientRelative($data['server']);
-      }
-      $cache[$name] = $data;
-    }
-    // Append extra data.
-    if ($dataExtra) {
-      $cache[$name] = array_merge($cache[$name], $dataExtra);
-    }
-    return $cache[$name];
+    return parent::extensionPush($name, $options, $value);
   }
 
   /**
@@ -135,8 +97,7 @@ class WebComp extends Loader {
   function scanFolderItem($directory, $item, $globalData) {
     if (is_dir($directory . $item)) {
       // Append global data.
-      $data = $this->dataBuild($item, $directory . $item . '/', $globalData);
-      $this->wjs->register($this->type, $item, $data);
+      $this->wjs->extensionAdd($this->type, $item, $directory . $item . '/', $globalData);
     }
   }
 

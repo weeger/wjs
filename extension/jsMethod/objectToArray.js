@@ -1,9 +1,9 @@
-(function (loader) {
+(function (WjsProto) {
   'use strict';
   /**
    * Convert an object to array.
    */
-  loader.addJsMethod('objectToArray', function (object) {
+  WjsProto.register('JsMethod', 'objectToArray', function (object) {
     // Convert object to array.
     var i, output = [], keys = Object.keys(object);
     for (i = 0; i < keys.length; i++) {
@@ -11,4 +11,4 @@
     }
     return output;
   });
-}(loader));
+}(WjsProto));

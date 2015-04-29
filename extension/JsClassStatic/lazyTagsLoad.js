@@ -1,31 +1,27 @@
-(function (loader) {
+(function (WjsProto) {
   'use strict';
-  var wjs = loader.wjs;
   /**
    * Detects html container of wjs extensions.
    */
-  loader.addJsClassStatic('lazyTagsLoad', {
+  WjsProto.register('JsClassStatic', 'lazyTagsLoad', {
     destinationRoutes: [],
     destinationActivated: {},
     destinationOriginalHtml: {},
     typesCounter: {},
-    wjs: wjs,
     screenWidth: 0,
     screenHeight: 0,
     processing: false,
 
     __construct: function () {
-      var self = this, wjs = self.wjs, callback = self.onScreenChange.bind(self);
-      // Wait for wjs.
-      wjs.ready(function () {
-        // Search for tags into whole document.
-        self.tagsDetect(wjs.document);
-        // Activate currently visible elements.
-        self.tagsVisibleActivateAll();
-        // Add listeners.
-        wjs.window.addEventListener('scroll', callback);
-        wjs.window.addEventListener('resize', callback);
-      });
+      var self = this, win = self.wjs.window, callback = self.onScreenChange.bind(self);
+      wjs.lazyTagsLoader = self;
+      // Search for tags into whole document.
+      self.tagsDetect(self.wjs.document);
+      // Activate currently visible elements.
+      self.tagsVisibleActivateAll();
+      // Add listeners.
+      win.addEventListener('scroll', callback);
+      win.addEventListener('resize', callback);
     },
 
     onScreenChange: function () {
@@ -33,7 +29,7 @@
     },
 
     tagsDetect: function (domElement) {
-      var self = this, i = 0, dom = domElement.querySelectorAll('[data-wjs]'), complete;
+      var self = this, i = 0, dom = domElement.querySelectorAll('[data-wjs]');
       for (; i < dom.length; i++) {
         // Add to routes if not exists.
         if (self.destinationRoutes.indexOf(dom[i]) === -1) {
@@ -44,8 +40,7 @@
 
     tagsVisibleActivateAll: function () {
       var i = 0, visible = [], self = this, wjs = self.wjs,
-        type, name, info, value,
-        split, dom, rect, saved,
+        type, name, info, value, dom, rect, saved,
         request = {},
       // Get scroll position.
         scrollTop = wjs.window.pageYOffset || wjs.document.documentElement.scrollTop,
@@ -70,8 +65,6 @@
           // Only unsaved need a request,
           // else do nothing.
           if (!saved) {
-            // Save as activated.
-            self.destinationActivated[i] = dom;
             // Load saved value.
             value = wjs.get(type, name);
             // Element is already loaded by wjs,
@@ -102,8 +95,6 @@
       wjs.use(request, {
         destination: false,
         lazyVisible: visible,
-        // We are not able to use complete() function properly
-        // to remove wjsTempId, due to a loading bug with several successive loads
         complete: self.useComplete.bind(self)
       });
     },
@@ -118,25 +109,35 @@
     },
 
     tagFill: function (type, name, dom, regData) {
-      var self = this;
-      // Backup current html in case of destroy.
-      self.destinationOriginalHtml[self.destinationRoutes.indexOf(dom)] = dom.innerHTML;
-      // Data must have a dom property (WebComp).
-      dom.appendChild(regData.dom.cloneNode(true));
-      self.typesCounter[type] = self.typesCounter[type] || {};
-      self.typesCounter[type][name] = self.typesCounter[type][name] || 0;
-      self.typesCounter[type][name]++;
+      var self = this, typesCounter = self.typesCounter,
+        destinationRoutes = self.destinationRoutes,
+        destinationActivated = self.destinationActivated,
+        routeIndex = destinationRoutes.indexOf(dom);
+      if (!destinationActivated[routeIndex]) {
+        // Save as activated.
+        destinationActivated[routeIndex] = dom;
+        // Backup current html in case of destroy.
+        self.destinationOriginalHtml[destinationRoutes.indexOf(dom)] = dom.innerHTML;
+        // Data must have a dom property (WebComp).
+        dom.appendChild(regData.dom.cloneNode(true));
+        typesCounter[type] = typesCounter[type] || {};
+        typesCounter[type][name] = typesCounter[type][name] || 0;
+        typesCounter[type][name]++;
+      }
     },
 
     tagEmpty: function (type, name, dom) {
-      var self = this, routeIndex = self.destinationRoutes.indexOf(dom);
-      if (routeIndex !== -1) {
+      var self = this, destinationActivated = self.destinationActivated,
+        destinationOriginalHtml = self.destinationOriginalHtml,
+        routeIndex = self.destinationRoutes.indexOf(dom);
+      if (destinationActivated[routeIndex]) {
+        // Empty.
         while (dom.firstChild) {
           dom.removeChild(dom.firstChild);
         }
-        dom.innerHTML = self.destinationOriginalHtml[routeIndex];
-        delete self.destinationActivated[routeIndex];
-        delete self.destinationOriginalHtml[routeIndex];
+        dom.innerHTML = destinationOriginalHtml[routeIndex];
+        delete destinationActivated[routeIndex];
+        delete destinationOriginalHtml[routeIndex];
         self.typesCounter[type][name]--;
         if (self.typesCounter[type][name] === 0 && self.wjs.settings.lazyTagsLoadAutoDestroy) {
           self.wjs.destroy(type, name, true);
@@ -148,7 +149,7 @@
       }
     },
 
-    useComplete: function (register, process) {
+    useComplete: function (registry, process) {
       var i = 0, j, k, types = Object.keys(process.options.lazyVisible), names, items;
       // Iterates over visible items who need to be filled.
       for (; i < types.length; i++) {
@@ -156,10 +157,10 @@
         for (j = 0; j < names.length; j++) {
           items = process.options.lazyVisible[types[i]][names[j]];
           for (k = 0; k < items.length; k++) {
-            this.tagFill(types[i], names[j], items[k], register[types[i]][names[j]]);
+            this.tagFill(types[i], names[j], items[k], registry[types[i]][names[j]]);
           }
         }
       }
     }
   });
-}(loader));
+}(WjsProto));

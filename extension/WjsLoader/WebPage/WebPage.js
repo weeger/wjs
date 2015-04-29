@@ -1,8 +1,8 @@
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('WebPage', {
-    classExtends: 'WjsLoaderWebComp',
+  WjsProto.register('WjsLoader', 'WebPage', {
+    loaderExtends: 'WebComp',
     pageCurrent: null,
 
     parse: function (name, value, process) {
@@ -10,7 +10,7 @@
       // Save page as current open.
       self.pageCurrent = name;
       // Use normal web comp.
-      return this.wjs.loaders.WebComp.parse.apply(this, arguments);
+      return this.wjs.loaders.WebComp.parse.call(this, name, value, process);
     },
 
     link: function (name) {
@@ -33,4 +33,4 @@
     }
   });
   // [-->
-}(wjsContext));
+}(WjsProto));

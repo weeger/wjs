@@ -1,3 +1,21 @@
+WJS - 4.0.0 - 2015-04-29
+------------------------
+- Full ajax async requests
+- Allow multiple request for destroy
+- Class protos improvments
+- JsMethod add() minification
+- Cleanup WjsLoader links on remove
+- New query strings manipulation methods
+- New options managment
+- New paths resolution with symlinks support
+- Drupal 7 : select core version
+- Drupal 7 : check libraries on install
+- Code style
+
+WJS - 3.4.0 - 2015-03-21
+------------------------
+- Minor debug
+
 WJS - 3.3.10 - 2015-01-24
 -------------------------
 - WebComp and WebPage improvment

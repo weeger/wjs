@@ -1,10 +1,9 @@
-(function (loader) {
+(function (WjsProto) {
   'use strict';
-  var wjs = loader.wjs;
   /**
    * Detects links containing href with wjs://
    */
-  loader.addJsClassStatic('wjsHref', {
+  WjsProto.register('JsClassStatic', 'wjsHref', {
 
     __construct: function () {
       this.linksInit(this.wjs.document.body);
@@ -42,6 +41,6 @@
         wjs.loaders[link[1]].link(link[2]);
       });
       return false;
-    },
+    }
   });
-}(loader));
+}(WjsProto));

@@ -1,16 +1,16 @@
 /**
  * Loader manage actions to do when requesting a new extension.
  * It is a collection of hooks called on requesting / parsing /
- * deleting extensions. It may use process to help it,
- * but keep in mind that processes can load and parse
- * multiple scripts in the same time.
+ * deleting extensions. It may use process to help it, but keep
+ * in mind that processes can load and parse multiple scripts
+ * in the same time.
  * @param {WjsProto} wjs
  */
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  /** @constructor */
-  context.wjs.classExtend('WjsLoader', {
+  // Save declaration statically into wjs proto.
+  WjsProto.proto.Loader = {
     type: '',
     preventReload: true,
     processType: 'server',
@@ -20,19 +20,14 @@
      * @private
      */
     __construct: function () {
-      // Store links to processes, in order
-      // to handle javascript cached responses.
-      this.cacheHandler = {};
+      // Create default entry into static variables,
+      // loader may add extra entry if needed, so
+      // entry name is not deeply linked to loader name.
+      // Entry can also be declared previously than loader.
+      WjsProto.common[this.type] = WjsProto.common[this.type] || {};
     },
 
     __destruct: function () {
-      // To override...
-    },
-
-    /**
-     * Called once on loader creation.
-     */
-    init: function () {
       // To override...
     },
 
@@ -47,6 +42,14 @@
     parse: function (extensionName, output, process) {
       // To override...
       return output;
+    },
+
+    /**
+     * Fired when a listened element is registered
+     * during parse. Should be initialised with listenRegister.
+     */
+    register: function (type, name, process) {
+      // To override...
     },
 
     /**
@@ -72,9 +75,9 @@
      * Launched on extension use request,
      * create data for process.
      * @param {string} name
-     * @param {WJSProcessProto} process
+     * @param {WjsProto.proto.Process} process
      */
-    extRequestUse: function (name, process) {
+    requestUse: function (name, process) {
       return {
         mode: this.processType,
         type: this.type,
@@ -86,15 +89,22 @@
      * Launched on extension use request,
      * create data for process.
      * @param {string} name
-     * @param {WJSProcessProto} process
+     * @param {WjsProto.proto.Process} process
      */
-    extRequestDestroy: function (name, process) {
+    requestDestroy: function (name, process) {
       return {
         mode: 'parse',
         type: this.type,
         name: name
       };
+    },
+
+    registerListen: function (type, name, process) {
+      var self = this;
+      WjsProto.registerListen(type, name, function () {
+        self.register.call(self, type, name, process);
+      });
     }
-  });
+  };
   // [-->
-}(window));
+}(WjsProto));

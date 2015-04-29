@@ -1,20 +1,22 @@
 /**
  * @require JsMethod > cssVendorPrefix
  */
-(function (loader) {
+(function (WjsProto) {
   'use strict';
   /**
    * Apply a animation delay for each items selected.
    */
-  loader.addJsMethod('cssListAnimationDelay', function (domContainer, querySelector, timeOffset) {
-    var i, j, items = domContainer.querySelectorAll(querySelector), localTimeOffset = [];
+  WjsProto.register('JsMethod', 'cssListAnimationDelay', function (domContainer, querySelector, timeOffset, timeGlobalDelay, timeOffsetMultiplier) {
+    var i = 0, j, items = domContainer.querySelectorAll(querySelector), localTimeOffset = [];
     timeOffset = typeof timeOffset === 'number' || timeOffset.indexOf(',') === -1 ? [timeOffset] : timeOffset.split(',');
-    for (i = 0; i < items.length; i++) {
+    timeGlobalDelay = timeGlobalDelay || 0;
+    timeOffsetMultiplier = timeOffsetMultiplier || 1;
+    for (; i < items.length; i++) {
       for (j = 0; j < timeOffset.length; j++) {
-        localTimeOffset[j] = (parseFloat(timeOffset[j]) * i) + 's';
+        localTimeOffset[j] = ((parseFloat(timeOffset[j]) * Math.pow(i,timeOffsetMultiplier)) + timeGlobalDelay) + 's';
       }
       items[i].style[this.cssVendorPrefix('animationDelay', items[i].style)] = localTimeOffset.join(',');
       items[i].classList.add('menu-fadein');
     }
   });
-}(loader));
+}(WjsProto));

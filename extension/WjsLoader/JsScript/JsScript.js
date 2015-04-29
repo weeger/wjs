@@ -1,33 +1,36 @@
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('JsScript', {
+  WjsProto.register('WjsLoader', 'JsScript', {
+
+    __construct: function () {
+      WjsProto.proto.Loader.__construct.call(this);
+    },
+
     /**
      * Execute retrieved javascript.
      * @param {string} name
-     * @param {string} value
-     * @param {WJSProcessProto} process
+     * @param {string|Function} value
+     * @param {WjsProto.proto.Process} process
      * @return {?}
      */
     parse: function (name, value, process) {
       // If value is not a function, it came from
       // the not cached json response, so
       // we are forced to evaluate it.
-      var isFunction = typeof value === 'function';
-      if (!isFunction) {
+      if (!(typeof value === 'function')) {
         // wjs, process and loader variables
         // can be used by scripts to register data.
         // We have to add local vars here, this allow to give
         // references to these vars into parsed script,
         // also after wjs script compression, who rename local vars.
         eval(value);
-        return value;
       }
       else {
         value(this, name, process);
-        return value;
       }
+      return value;
     }
   });
   // [-->
-}(wjsContext));
+}(WjsProto));

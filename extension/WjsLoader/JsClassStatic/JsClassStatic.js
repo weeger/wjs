@@ -1,24 +1,22 @@
-/**
- * @require JsMethod > staticClass
- */
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('JsClassStatic', {
-    // Extends full named loader class.
-    classExtends: 'WjsLoaderJsClass',
-    parse: function (name, data, process) {
-      var output = this.wjs.loaders.JsClass.parse.apply(this, [name, data, process]);
+  WjsProto.register('WjsLoader', 'JsClassStatic', {
+    loaderExtends: 'JsClass',
+
+    __construct: function () {
+      this.staticClasses = {};
+      this.wjs.loaders.JsClass.__construct.call(this);
+    },
+
+    register: function (type, name, process, value) {
+      var self = this,
+      // Parent execute classExtend.
+        output = self.wjs.loaders.JsClass.register.apply(self, arguments);
+      // Create proto
+      this.staticClasses[name] = new (self.wjs.classProto(name))();
       return output;
-    },
-
-    addJsClassStatic: function (name, proto) {
-      this.addLastCompSave(name, this.wjs.staticClass(name, proto));
-    },
-
-    loadCompleteJsClassStatic: function (name, process) {
-      return this.loadCompleteJsClass(name, process);
     }
   });
   // [-->
-}(wjsContext));
+}(WjsProto));

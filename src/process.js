@@ -5,80 +5,81 @@
  * and can execute a "complete" callback when finished.
  * This is useful when loading is asynchronous and allows
  * to launch several processes separately.
- * @param {WjsProto} wjs
+ * @param {WjsProto} WjsProto
  */
-(function (context) {
+(function (WjsProto) {
   'use strict';
   // <--]
-  /**
-   * We don't use classExtend, given that
-   * processes does not use class inheritances.
-   * @param {Object=} options
-   * @constructor
-   */
-  var WJSProcessProto = function (request, options) {
-    var self = this, wjs = context.wjs;
-    options = wjs.extendOptions(options || {});
-    // Save the parent process locally,
-    // it allow to delay process
-    // with the same context.
-    if (!options.processParent && wjs.processParent) {
-      options.processParent = wjs.processParent;
-    }
-    // Default values
-    wjs.extendObject(self, {
-      /** @type {Number} */
-      id: wjs.processCounter++,
-      /** @type {WJSProto} */
-      wjs: wjs,
-      /** @type {boolean} */
-      destroy: options.destroy || false,
-      /** @type {Object.Object} */
-      booted: false,
-      /** @type {Object.Object} */
-      parseQ: {},
-      /** @type {boolean} Async mode is specified for whole process. */
-      async: options.async || false,
-      /** @type {Function} */
-      callbacks: options.complete ? [options.complete] : [],
-      /** @type {Array.Object} */
-      extRequests: [],
-      /** @type {boolean} */
-      exclude: options.exclude,
-      /** @type {boolean} By default processes are queued for execution. */
-      stacked: options.stacked !== undefined ? options.stacked : true,
-      /** @type {Object.Array} */
-      request: request,
-      /** @type {Object} Keep reference for extra options. */
-      options: options,
-      /** @type {Array.WJSProto} Processes waiting for this one to finish for boot. */
-      next: [],
-      /** @type {Array} */
-      processStack: [],
-      /** @type {Object} Registry of parsed data. */
-      output: {}
-    });
-    // Save it into w.
-    self.wjs.processes.push(self);
-    // Append request.
-    if (request) {
-      // Make first a specific verification for loaders.
-      wjs.loadersExists(Object.keys(request), function () {
-        self.boot();
+  WjsProto.proto.Process = {
+
+    __construct: function (request, options, wjs) {
+      var self = this;
+      options = wjs.extendOptions(options || {});
+      // Save the parent process locally,
+      // it allow to delay process
+      // with the same context.
+      if (!options.processParent && wjs.processParent) {
+        options.processParent = wjs.processParent;
+      }
+      // Default values
+      wjs.extendObject(self, {
+        /** @type {Number} */
+        id: wjs.processCounter++,
+        /** @type {WjsProto} */
+        wjs: wjs,
+        /** @type {boolean} */
+        destroy: options.destroy || false,
+        /** @type {Object} */
+        booted: false,
+        /** @type {Object} */
+        parseQ: {},
+        /** @type {boolean} Async mode is specified for whole process. */
+        async: options.async || true,
+        /** @type {Function} */
+        callbacks: options.complete ? [options.complete] : [],
+        /** @type {Array} */
+        extRequests: [],
+        /** @type {boolean} */
+        exclude: options.exclude,
+        /** @type {boolean} By default processes are queued for execution. */
+        stacked: options.stacked !== undefined ? options.stacked : true,
+        /** @type {Object} */
+        request: request,
+        /** @type {Object} Keep reference for extra options. */
+        options: options,
+        /** @type {Array} Processes waiting for this one to finish for boot. */
+        next: [],
+        /** @type {Array} */
+        processStack: [],
+        /** @type {Object} Registry of parsed data. */
+        output: {}
       });
-    }
-  };
+      // Save it into w.
+      self.wjs.processes.push(self);
+      // Append request.
+      if (request) {
+        // Make first a specific verification for loaders.
+        wjs.loadersExists(Object.keys(request), function () {
+          // All processes are launched in a new call stack,
+          // it avoid to overflow in case of large amount of
+          // dependencies calls. Wjs manage an internal stack
+          // to keep order of "use" and "destroy" calls.
+          self.wjs.window.setTimeout(function () {
+            self.boot();
+          });
+        });
+      }
+    },
 
-  WJSProcessProto.prototype = {
-
+    /**
+     * Start process when loaders exists checked.
+     */
     boot: function () {
       var self = this,
         wjs = self.wjs,
         request = self.request,
-        requestDependencies = {}, i,
-        process,
+        requestDependencies = {},
         processStack,
-        hook = 'extRequest' + ((self.destroy) ? 'Destroy' : 'Use'),
         responsePackage = {};
       // Prevent to boot multiple times,
       // it can occur when multiple processes
@@ -91,7 +92,7 @@
       // It keep processes execution when multiple calls
       // are executed successively.
       if (self.stacked) {
-        processStack = self.options.processParent ? self.options.processParent.processStack : self.wjs.processStack;
+        processStack = self.options.processParent ? self.options.processParent.processStack : wjs.processStack;
         // Add to process stack if not present.
         if (processStack.indexOf(this) === -1) {
           processStack.push(this);
@@ -116,7 +117,7 @@
       // if yes, this process boot is queued.
       // This test is dependent to resource,
       // not to processes stack or parent.
-      if (!wjs.regEach(request, function (type, name) {
+      else if (!wjs.regEach(request, function (type, name) {
         var process = wjs.processFor(type, name);
         if (process && process !== self) {
           // Add current process to the waiting list.
@@ -133,6 +134,7 @@
       // is not currently parsing it.
       if (!wjs.regEach(request, function (type, name) {
         var i, error, processQueued,
+          hook = 'request' + (self.destroy ? 'Destroy' : 'Use'),
           extensionData = wjs.get(type, name);
         // Handle reload option.
         if (extensionData && self.options.reload) {
@@ -152,10 +154,10 @@
         // Check if loader exists, if not we can't
         // prepare request so we start to build response package.
         else if (!wjs.loaders[type]) {
-          error = 'WJS_ERR_PULL_UNDEFINED_LOADER';
+          error = 'WJS_ERR_PULL_UNDEFINED_LOADER_TYPE';
           responsePackage[type] = responsePackage[type] || {};
           responsePackage[type][name] = {'#data': error};
-          self.wjs.err('Load error for ' + error);
+          wjs.err('Load error for ' + type + '::' + name + ' : ' + error);
         }
         else {
           // Search if a process is not currently
@@ -174,9 +176,9 @@
               self.loadingComplete(true);
               // A process is about to parse requested extension,
               // We enforce process to parse it now before launching this one again.
-              processQueued.itemParse(type, name, function () {
-                // Launch request again.
-                return wjs.use(request, self.options);
+              processQueued.itemProcess(type, name, function () {
+                // Launch request again (use or destroy).
+                return wjs.process(self.request, self.options);
               });
               return false;
             }
@@ -199,7 +201,7 @@
      * Launch retrieving.
      */
     loadingStart: function (responsePackage) {
-      var i, j, key, type, name,
+      var i, key, type, name,
         self = this,
         wjs = self.wjs,
         requests = self.extRequests,
@@ -251,7 +253,7 @@
         }
         // Launch AJAX call.
         wjs.ajax({
-          url: settings.responsePath + '?' +
+          url: settings.pathResponse + '?' +
             wjs.param(serverRequest) +
             settings.paramExtra,
           method: 'GET',
@@ -274,12 +276,12 @@
      * Callback when all request complete,
      * only one complete callback after start.
      *
-     * @param {boolean} silent Set to true avoid callbacks calls.
+     * @param {boolean=} silent Set to true avoid callbacks calls.
      */
     loadingComplete: function (silent) {
       var self = this,
         wjs = self.wjs,
-        arg, i = 0,
+        i = 0,
         processStack,
         parent = wjs.processParent,
         stackIndex;
@@ -295,9 +297,9 @@
       // should be eligible for garbage collection.
       Object.freeze(self);
       // Reboot next process from stack.
-      if (self.stacked && stackIndex !== -1) {
+      if (self.stacked) {
         processStack = self.options.processParent ? self.options.processParent.processStack : self.wjs.processStack;
-        stackIndex = stackIndex = processStack.indexOf(self);
+        stackIndex = processStack.indexOf(self);
         // Processes can be stackable but not stacked,
         // like startup process who are not booting,
         // only directly starting.
@@ -334,11 +336,11 @@
      * }
      */
     responseParse: function (response) {
-      var self = this;
+      var self = this, wjs = self.wjs, parseQ = self.parseQ;
       // Add data to parse queue.
-      self.wjs.extendObject(self.parseQ, response, true);
+      wjs.extendObject(parseQ, response, true);
       // Search once more for loaders.
-      self.wjs.loadersExists(Object.keys(self.parseQ), function () {
+      wjs.loadersExists(Object.keys(parseQ), function () {
         // Launch first item parsing.
         self.responseParseNext();
       });
@@ -348,57 +350,40 @@
      * Launch parsing of next item in the parse queue.
      */
     responseParseNext: function () {
-      var self = this, wjs = self.wjs, extNext, output, queue = self.parseQ;
-      // This is a trick to not delete loaders before
-      // to delete all extensions. In place of that
-      // we should create sub processes (like in parse function)
-      // according to objects dependencies.
-      if (self.destroy && queue.WjsLoader && Object.keys(queue).length > 1) {
-        queue = wjs.extendObject({}, queue, true);
-        delete queue.WjsLoader;
-      }
-      // Retrieve next item.
-      while (extNext = wjs.regNext(queue)) {
-        if (!self.destroy) {
-          // Process can retrieve already loaded extensions
-          // so we have to check again if it already saved.
-          if (!wjs.get(extNext.type, extNext.name)) {
-            self.itemParse(extNext.type, extNext.name);
-            // We stop to the first matched item.
-            // Next treatment should be launched by parsing function.
-            // It allows to treat asynchronous parsing, like files.
+      var self = this, wjs = self.wjs;
+      // Breaking stack prevent overflows.
+      wjs.window.setTimeout(function () {
+        var extNext, ObjectKeys = Object.keys, queue = self.parseQ;
+        // This is a trick to not delete loaders before
+        // to delete all extensions. In place of that
+        // we should create sub processes (like in parse function)
+        // according to objects dependencies.
+
+        if (self.destroy && queue.WjsLoader && ObjectKeys(queue).length > 1) {
+          queue = wjs.extendObject({}, queue, true);
+          delete queue.WjsLoader;
+        }
+        // Retrieve next item.
+        while (extNext = wjs.regNext(queue)) {
+          if (self.itemProcess(extNext.type, extNext.name)) {
             return;
           }
+          wjs.regRem(queue, extNext.type, extNext.name);
         }
-        else {
-          self.itemDestroy(extNext.type, extNext.name);
-          return;
+        // At the end of loading, queue must be empty.
+        // If not, may be an unknown script is present in
+        // the returned package.
+        if (ObjectKeys(queue).length > 0) {
+          self.wjs.err('Parse queue not empty.');
         }
-        wjs.regRem(queue, extNext.type, extNext.name);
-      }
-      // At the end of loading, queue must be empty.
-      // If not, may be an unknown script is present in
-      // the returned package.
-      if (Object.keys(queue).length > 0) {
-        self.wjs.err('Parse queue not empty.');
-      }
-      self.loadingComplete();
+        self.loadingComplete();
+      });
     },
 
-    /**
-     * Create a specific function allows to parse item from
-     * external context, like in requirement treatment.
-     * @param {string} extensionType
-     * @param {string} extensionName
-     * @param {Function=} callback
-     */
-    itemParse: function (extensionType, extensionName, callback) {
-      var self = this, wjs = self.wjs,
-        output, require,
-        requireKey = '#require',
+    itemProcess: function (extensionType, extensionName, callback) {
+      var self = this,
         callbackKey = '#callbacks',
-        extensionData = self.parseQ[extensionType][extensionName],
-        url;
+        extensionData = self.parseQ[extensionType][extensionName];
       // parseQ contains a editable object, we use it to store
       // callbacks, they will wait for parse complete.
       // These callbacks are different from request callbacks,
@@ -408,6 +393,50 @@
         extensionData[callbackKey] = extensionData[callbackKey] || [];
         extensionData[callbackKey].push(callback);
       }
+      if (!self.destroy) {
+        // Process can retrieve already loaded extensions
+        // so we have to check again if it already saved.
+        if (!self.wjs.get(extensionType, extensionName)) {
+          self.itemParse(extensionType, extensionName, callback);
+          // We stop to the first matched item.
+          // Next treatment should be launched by parsing function.
+          // It allows to treat asynchronous parsing, like files.
+          return true;
+        }
+      }
+      else {
+        self.itemDestroy(extensionType, extensionName, callback);
+        return true;
+      }
+      return false;
+    },
+
+    itemProcessComplete: function (extensionType, extensionName) {
+      var wjs = this.wjs, callback = this.parseQ[extensionType][extensionName]['#callbacks'];
+      // Remove from queue.
+      wjs.regRem(this.parseQ, extensionType, extensionName);
+      // Launch callback.
+      if (callback) {
+        wjs.callbacks(callback);
+      }
+      else {
+        // Go to next item.
+        this.responseParseNext();
+      }
+    },
+
+    /**
+     * Create a specific function allows to parse item from
+     * external context, like in requirement treatment.
+     * @param {string} extensionType
+     * @param {string} extensionName
+     * @param {Function=} callback
+     */
+    itemParse: function (extensionType, extensionName) {
+      var self = this, wjs = self.wjs,
+        require,
+        requireKey = '#require',
+        extensionData = self.parseQ[extensionType][extensionName];
       // Load required elements first.
       if (extensionData[requireKey] !== undefined) {
         // Save requirements, it allows to delete
@@ -441,31 +470,30 @@
       }
       // This is a cached content.
       if (typeof extensionData['#data'] === 'string' && extensionData['#data'].indexOf('cache://') === 0) {
+        // Cache registry save links between extensions and
+        // cache links to manage deletions and dependencies.
         wjs.cacheReg[extensionType + '::' + extensionName] = extensionData['#data'].split('://')[1];
-        // Go to search if cached data have been stored
-        // into buffer, before to parse this extension.
-        if (wjs.cacheBuffer[extensionType] && wjs.cacheBuffer[extensionType][extensionName]) {
-          self.cacheHandle(extensionType, extensionName, wjs.cacheBuffer[extensionType][extensionName]);
-        }
-        else {
-          // If not, cache file have not been already loaded,
-          // so we wait for load, it will execute cacheHandle.
-          // It will need to access to this process, using cacheHandler.
-          wjs.loaders[extensionType].cacheHandler[extensionName] = self;
-        }
+        // Launch an event listener for cache retrieving.
+        WjsProto.registerListen('cache', extensionType + '/' + extensionName, function (data) {
+          // Replace cache:// link by real data into process object
+          // it create a safe place where to find raw data.
+          extensionData['#data'] = data;
+          self.itemParseSave(extensionType, extensionName, data);
+        });
         return;
       }
       // If data is not cached.
-      self.cacheHandle(extensionType, extensionName, extensionData['#data']);
+      self.itemParseSave(extensionType, extensionName, extensionData['#data']);
     },
 
-    cacheHandle: function (extensionType, extensionName, data) {
+    /**
+     * The callback part of itemParse.
+     */
+    itemParseSave: function (extensionType, extensionName, data) {
       var self = this, wjs = self.wjs, output,
       // Local copy prevent global loader deletion
       // before the end on this script.
-        loader = wjs.loaders[extensionType],
-        buffer = wjs.cacheBuffer[extensionType],
-        handler = loader ? loader.cacheHandler : false;
+        loader = wjs.loaders[extensionType];
       // Handle errors.
       if (typeof data === 'string' && data.indexOf('WJS_ERR_') === 0) {
         // Throw custom error.
@@ -476,18 +504,6 @@
       else {
         // By default save raw data.
         output = loader.parse(extensionName, data, self);
-      }
-      // Manage cache.
-      // Remove handler for this extension.
-      if (handler[extensionName]) {
-        delete handler[extensionName];
-      }
-      // Cleanup buffer.
-      if (buffer && buffer[extensionName]) {
-        delete buffer[extensionName];
-        if (wjs.objectIsEmpty(buffer)) {
-          delete wjs.cacheBuffer[extensionType];
-        }
       }
       // If loader parsing returns false, complete will
       // be handled by it, maybe asynchronously.
@@ -502,7 +518,7 @@
      * @param {?} saveData
      */
     itemParseComplete: function (extensionType, extensionName, saveData) {
-      var self = this, callback = self.parseQ[extensionType][extensionName]['#callbacks'];
+      var self = this;
       // Handle errors for missing loaders.
       if (self.wjs.extLoaded[extensionType]) {
         // Save into wjs.
@@ -511,15 +527,7 @@
         self.output[extensionType] = self.output[extensionType] || [];
         self.output[extensionType][extensionName] = saveData;
       }
-      // Remove from queue.
-      self.wjs.regRem(self.parseQ, extensionType, extensionName);
-      if (callback) {
-        self.wjs.callbacks(callback);
-      }
-      else {
-        // Go to next item.
-        self.responseParseNext();
-      }
+      self.itemProcessComplete(extensionType, extensionName);
     },
 
     /**
@@ -528,7 +536,7 @@
      * @param {string=} name
      */
     itemDestroy: function (type, name) {
-      var self = this, wjs = self.wjs, data = this.wjs.get(type, name);
+      var self = this, wjs = self.wjs, data = wjs.get(type, name);
       if (!wjs.loaders[type] || data === false || wjs.loaders[type].destroy(name, data, self) !== false) {
         self.itemDestroyComplete(type, name);
       }
@@ -536,19 +544,17 @@
 
     /**
      * Handle completed destruction.
-     * @param {string=} type
-     * @param {string=} name
+     * @param {string=} extensionType
+     * @param {string=} extensionName
      */
-    itemDestroyComplete: function (type, name) {
+    itemDestroyComplete: function (extensionType, extensionName) {
       var wjs = this.wjs;
-      wjs.regRem(this.parseQ, type, name);
-      if (this.wjs.loaders[type]) {
+      if (wjs.loaders[extensionType]) {
         // Remove entry.
-        delete wjs.extLoaded[type][name];
-        delete wjs.extRequire[type][name];
+        delete wjs.extLoaded[extensionType][extensionName];
+        delete wjs.extRequire[extensionType][extensionName];
       }
-      // Go to next item.
-      this.responseParseNext();
+      this.itemProcessComplete(extensionType, extensionName);
     },
 
     /**
@@ -567,7 +573,5 @@
       return missing;
     }
   };
-  // We save reference to prototype into wjs.
-  context.wjs.processProto = WJSProcessProto;
   // [-->
-}(window));
+}(WjsProto));

@@ -1,15 +1,19 @@
-(function (context) {
+/**
+ * @require WjsLoader > JsScript
+ */
+(function (WjsProto) {
   'use strict';
   // <--]
-  context.wjs.loaderAdd('JsMethod', {
-    // Extends full named loader class.
-    classExtends: 'WjsLoaderJsScript',
+  WjsProto.register('WjsLoader', 'JsMethod', {
+    loaderExtends: 'JsScript',
     addLastComp: null,
     addLastCompCallback: null,
+    wjsShortcuts: true,
 
-    destroy: function (name, data) {
-      if (this.wjs.hasOwnProperty(name)) {
-        delete this.wjs[name];
+    destroy: function (name) {
+      var self = this;
+      if (self.wjsShortcuts && self.wjs.hasOwnProperty(name)) {
+        delete self.wjs[name];
       }
       return true;
     },
@@ -17,57 +21,31 @@
     /**
      * Treat returned content as normal javascript.
      * Extra javascript is added from server side to
-     * manage handling with addJsMethod.
+     * manage handling with add.
      * @param {string} name
      * @param {string} value
-     * @param {WJSProcessProto} process
+     * @param {WjsProto.proto.Process} process
      * @return {?}
      */
     parse: function (name, value, process) {
-      this.wjs.loaders.JsScript.parse.apply(this, [name, value, process]);
+      // Start listening for method registering
+      this.registerListen(this.type, name, process, value);
+      // Parse as a normal script.
+      this.wjs.loaders.JsScript.parse.call(this, name, value, process);
       // Return false stops parsing process.
       return false;
     },
 
-    /**
-     * Shortcut function to handle method declaration.
-     * addJsMethod and addJsMethodComplete are called
-     * in the same process.
-     * @param {string} name
-     * @param {Function} callback
-     */
-    addJsMethod: function (name, data) {
-      this.addLastCompSave(name, data);
-    },
-
-    addLastCompSave: function (name, data) {
-      this.addLastComp = name;
-      this.addLastCompData = data;
-    },
-
-    /**
-     * Execute callback to continue parsing,
-     * call to this function is generated on server side,
-     * and appended to the end of the script.
-     * @param {string} name
-     * @param {WJSProcessProto} process
-     */
-    loadCompleteJsMethod: function (name, process) {
+    register: function (type, name, process, value) {
       var self = this;
-      if (self.addLastComp !== null) {
-        if (!self.wjs.hasOwnProperty(name)) {
-          self.wjs[name] = self.addLastCompData;
-        }
-        process.itemParseComplete(
-          self.type,
-          self.addLastComp,
-          self.addLastCompData
-        );
-        // Reset temp variables.
-        self.addLastComp =
-          self.addLastCompData = null;
+      // Add shortcut into wjs[name].
+      if (self.wjsShortcuts === true && !self.wjs.hasOwnProperty(name)) {
+        self.wjs[name] = (WjsProto.retrieve(this.type, name)).bind(self.wjs);
       }
+      // Continue parsing.
+      // Allow child prototypes to force saved value.
+      process.itemParseComplete(this.type, name, value || WjsProto.retrieve(this.type, name));
     }
   });
   // [-->
-}(wjsContext));
+}(WjsProto));

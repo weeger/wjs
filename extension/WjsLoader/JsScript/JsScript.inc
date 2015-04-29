@@ -13,27 +13,34 @@ class JsScript extends Loader {
   /**
    * Append object to the output array.
    */
-  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+  function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
-    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION) {
+    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
       if (is_file($value)) {
         $value = file_get_contents($value);
         $this->wjs->jsParseRequire($this->type, $name, $value);
       }
-      $output = parent::extensionPush($name, $excludeRequire, $value);
-      if ($this->wjs->cacheEnabled === FALSE) {
-        $output['#data'] = 'var loader=this,name=arguments[0],process=arguments[2];' . $output['#data'];
-      }
+      $output = parent::extensionPush($name, $options, $value);
       return $output;
     }
-    else {
-      return parent::extensionPush($name, $excludeRequire, $value);
-    }
+    return parent::extensionPush($name, $options, $value);
   }
 
   function cacheJsEncode($data) {
     // Wrap data into a function, so cached file
     // will be a pure javascript file with no eval.
-    return 'function(loader,name,process){' . $data . '}';
+    return 'function(){' . $data . '}';
+  }
+
+  function scanFolderItem($directory, $item, $globalData) {
+    if (is_file($directory . $item)) {
+      $info = pathinfo($directory . $item);
+      // Avoid minified files.
+      if (substr($info['filename'], -4) !== '.min') {
+        $this->wjs->extensionAdd($this->type, $info['filename'],
+          // Return good version
+          $this->wjs->jsFileVersioned($directory . $item));
+      }
+    }
   }
 }
