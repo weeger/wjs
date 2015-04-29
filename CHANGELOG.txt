@@ -1,3 +1,8 @@
+WJS - 4.0.1 - 2015-04-29
+------------------------
+- Readme image
+- travis.yml
+
 WJS - 4.0.0 - 2015-04-29
 ------------------------
 - Full ajax async requests
