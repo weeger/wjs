@@ -1,0 +1,10 @@
+{
+  "destination": "#message",
+  "Menu": true,
+  "require": {
+    "WebComp": [
+      "BgAnim",
+      "BubbleUrl"
+    ]
+  }
+}

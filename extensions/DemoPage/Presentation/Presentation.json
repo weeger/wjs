@@ -1,0 +1,14 @@
+{
+  "destination": "#message",
+  "Menu": true,
+  "GitHub": true,
+  "require": {
+    "Image": {
+      "storm": "extensions/DemoPage/Presentation/wire.gif"
+    },
+    "WebComp": [
+      "BgAnim",
+      "SideLinks"
+    ]
+  }
+}

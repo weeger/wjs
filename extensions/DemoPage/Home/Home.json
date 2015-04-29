@@ -1,0 +1,7 @@
+{
+  "destination": "#message",
+  "require": {
+    "WebComp": ["BgAnim"]
+  }
+}
+

@@ -1,0 +1,198 @@
+#linksBottomWrapper {
+    width: 640px;
+    margin: 0 auto;
+    z-index:10;
+}
+
+ul#linksBottom {
+    top: 160px;
+    left: 0;
+    width: 570px;
+    margin: 0 auto;
+    padding: 10px 0 0 0;
+}
+
+ul#linksBottom li {
+    opacity: 0;
+    background: #F2F2F2;
+    width: 280px;
+    list-style-type: none;
+    margin: 0 0 10px 0;
+    padding: 0;
+    float: left;
+    -webkit-animation: linkShadowArise 6s cubic-bezier(0, .6, .46, 1) infinite, linkIntro .5s linear forwards;
+    animation: linkShadowArise 6s cubic-bezier(0, .6, .46, 1) infinite, linkIntro .5s linear forwards;
+}
+
+ul#linksBottom li:nth-child(odd) {
+    margin-right: 10px;
+}
+
+ul#linksBottom li a {
+    position: relative;
+    color: #888;
+    text-align: center;
+    padding: 10px;
+    margin: 0;
+    display: block;
+    /*background: #222;*/
+    border: 4px solid rgba(255, 255, 255, .1);
+    box-shadow: 1px 1px 6px rgba(0, 0, 0, .4);
+}
+
+ul#linksBottom li a:hover {
+    background: #333;
+    color: #CCC;
+}
+
+ul#linksBottom .bubble {
+    border-radius: 100%;
+    border: 2px solid #333;
+    background: #444 url('bubbles.gif');
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: -8px;
+    box-shadow:0 2px 2px rgba(0,0,0,.8);
+    z-index:1000;
+}
+
+ul#linksBottom li a:hover .bubble {
+    background-position: -50px 0;
+}
+
+ul#linksBottom li:nth-child(odd) .bubble {
+    left: -30px;
+}
+
+ul#linksBottom li:nth-child(even) .bubble {
+    right: -30px;
+}
+
+ul#linksBottom .bubble-twitter {
+    background-position: 0px -50px;
+}
+
+ul#linksBottom li a:hover .bubble-twitter {
+    background-position: -50px -50px;
+}
+
+ul#linksBottom .bubble-wexample {
+    background-position: 0px -100px;
+}
+
+ul#linksBottom li a:hover .bubble-wexample {
+    background-position: -50px -100px;
+}
+
+ul#linksBottom .bubble-wemplate {
+    background-position: 0px -150px;
+}
+
+ul#linksBottom li a:hover .bubble-wemplate {
+    background-position: -50px -150px;
+}
+
+ul#linksBottom .bubble-tiunine {
+    background-position: 0px -200px;
+}
+
+ul#linksBottom li a:hover .bubble-tiunine {
+    background-position: -50px -200px;
+}
+
+ul#linksBottom .bubble-home {
+    background-position: 0px -250px;
+}
+
+ul#linksBottom li a:hover .bubble-home {
+    background-position: -50px -250px;
+}
+
+ul#linksBottom .bubble-drupal6 {
+    background-position: 0px -300px;
+}
+
+ul#linksBottom li a:hover .bubble-drupal6 {
+    background-position: -50px -300px;
+}
+
+ul#linksBottom .bubble-drupal7 {
+    background-position: 0px -350px;
+}
+
+ul#linksBottom li a:hover .bubble-drupal7 {
+    background-position: -50px -350px;
+}
+
+@-webkit-keyframes linkShadowArise {
+    0% {
+        background: #F0F0F0;
+        box-shadow: 0 0 0 rgba(0, 0, 0, .3);
+    }
+    50% {
+        background: #FFF;
+        box-shadow: 5px 5px 2px rgba(0, 0, 0, .1);
+    }
+    100% {
+        background: #F0F0F0;
+        box-shadow: 0 0 0 rgba(0, 0, 0, .3);
+    }
+}
+
+@-webkit-keyframes linkIntro {
+    0% {
+        margin-top: -100px;
+        opacity: 0;
+    }
+    50% {
+        margin-top: 100px;
+    }
+    80% {
+        margin-top: 0px;
+        opacity: 1;
+    }
+    90% {
+        margin-top: 5px;
+    }
+    100% {
+        margin-top: 0px;
+        opacity: 1;
+    }
+}
+
+@keyframes linkShadowArise {
+    0% {
+        background: #F0F0F0;
+        box-shadow: 0 0 0 rgba(0, 0, 0, .3);
+    }
+    50% {
+        background: #FFF;
+        box-shadow: 5px 5px 2px rgba(0, 0, 0, .1);
+    }
+    100% {
+        background: #F0F0F0;
+        box-shadow: 0 0 0 rgba(0, 0, 0, .3);
+    }
+}
+
+@keyframes linkIntro {
+    0% {
+        margin-top: -100px;
+        opacity: 0;
+    }
+    50% {
+        margin-top: 100px;
+    }
+    80% {
+        margin-top: 0px;
+        opacity: 1;
+    }
+    90% {
+        margin-top: 5px;
+    }
+    100% {
+        margin-top: 0px;
+        opacity: 1;
+    }
+}

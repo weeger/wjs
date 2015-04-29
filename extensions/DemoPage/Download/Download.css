@@ -1,0 +1,48 @@
+b { color:blueviolet; }
+
+#menu-content .menu-download a {
+    background:blueviolet;
+    color:black;
+}
+
+#main-content {
+    -webkit-animation:loadDownload 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
+    animation:loadDownload 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
+}
+
+#main.unload #main-content {
+    -webkit-animation:unloadDownload 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
+    animation:unloadDownload 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
+}
+
+@-webkit-keyframes loadDownload {
+    from { height:250px; }
+    to { height:350px; }
+}
+
+@-webkit-keyframes unloadDownload {
+    from { height:350px; }
+    to { height:250px; }
+}
+
+@keyframes loadDownload {
+    from { height:250px; }
+    to { height:350px; }
+}
+
+@keyframes unloadDownload {
+    from { height:350px; }
+    to { height:250px; }
+}
+
+#main-content ul {
+    text-align:left;
+    list-style:armenian;
+    color:#CCC;
+}
+#main-content #message span {
+    color:#555;
+}
+#main-content #message a {
+    color:red;
+}

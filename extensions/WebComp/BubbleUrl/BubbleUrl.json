@@ -1,0 +1,9 @@
+{
+  "destination": "body",
+  "client":"extensions/WebComp/BubbleUrl/",
+  "require": {
+    "Image": {
+      "BubbleUrl": "extensions/WebComp/BubbleUrl/BubbleUrl.png"
+    }
+  }
+}
