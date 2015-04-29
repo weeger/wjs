@@ -1,2 +1,4 @@
 # Ignore cached content
 cache/*
+# This file holds cache folder
+!cache/README.txt
