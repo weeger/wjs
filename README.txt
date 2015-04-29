@@ -47,7 +47,7 @@ Configuration
   * Change the cacheToken variable to flush the site cache.
 
 - A custom "loader" manage the pages transitions
-  into loader/DemoPage
+  into extensions/WjsLoader/DemoPage
 
 - Get more information about the usage of wjs library on
   https://github.com/weeger/wjs
