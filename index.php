@@ -31,7 +31,7 @@ require_once dirname(__FILE__) . '/config.inc';
   </div>
 </div>
 
-<!-- [ANALYTICS] -->
+
 <!-- Thanks for watching to my code | Follow me @discreetLibrary -->
 </body>
 </html>
