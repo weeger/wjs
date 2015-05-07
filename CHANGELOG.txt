@@ -1,7 +1,13 @@
+WJS - 4.1.0 - 2015-05-07
+------------------------
+- Advanced WebComp and WebPage objects
+- New JsMethod
+- New demo base version
+- Dead code 
+
 WJS - 4.0.2 - 2015-04-29
 ------------------------
 - demo readme update
-- 
 
 WJS - 4.0.1 - 2015-04-29
 ------------------------

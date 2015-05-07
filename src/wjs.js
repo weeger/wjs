@@ -777,7 +777,10 @@
     WjsProto.event('wjsRegister::' + type + '::' + name, context.window);
   };
 
-  WjsProto.registerGet = function (type, name) {
+  /**
+   * Retrieve saved data.
+   */
+  WjsProto.retrieve = function (type, name) {
     var common = this.common;
     if (common[type] && common[type][name]) {
       return common[type][name];
@@ -792,7 +795,7 @@
    * @param callback
    */
   WjsProto.registerListen = function (type, name, callback) {
-    var self = this, data = WjsProto.registerGet(type, name);
+    var self = this, data = WjsProto.retrieve(type, name);
     if (data) {
       callback(data);
     }
@@ -804,13 +807,6 @@
         };
       context.window.addEventListener(eventName, localCallback);
     }
-  };
-
-  /**
-   * Retrieve saved data.
-   */
-  WjsProto.retrieve = function (type, name) {
-    return this.common[type][name];
   };
 
   /**

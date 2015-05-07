@@ -12,22 +12,23 @@ define('WJS_PUSH_JSLINK_INCLUDED', 'WJS_PUSH_JSLINK_INCLUDED');
 class JsLink extends Loader {
 
   function extensionAdd($name, $value) {
+    $value = $value ? $value : realpath($name);
     if (is_string($value)) {
       $value = array('server' => $value);
     }
     if (is_array($value) && !isset($value['client'])) {
-      $value['client'] = $this->wjs->pathClient($value['server']);
+      $value['client'] = $this->wjs->pathClient(realpath($value['server']));
     }
     // Use minified files for master versions.
     if ($this->wjs->jsCoreFilesVersion !== 'source' && isset($value['server'])) {
       // Get minified path.
-      $minJs = $this->wjs->jsPathMin($value['server']);
+      $minJs = $this->wjs->filePathMin($value['server'], 'js');
       // Minified file must exists.
       if (is_file($minJs)) {
-        $value['server'] = $this->wjs->jsPathMin($value['server']);
+        $value['server'] = $minJs;
         // Minify also client path.
         if (isset($value['client'])) {
-          $value['client'] = $this->wjs->jsPathMin($value['client']);
+          $value['client'] = $this->wjs->filePathMin($value['client'], 'js');
         }
       }
     }
@@ -60,8 +61,12 @@ class JsLink extends Loader {
           // Remove into wjs registry.
         $this->wjs->outputPackage[$this->type][$name]['#data'] = WJS_PUSH_JSLINK_INCLUDED;
       }
-      // Return always server path.
-      $files[] = $this->extensions[$name][$side];
+      // Avoid duplicates, it can occur when
+      // loader have parent or dependencies.
+      if (!in_array($this->extensions[$name][$side], $files)) {
+        // Return always server path.
+        $files[] = $this->extensions[$name][$side];
+      }
     }
   }
 }

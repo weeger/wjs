@@ -5,8 +5,8 @@
    * in the same time, useful for classes definition
    * created only once.
    */
-  WjsProto.register('JsMethod', 'staticClass', function (name, proto) {
+  WjsProto.register('JsMethod', 'staticClass', function (name, proto, args) {
     this.classExtend(name, proto);
-    return new (this.classProto(name))();
+    return new (this.classProto(name))(args);
   });
 }(WjsProto));

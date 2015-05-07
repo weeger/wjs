@@ -32,7 +32,7 @@ class WjsLoader extends JsLink {
     // If only server path to js is found,
     // try to detect his path from client side.
     if (isset($value['serverPathJs']) && !isset($value['clientPathJs'])) {
-      $value['clientPathJs'] = $this->wjs->pathClient(realpath($this->wjs->pathClient($value['serverPathJs'])));
+      $value['clientPathJs'] = $this->wjs->pathClient(realpath($value['serverPathJs']));
     }
     // Load PHP class definition.
     // Data is a path pointing to the main folder.
