@@ -20,6 +20,23 @@
     },
 
     options: {
+      require: {
+        defaults: false,
+        define: function (value) {
+//          log(value);
+//          this.wjs.use(value, {
+//            auto_Instance: this.loader.auto_Instance
+//          });
+        }
+      },
+      requireStatic: {
+        defaults: false,
+        define: function (value) {
+          if (value) {
+
+          }
+        }
+      },
       urlHistory: {
         defaults: false,
         unique: false,

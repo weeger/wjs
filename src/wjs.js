@@ -678,16 +678,16 @@
      * @param {Function} callback
      */
     onload: function (dom, callback) {
-      var loaded = false, callbackLauncher = function (e) {
+      var loaded = false, localCallback = function () {
         loaded = true;
-        dom.removeEventListener('load', callbackLauncher);
+        dom.removeEventListener('load', localCallback);
         callback();
       };
-      dom.addEventListener('load', callbackLauncher);
+      dom.addEventListener('load', localCallback);
       // Protect load errors with a timeout.
       this.window.setTimeout(function () {
         if (!loaded) {
-          callback();
+          localCallback();
         }
       }, 200);
     },

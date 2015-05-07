@@ -34,14 +34,11 @@
     /**
      * Called after ajax call, ask loader
      * to parse his own extension.
-     * @param extensionName
-     * @param output
-     * @param process
      * @returns {*}
      */
-    parse: function (extensionName, output, process) {
-      // To override...
-      return output;
+    parse: function (name, value, process) {
+      this.enable(name, value, process);
+      return value;
     },
 
     /**
@@ -67,6 +64,16 @@
      * @param {?} data
      */
     destroy: function (name, data) {
+      this.disable(name, data);
+      return true;
+    },
+
+    enable: function (name, value, process) {
+      // To override...
+      return true;
+    },
+
+    disable: function (name, value) {
       // To override...
       return true;
     },

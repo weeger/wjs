@@ -1,31 +1,25 @@
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'Image', {
     processType: 'parse',
-
     /**
      * Use Image loading to complete process.
-     * @param {string} name
-     * @param {string} value
-     * @param {WjsProto.proto.Process} process
-     * @return {?}
      */
     parse: function (name, value, process) {
-      // Create a new object.
-      var self = this,
-        image = new self.wjs.window.Image(),
-        type = self.type;
+      // Create a new Image object.
+      var self = this, type = self.type,
+        image = new self.wjs.window.Image();
+      // Wait for load completed.
       self.wjs.onload(image, function () {
+        // Allow inherited to place image somewhere.
+        self.enable();
+        // Continue.
         process.itemParseComplete(type, name, image);
       });
       // This launch image load process.
       image.src = name;
-      // Return false stops parsing process,
-      // And let us handle when we want to
-      // continue parsing (after image loading).
+      // Stop process.
       return false;
     }
   });
-  // [-->
 }(WjsProto));

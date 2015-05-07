@@ -358,7 +358,6 @@
         // to delete all extensions. In place of that
         // we should create sub processes (like in parse function)
         // according to objects dependencies.
-
         if (self.destroy && queue.WjsLoader && ObjectKeys(queue).length > 1) {
           queue = wjs.extendObject({}, queue, true);
           delete queue.WjsLoader;
@@ -430,21 +429,20 @@
      * external context, like in requirement treatment.
      * @param {string} extensionType
      * @param {string} extensionName
-     * @param {Function=} callback
      */
     itemParse: function (extensionType, extensionName) {
       var self = this, wjs = self.wjs,
-        require,
+        require, extRequire = wjs.extRequire,
         requireKey = '#require',
         extensionData = self.parseQ[extensionType][extensionName];
       // Load required elements first.
       if (extensionData[requireKey] !== undefined) {
         // Save requirements, it allows to delete
         // dependencies on object destroy.
-        wjs.extRequire[extensionType][extensionName] =
-          wjs.extRequire[extensionType][extensionName] || {};
+        extRequire[extensionType][extensionName] =
+          extRequire[extensionType][extensionName] || {};
         wjs.extendObject(
-          wjs.extRequire[extensionType][extensionName],
+          extRequire[extensionType][extensionName],
           extensionData[requireKey]);
         // Requirement may be already parsed before this item.
         if (self.requireMissing(extensionData[requireKey])) {
@@ -490,7 +488,7 @@
      * The callback part of itemParse.
      */
     itemParseSave: function (extensionType, extensionName, data) {
-      var self = this, wjs = self.wjs, output,
+      var wjs = this.wjs, output,
       // Local copy prevent global loader deletion
       // before the end on this script.
         loader = wjs.loaders[extensionType];
@@ -503,12 +501,12 @@
       }
       else {
         // By default save raw data.
-        output = loader.parse(extensionName, data, self);
+        output = loader.parse(extensionName, data, this);
       }
       // If loader parsing returns false, complete will
       // be handled by it, maybe asynchronously.
       if (output !== false) {
-        self.itemParseComplete(extensionType, extensionName, output);
+        this.itemParseComplete(extensionType, extensionName, output);
       }
     },
 
@@ -518,16 +516,16 @@
      * @param {?} saveData
      */
     itemParseComplete: function (extensionType, extensionName, saveData) {
-      var self = this;
+      var output = this.output, extLoaded = this.wjs.extLoaded;
       // Handle errors for missing loaders.
-      if (self.wjs.extLoaded[extensionType]) {
+      if (extLoaded[extensionType]) {
         // Save into wjs.
-        self.wjs.extLoaded[extensionType][extensionName] = saveData;
+        extLoaded[extensionType][extensionName] = saveData;
         // Save as output for callbacks functions.
-        self.output[extensionType] = self.output[extensionType] || [];
-        self.output[extensionType][extensionName] = saveData;
+        output[extensionType] = output[extensionType] || [];
+        output[extensionType][extensionName] = saveData;
       }
-      self.itemProcessComplete(extensionType, extensionName);
+      this.itemProcessComplete(extensionType, extensionName);
     },
 
     /**
@@ -536,9 +534,9 @@
      * @param {string=} name
      */
     itemDestroy: function (type, name) {
-      var self = this, wjs = self.wjs, data = wjs.get(type, name);
-      if (!wjs.loaders[type] || data === false || wjs.loaders[type].destroy(name, data, self) !== false) {
-        self.itemDestroyComplete(type, name);
+      var data = this.wjs.get(type, name), loader = this.wjs.loaders[type];
+      if (!loader || data === false || loader.destroy(name, data, this) !== false) {
+        this.itemDestroyComplete(type, name);
       }
     },
 

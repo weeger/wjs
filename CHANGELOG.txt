@@ -1,3 +1,11 @@
+WJS - 4.1.1 - 2015-05-07
+------------------------
+- Audio loader
+- Enable / Disable extensions
+- WebPage destroy delay
+- Various debug
+- Readme
+
 WJS - 4.1.0 - 2015-05-07
 ------------------------
 - Advanced WebComp and WebPage objects
