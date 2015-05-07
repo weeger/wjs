@@ -3,12 +3,12 @@
 }
 
 .WebComp-TestInc.fadeIn {
-  -webkit-animation: TestIncFadeIn 1s linear forwards;
-          animation: TestIncFadeIn 1s linear forwards;
+  -webkit-animation: TestIncFadeIn .5s linear forwards;
+          animation: TestIncFadeIn .5s linear forwards;
 }
 .WebComp-TestInc.fadeOut {
-  -webkit-animation: TestIncFadeOut 1s linear forwards;
-          animation: TestIncFadeOut 1s linear forwards;
+  -webkit-animation: TestIncFadeOut .5s linear forwards;
+          animation: TestIncFadeOut .5s linear forwards;
 }
 
 @-webkit-keyframes TestIncFadeIn {

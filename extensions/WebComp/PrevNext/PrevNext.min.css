@@ -8,20 +8,20 @@
   z-index: -10;
 }
 .WebComp-PrevNext.fadeIn {
-  -webkit-animation: PrevNextFadeIn 2s cubic-bezier(0, 0.9, 0, 1) forwards;
-          animation: PrevNextFadeIn 2s cubic-bezier(0, 0.9, 0, 1) forwards;
+  -webkit-animation: PrevNextFadeIn .5s cubic-bezier(0, 0.9, 0, 1) forwards;
+          animation: PrevNextFadeIn .5s cubic-bezier(0, 0.9, 0, 1) forwards;
 }
 .WebComp-PrevNext.loaded a {
   /* ie require z-index 0 to allow click event */
   z-index: 0;
 }
 .WebComp-PrevNext.fadeIn #previous {
-  -webkit-animation: PrevNextFadeInPrev 2s cubic-bezier(0, 0.9, 0, 1) forwards;
-          animation: PrevNextFadeInPrev 2s cubic-bezier(0, 0.9, 0, 1) forwards;
+  -webkit-animation: PrevNextFadeInPrev .5s cubic-bezier(0, 0.9, 0, 1) forwards;
+          animation: PrevNextFadeInPrev .5s cubic-bezier(0, 0.9, 0, 1) forwards;
 }
 .WebComp-PrevNext.fadeIn #next {
-  -webkit-animation: PrevNextFadeInNext 2s cubic-bezier(0, 0.9, 0, 1) forwards;
-          animation: PrevNextFadeInNext 2s cubic-bezier(0, 0.9, 0, 1) forwards;
+  -webkit-animation: PrevNextFadeInNext .5s cubic-bezier(0, 0.9, 0, 1) forwards;
+          animation: PrevNextFadeInNext .5s cubic-bezier(0, 0.9, 0, 1) forwards;
 }
 .WebComp-PrevNext.loaded #previous {
   left: -100px;

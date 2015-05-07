@@ -1,0 +1,57 @@
+.WebComp-BasicDemoPage-NewPage {
+  padding: 20px;
+}
+.WebComp-BasicDemoPage-NewPage.fadeIn {
+  -webkit-animation: NewPageFadeIn .5s cubic-bezier(0, 0.98, 0, 1) forwards;
+          animation: NewPageFadeIn .5s cubic-bezier(0, 0.98, 0, 1) forwards;
+}
+.WebComp-BasicDemoPage-NewPage.fadeOut {
+  -webkit-animation: NewPageFadeOut .5s cubic-bezier(0, 0.98, 0, 1) forwards;
+          animation: NewPageFadeOut .5s cubic-bezier(0, 0.98, 0, 1) forwards;
+}
+.WebComp-BasicDemoPage-NewPage.loaded {
+  width: 350px;
+  height: 450px;
+}
+
+@-webkit-keyframes NewPageFadeIn {
+  from {
+    width: 100px;
+    height: 100px;
+  }
+  to {
+    width: 350px;
+    height: 450px;
+  }
+}
+
+@keyframes NewPageFadeIn {
+  from {
+    width: 100px;
+    height: 100px;
+  }
+  to {
+    width: 350px;
+    height: 450px;
+  }
+}
+@-webkit-keyframes NewPageFadeOut {
+  from {
+    width: 350px;
+    height: 450px;
+  }
+  to {
+    width: 100px;
+    height: 100px;
+  }
+}
+@keyframes NewPageFadeOut {
+  from {
+    width: 350px;
+    height: 450px;
+  }
+  to {
+    width: 100px;
+    height: 100px;
+  }
+}

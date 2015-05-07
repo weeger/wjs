@@ -4,16 +4,6 @@
   WjsProto.register('WjsLoader', 'CssLink', {
     processType: 'parse',
 
-    destroy: function (name, data) {
-      // Parent node can be missing in case of
-      // deletion of an unknown dom item.
-      if (data.parentNode) {
-        // Remove child from dom.
-        data.parentNode.removeChild(data);
-      }
-      return true;
-    },
-
     parse: function (name, value, process) {
       // Link have been included into page head.
       if (value === 'WJS_PUSH_CSSLINK_INCLUDED') {
@@ -28,14 +18,29 @@
       value = self.wjs.urlToken(value || name);
       if (!(value instanceof wjs.window.Error)) {
         self.wjs.onload(domLink, function () {
+          // Append to head.
+          self.enable(name, domLink);
+          // Continue.
           self.parseLinkLoaded(name, domLink, process);
         });
         // Set attributes.
         domLink.setAttribute('rel', 'stylesheet');
         domLink.setAttribute('href', value);
-        self.wjs.document.head.appendChild(domLink);
         // Stop parsing.
         return false;
+      }
+    },
+
+    enable: function (name, value) {
+      this.wjs.document.head.appendChild(value);
+    },
+
+    disable: function (name, value) {
+      // Parent node can be missing in case of
+      // deletion of an unknown dom item.
+      if (value.parentNode) {
+        // Remove child from dom.
+        value.parentNode.removeChild(value);
       }
     },
 

@@ -1,0 +1,23 @@
+(function (WjsProto) {
+  'use strict';
+  WjsProto.register('WjsLoader', 'Audio', {
+    processType: 'parse',
+    /**
+     * Use Audio loading to complete process.
+     */
+    parse: function (name, value, process) {
+      // Create a new Audio object.
+      var self = this, type = self.type,
+        audio = new self.wjs.window.Audio(name);
+      // Wait for load completed (no progressive playing)
+      self.wjs.onload(audio, function () {
+        // Allow inherited to place image somewhere.
+        self.enable();
+        // Continue.
+        process.itemParseComplete(type, name, audio);
+      });
+      // Stop process.
+      return false;
+    }
+  });
+}(WjsProto));

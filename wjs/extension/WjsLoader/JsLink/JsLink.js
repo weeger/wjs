@@ -4,16 +4,6 @@
   WjsProto.register('WjsLoader', 'JsLink', {
     processType: 'parse',
 
-    destroy: function (name, data) {
-      // Parent node can be missing in case of
-      // deletion of an unknown dom item.
-      if (data.parentNode) {
-        // Remove child from dom.
-        data.parentNode.removeChild(data);
-      }
-      return true;
-    },
-
     parse: function (name, value, process) {
       // Link have been included into page head.
       if (value === 'WJS_PUSH_JSLINK_INCLUDED') {
@@ -28,17 +18,32 @@
       // or from client as a url name.
       value = wjs.urlToken(value || name);
       if (!(value instanceof wjs.window.Error)) {
-        self.wjs.onload(domScript, function () {
+        wjs.onload(domScript, function () {
+          // Append to head.
+          self.enable(name, domScript);
+          // Continue.
           self.parseLinkLoaded(name, domScript, process);
         });
         // We don't specify type as it is not required in HTML5.
         domScript.setAttribute('src', value);
-        wjs.document.head.appendChild(domScript);
         // Stop parsing.
         return false;
       }
       // Continue parsing.
       return true;
+    },
+
+    enable: function (name, value) {
+      this.wjs.document.head.appendChild(value);
+    },
+
+    disable: function (name, value) {
+      // Parent node can be missing in case of
+      // deletion of an unknown dom item.
+      if (value.parentNode) {
+        // Remove child from dom.
+        value.parentNode.removeChild(value);
+      }
     },
 
     parseLinkLoaded: function (name, domScript, process) {

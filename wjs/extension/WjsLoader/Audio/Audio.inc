@@ -4,12 +4,12 @@ namespace Wjs\Loader;
 
 use \Wjs\Loader;
 
-class Image extends Loader {
+class Audio extends Loader {
   /**
    * Append object to the output array.
    */
   function extensionPush($name, $options = array(), $value = NULL) {
-    // There is no value for images, value = name = url.
+    // There is no value for audio, value = name = url.
     return parent::extensionPush($name, $options, $name);
   }
 }

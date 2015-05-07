@@ -10,7 +10,6 @@
   // <--]
   WjsProto.register('WjsLoader', 'WebComp', {
     protoBaseClass: 'BasicWebComp',
-    autoInstance: false,
 
     __construct: function () {
       var self = this;
@@ -30,11 +29,8 @@
       var type = this.type;
       // Create class extensions.
       this.protoAdd(name, WjsProto.retrieve(type, name), name);
-      // Create an instance once downloaded.
-      // Auto instance can be explicitly activated
-      if (process.options.autoInstance !== undefined ? process.options.autoInstance : this.autoInstance) {
-        this.instance(name, value);
-      }
+      // Enable.
+      WjsProto.proto.Loader.parse.apply(this, arguments);
       return value;
     },
 

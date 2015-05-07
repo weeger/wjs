@@ -11,10 +11,11 @@ Check out the <a target="_blank" href="http://wjs.wexample.com">demo website</a>
 You can see a live demo here, and discover the source code here. Wjs is the open source part of the Wexample project. It is actually written in Javascript for the client part, and PHP for the server part. It is also ready to be translated into every other server side languages, depending of needs. 
 
 Wjs is made for you if : 
+- You are a very special person
 - You are seeking a lazy loader (to load almost any type of data)
 - You want to discover a new way to create rich web interfaces
-- You want to bring to your user a new way of navigation
-- You need an easy use of basic OOP concept in Javascript
+- You want to bring to your user a fresh system of navigation
+- You need an easy use of basic OOP concepts in Javascript
 
 Wjs is NOT for you if you are seeking a unifier Javascript framework (like jQuery, Backbone, etc...).
 
@@ -287,6 +288,20 @@ On client side :
 ```javascript
 // We load the HTML5 Image Logo
 wjs.use('Image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
+  complete: yourCustomCallback
+});
+```
+
+
+Audio loading
+-------------
+
+You can also use wjs to retrieve audio, and use it only when load complete. Images do not need to be packed on server side. 
+
+On client side : 
+```javascript
+// We load an mp3 or ogg file.
+wjs.use('Audio', audioUrl, {
   complete: yourCustomCallback
 });
 ```

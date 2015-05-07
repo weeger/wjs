@@ -3,10 +3,10 @@
 }
 
 .WebComp-TestInc.fadeIn {
-  animation: TestIncFadeIn 1s linear forwards;
+  animation: TestIncFadeIn .5s linear forwards;
 }
 .WebComp-TestInc.fadeOut {
-  animation: TestIncFadeOut 1s linear forwards;
+  animation: TestIncFadeOut .5s linear forwards;
 }
 
 @keyframes TestIncFadeIn {

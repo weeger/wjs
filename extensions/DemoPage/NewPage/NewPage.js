@@ -4,12 +4,15 @@
  */
 (function (WjsProto) {
   'use strict';
-  WjsProto.register('DemoPage', 'Overview', {
+  WjsProto.register('DemoPage', 'NewPage', {
     optionsDefault: {
       domDestination: '#main-page-body',
-      sharedRequire: {
-        WebComp:['SharedComp']
-      }
+//      require: {
+//        WebComp:['SharedComp']
+//      },
+//      requireStatic: {
+//        WebComp:['SharedComp']
+//      }
     }
   });
 }(WjsProto));

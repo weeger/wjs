@@ -1,13 +1,11 @@
-.WebComp-TestInc {
-  color: red;
-}
 .WebComp-TestIncTwo.fadeIn {
-  animation: TestIncFadeIn .2s linear forwards;
+  animation: TestIncTwoFadeIn .2s linear forwards;
 }
-.WebComp-TestInc.fadeOut {
-  animation: TestIncFadeOut 1s linear forwards;
+.WebComp-TestIncTwo.fadeOut {
+  animation: TestIncTwoFadeOut .2s linear forwards;
 }
-@keyframes TestIncFadeIn {
+
+@keyframes TestIncTwoFadeIn {
   from {
     opacity: 0;
   }
@@ -15,10 +13,8 @@
     opacity: 1;
   }
 }
-.WebComp-TestIncTwo.fadeOut {
-  animation: TestIncFadeOut 1s linear forwards;
-}
-@keyframes TestIncFadeOut {
+
+@keyframes TestIncTwoFadeOut {
   from {
     opacity: 1;
   }

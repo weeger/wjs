@@ -11,9 +11,8 @@
     wjsShortcuts: true,
 
     destroy: function (name) {
-      var self = this;
-      if (self.wjsShortcuts && self.wjs.hasOwnProperty(name)) {
-        delete self.wjs[name];
+      if (this.wjsShortcuts && this.wjs[name]) {
+        delete this.wjs[name];
       }
       return true;
     },
@@ -37,10 +36,10 @@
     },
 
     register: function (type, name, process, value) {
-      var self = this;
+      var wjs = this.wjs;
       // Add shortcut into wjs[name].
-      if (self.wjsShortcuts === true && !self.wjs.hasOwnProperty(name)) {
-        self.wjs[name] = (WjsProto.retrieve(this.type, name)).bind(self.wjs);
+      if (this.wjsShortcuts === true && !wjs[name]) {
+        wjs[name] = (WjsProto.retrieve(this.type, name)).bind(wjs);
       }
       // Continue parsing.
       // Allow child prototypes to force saved value.

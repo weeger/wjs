@@ -1,11 +1,12 @@
+body { background:red; }
 .WebComp-BasicDemoPage-Overview {
   padding: 20px;
 }
 .WebComp-BasicDemoPage-Overview.fadeIn {
-  animation: OverviewFadeIn 2s cubic-bezier(0, 0.98, 0, 1) forwards;
+  animation: OverviewFadeIn .5s cubic-bezier(0, 0.98, 0, 1) forwards;
 }
 .WebComp-BasicDemoPage-Overview.fadeOut {
-  animation: OverviewFadeOut 2s cubic-bezier(0, 0.98, 0, 1) forwards;
+  animation: OverviewFadeOut .5s cubic-bezier(0, 0.98, 0, 1) forwards;
 }
 .WebComp-BasicDemoPage-Overview.loaded {
   width: 350px;

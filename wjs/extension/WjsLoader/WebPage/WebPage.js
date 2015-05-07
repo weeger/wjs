@@ -7,8 +7,13 @@
   WjsProto.register('WjsLoader', 'WebPage', {
     loaderExtends: 'WebComp',
     protoBaseClass: 'BasicWebPage',
-    autoInstance: true,
     pageCurrent: null,
+    destroyDelay: 5000,
+
+    __construct: function () {
+      this.destroyTimeouts = {};
+      this.wjs.loaders.WebComp.__construct.call(this);
+    },
 
     /**
      * Fired when use click on a wjs://DemoPage:PageName link.
@@ -16,6 +21,22 @@
      */
     link: function (name) {
       this.pageShow(name);
+    },
+
+    parse: function (name, value, process) {
+      return this.wjs.loaders.WebComp.parse.apply(this, arguments);
+    },
+
+    enable: function (name, value, process) {
+      // Create an instance once downloaded.
+      // Auto instance can be explicitly activated
+      if (!process.options.webPagePreload) {
+        this.instance(name, value);
+      }
+    },
+
+    disable: function () {
+
     },
 
     /**
@@ -38,6 +59,7 @@
 
     /**
      * Display loaded page, launch load animations.
+     * @require JsMethod > extEnable
      */
     pageShow: function (name) {
       var wjs = this.wjs;
@@ -45,18 +67,22 @@
         this.pageHide(name);
         return;
       }
+      // Remove destroy time out.
+      if (this.destroyTimeouts[name]) {
+        this.wjs.window.clearTimeout(this.destroyTimeouts[name]);
+      }
       if (!wjs.get(this.type, name)) {
-        wjs.use(this.type, name, {
-          autoInstance: true
-        });
+        wjs.use(this.type, name);
       }
       else {
+        wjs.extEnable(this.type, name);
         wjs.loaders[this.type].instance(name);
       }
     },
 
     /**
      * Hide page.
+     * @require JsMethod > extDisable
      */
     pageHide: function (replacement) {
       // Prevent multiple loads.
@@ -67,6 +93,10 @@
         // and also for new page preload complete.
           callback = function () {
             if (loaded && exited) {
+              self.wjs.extDisable(self.pageCurrent.loader.type, self.pageCurrent.type);
+              // It could be an inherited loader.
+              self.pageCurrent.loader.destroyTimeout(self.pageCurrent.type);
+              self.pageCurrent = false;
               self.pageHideStarted = false;
               self.pageShow(replacement);
             }
@@ -75,7 +105,7 @@
         // Launch loading, don't wait complete element
         // destruction, it can contain asynchronous processes.
         self.wjs.use(this.type, replacement, {
-          autoInstance: false,
+          webPagePreload: true,
           complete: function () {
             loaded = true;
             callback();
@@ -83,18 +113,21 @@
         });
         // Launch page exit.
         pageCurrent.exit(function () {
-          self.wjs.destroy(self.type, self.pageCurrent.type, {
-            dependencies: true,
-            complete: function () {
-              // TODO : Allow to destroy with a delay, in case of quick revert
-              // TODO : We need to be able to "disable" extension without destroying it in case of css and js files.
-              exited = true;
-              callback();
-            }
-          });
-          self.pageCurrent = false;
+          exited = true;
+          callback();
         });
       }
+    },
+
+    destroyTimeout: function (name) {
+      var self = this, callback = function () {
+        self.wjs.destroy(self.type, name, {
+          // TODO : Shared dependencies.
+          dependencies: true
+        });
+        delete self.destroyTimeouts[name];
+      };
+      this.destroyTimeouts[name] = this.wjs.window.setTimeout(callback, this.destroyDelay);
     }
   });
   // [-->
