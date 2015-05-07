@@ -108,7 +108,7 @@ Registered data is also depending of each loader behavior, more information on l
 
 On server side : 
 ```php
-$this->wjs->extensionAdd('JsArray', 'jsArrayTestExampleName', array(
+$this->wjs->extensionAdd('JsArray', 'myJsArrayCustomName', array(
   0 => 'MyItem',
 ));
 ```
@@ -148,9 +148,9 @@ $wjs->response($_GET);
 So you can filter and manage returned content.
 ```php
 // Think about always make some verification on requested content.
-if (isset($_GET['wjs']['JsArray']) && $_GET['wjs']['JsArray'] === 'jsArraySecondTestExampleName') {
+if (isset($_GET['wjs']['JsArray']) && $_GET['wjs']['JsArray'] === 'myJsArrayName') {
   // Manage which data to retrieve.
-  $wjs->import('JsArray', 'jsArraySecondTestExampleName');
+  $wjs->import('JsArray', 'myJsArrayName');
   // When response is ready to be sent,
   // this function will add json headers,
   // print package content, then exit.
@@ -196,7 +196,7 @@ Like objects, you can also append data as javascript arrays. Note that array key
 
 On server side : 
 ```php
-$this->wjs->extensionAdd('JsArray', 'jsArrayTestExampleName', array(
+$this->wjs->extensionAdd('JsArray', 'myJsArrayName', array(
   0           => 'ATest',
   1           => 'AnOtherTest',
   'keysWill'  => 123,
@@ -206,7 +206,7 @@ $this->wjs->extensionAdd('JsArray', 'jsArrayTestExampleName', array(
 On client side : 
 ```javascript
 // Will return : ["ATest", "AnOtherTest", 123, Array[1]]
-wjs.use('JsArray', 'jsArraySecondTestExampleName', function (arrayContent) {
+wjs.use('JsArray', 'myJsArrayName', function (arrayContent) {
   continueYourScript(arrayContent);
 });
 ```
@@ -464,7 +464,7 @@ Document ready
 
 In order to wait wjs to be loaded before using it, you should wrap your scripts into the wjs.ready(callback); function. It ensure the callback to be executed after your page loading and also after wjs initialization. On client side : 
 ```javascript
-w.ready(function(){ 
+WjsProto.ready(function(){ 
   console.log("Ready to pull !"); 
   // Place here your wjs.use() requests.
 })

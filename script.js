@@ -1,23 +1,21 @@
-(function (win) {
+(function (context) {
   'use strict';
 
-  // Place a normal script when document is ready.
-  win.addEventListener('load', function () {
-    // Add buttons with javascript,
-    // the goal is to hide these links to search engine.
-    // The displayed text into search engine should be only
-    // the main page title and subtitle.
-    if (!(/bot|googlebot|crawler|spider|robot|crawling/i.test(win.navigator.userAgent))) {
-      win.document.getElementById('main-content').innerHTML +=
-        '<a id="previous" class="disabled" href="javascript:void(0);">&lt;&lt; previous</a>' +
-          '<a id="next" class="disabled" href="javascript:void(0);">next &gt;&gt;</a>';
-    }
-  });
-
-  WjsProto.ready('wjs', function () {
+  /**
+   * Place a normal script when document is ready.
+   * @require JsMethod > wjsIncludeInit
+   */
+  context.WjsProto.ready(function () {
+    this.wjsIncludeInit(this.window.document.body);
     // You can place extra javascript here
     // after the main site initialisation.
     // You can also add you scripts by the
     // classic way (outside this function).
   });
-}(window));
+
+  // Debug tool
+  context.log = function (message) {
+    console.log(message);
+  }
+
+}(this));

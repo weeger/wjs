@@ -1,0 +1,47 @@
+.WebComp-TestInc {
+  color: red;
+}
+.WebComp-TestIncTwo.fadeIn {
+  -webkit-animation: TestIncFadeIn .2s linear forwards;
+          animation: TestIncFadeIn .2s linear forwards;
+}
+.WebComp-TestInc.fadeOut {
+  -webkit-animation: TestIncFadeOut 1s linear forwards;
+          animation: TestIncFadeOut 1s linear forwards;
+}
+@-webkit-keyframes TestIncFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes TestIncFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.WebComp-TestIncTwo.fadeOut {
+  -webkit-animation: TestIncFadeOut 1s linear forwards;
+          animation: TestIncFadeOut 1s linear forwards;
+}
+@-webkit-keyframes TestIncFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes TestIncFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

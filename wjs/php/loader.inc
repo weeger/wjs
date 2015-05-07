@@ -188,6 +188,8 @@ abstract class Loader extends Router {
   function headerFiles($type, &$files = array(), $side = 'client', $render = FALSE) {
     // Give pushed extensions.
     foreach ($this->extensionsPushed as $extensionName => $pushedData) {
+      // Load js from dependencies,
+      // duplication is managed into files addition.
       $dependencies = $this->extensionGetRequire($extensionName, $this->wjs->extensionExclude);
       foreach ($dependencies as $requiredType => $items) {
         foreach ($items as $requiredName) {

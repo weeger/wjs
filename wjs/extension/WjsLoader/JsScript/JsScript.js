@@ -3,10 +3,6 @@
   // <--]
   WjsProto.register('WjsLoader', 'JsScript', {
 
-    __construct: function () {
-      WjsProto.proto.Loader.__construct.call(this);
-    },
-
     /**
      * Execute retrieved javascript.
      * @param {string} name

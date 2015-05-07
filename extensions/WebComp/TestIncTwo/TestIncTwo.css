@@ -1,0 +1,28 @@
+.WebComp-TestInc {
+  color: red;
+}
+.WebComp-TestIncTwo.fadeIn {
+  animation: TestIncFadeIn .2s linear forwards;
+}
+.WebComp-TestInc.fadeOut {
+  animation: TestIncFadeOut 1s linear forwards;
+}
+@keyframes TestIncFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.WebComp-TestIncTwo.fadeOut {
+  animation: TestIncFadeOut 1s linear forwards;
+}
+@keyframes TestIncFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

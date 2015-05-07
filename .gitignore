@@ -2,3 +2,5 @@
 cache/*
 # This file holds cache folder
 !cache/README.txt
+# Little security protection
+!cache/.htaccess

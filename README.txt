@@ -39,9 +39,6 @@ Configuration
   * extensions/DemoPage : Contains site's pages
   * extensions/WebComp : Contains other components like menus.
 
-- Pages folders contain .json files who defines dependencies
-  between pages and components.
-
 - Advanced users can also edit the config.inc file which is
   fully commented.
   * Change the cacheToken variable to flush the site cache.

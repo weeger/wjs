@@ -253,11 +253,11 @@ class Wjs extends Router {
   }
 
   /**
-   * Shorthand function name for extensionPush.
-   * If a value specified, add extensions before pushing it.
+   * Shorthand function name for extension add + push.
    */
   function import($extensionType, $extensionName, $value = NULL) {
-    if ($value !== NULL) {
+    if (!$this->extensionGet($extensionType, $extensionName)) {
+      // Some loaders supports null value.
       $this->extensionAdd($extensionType, $extensionName, $value);
     }
     $this->extensionPush($extensionType, $extensionName);
@@ -348,7 +348,10 @@ class Wjs extends Router {
    * @return mixed
    */
   function extensionGet($extensionType, $extensionName) {
-    return $this->loaderGet($extensionType)->extensions[$extensionName];
+    $loader = $this->loaderGet($extensionType);
+    if ($loader && isset($loader->extensions[$extensionName])) {
+      return $loader->extensions[$extensionName];
+    }
   }
 
   /**
@@ -568,11 +571,12 @@ class Wjs extends Router {
    * Convert a path.js to path.min.js.
    *
    * @param $path
+   * @param $extension
    *
    * @return string
    */
-  function jsPathMin($path) {
-    return substr($path, 0, -strlen('.js')) . '.min.js';
+  function filePathMin($path, $extension) {
+    return substr($path, 0, -strlen('.' . $extension)) . '.min.' . $extension;
   }
 
   /**
@@ -582,7 +586,7 @@ class Wjs extends Router {
   function jsFileVersioned($jsFile) {
     if ($this->jsCoreFilesVersion === 'master') {
       // Use minified files if exists.
-      $jsMin = $this->jsPathMin($jsFile);
+      $jsMin = $this->filePathMin($jsFile, 'js');
       if (is_file($jsMin)) {
         return $jsMin;
       }
@@ -731,7 +735,12 @@ class Wjs extends Router {
         // Get item specific params.
         $itemGlobalData = isset($globalData[$item]) ? $globalData[$item] : array();
         $itemOrder      = isset($order[$item]) ? $order[$item] : array();
-        $this->loaderGet($item)->scanFolderExtensions($directory . $item . '/', $itemGlobalData, $itemOrder);
+        $subDirectory   = $directory . $item . '/';
+        // As directories can be manually ordered,
+        // directory may not exists.
+        if (is_dir($subDirectory)) {
+          $this->loaderGet($item)->scanFolderExtensions($subDirectory, $itemGlobalData, $itemOrder);
+        }
       }
     }
   }
@@ -785,7 +794,8 @@ class Wjs extends Router {
       $this->extensionAddRequire($extensionType, $extensionName, $requireType, $result[2][$key], $options);
     }
     if (!empty($result[1])) {
-      $this->extensionPush('JsMethod', 'wjsIncludeTag');
+      // Automatically push include tag detection.
+      $this->extensionPush('JsMethod', 'wjsIncludeInit');
     }
   }
 
@@ -798,8 +808,7 @@ class Wjs extends Router {
     $wrapped = '<div>' . $html . '</div>';
     $domSave = NULL;
     // Load depending of PHP version.
-    $php54 = (version_compare(PHP_VERSION, '5.4.0') >= 0);
-    if ($php54) {
+    if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
       $dom->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     }
     // Version under PHP 5.4 do not support second argument in loadHTML,

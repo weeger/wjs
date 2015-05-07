@@ -1,12 +1,15 @@
+# Force mime type
 <IfModule mod_mime.c>
-    AddType application/x-javascript .js
-    AddType text/css .css
+  AddType application/x-javascript .js
+  AddType text/css .css
 </IfModule>
+
+# Active page compression
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/css application/x-javascript text/x-component text/html text/plain text/xml application/javascript
-    <IfModule mod_setenvif.c>
-        BrowserMatch ^Mozilla/4 gzip-only-text/html
-        BrowserMatch ^Mozilla/4\.0[678] no-gzip
-        BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-    </IfModule>
+  AddOutputFilterByType DEFLATE text/css application/x-javascript text/x-$
+  <IfModule mod_setenvif.c>
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+  </IfModule>
 </IfModule>

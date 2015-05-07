@@ -1,62 +1,34 @@
-b { color:green; }
-
-#menu-content .menu-overview a {
-    background:green;
-    color:black;
+.WebComp-BasicDemoPage-Overview {
+  padding: 20px;
+}
+.WebComp-BasicDemoPage-Overview.fadeIn {
+  animation: OverviewFadeIn 2s cubic-bezier(0, 0.98, 0, 1) forwards;
+}
+.WebComp-BasicDemoPage-Overview.fadeOut {
+  animation: OverviewFadeOut 2s cubic-bezier(0, 0.98, 0, 1) forwards;
+}
+.WebComp-BasicDemoPage-Overview.loaded {
+  width: 350px;
+  height: 450px;
 }
 
-.WebComp-BgAnim {
-    height:658px;
-    background:url('bg-overview.jpg') no-repeat top center;
-    -webkit-animation:homeBgIntro 2s cubic-bezier(.03,.61,.49,.99) forwards;
-    animation:homeBgIntro 2s cubic-bezier(.03,.61,.49,.99) forwards;
+@keyframes OverviewFadeIn {
+  from {
+    width: 100px;
+    height: 100px;
+  }
+  to {
+    width: 350px;
+    height: 450px;
+  }
 }
-
-#main-content {
-    height:250px;
-    -webkit-animation:loadPage2 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
-    animation:loadPage2 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
-}
-
-#main.unload #main-content {
-    -webkit-animation:unloadPage2 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
-    animation:unloadPage2 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
-}
-
-.preview {
-    margin-top:30px;
-}
-
-/* -- webkit -- */
-
-@-webkit-keyframes loadPage2 {
-    from { height:250px; }
-    to { height:700px; }
-}
-
-@-webkit-keyframes unloadPage2 {
-    from { height:700px; }
-    to { height:250px; }
-}
-
-@-webkit-keyframes homeBgIntro {
-    from { opacity:0; background-position:45% 0%; }
-    to { opacity:1; background-position:50% 0%; }
-}
-
-/* -- normal -- */
-
-@keyframes loadPage2 {
-    from { height:250px; }
-    to { height:700px; }
-}
-
-@keyframes unloadPage2 {
-    from { height:700px; }
-    to { height:250px; }
-}
-
-@keyframes homeBgIntro {
-    from { opacity:0; background-position:45% 0%; }
-    to { opacity:1; background-position:50% 0%; }
+@keyframes OverviewFadeOut {
+  from {
+    width: 350px;
+    height: 450px;
+  }
+  to {
+    width: 100px;
+    height: 100px;
+  }
 }

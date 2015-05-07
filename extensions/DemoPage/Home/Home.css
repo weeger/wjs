@@ -1,55 +1,52 @@
-#main-content {
-    height:250px;
-    -webkit-animation:loadHome 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
-    animation:loadHome 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
+.WebComp-BasicDemoPage-Home {
+  font-size:25px;
 }
 
-#main.unload #main-content {
-    -webkit-animation:unloadHome 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
-    animation:unloadHome 1s cubic-bezier(0.005, 0.985, 0.005, 1.010) forwards;
+/* Special classes names exists to handle various */
+/* loading statuses : fadeIn, fadeOut, loaded, etc...*/
+
+.WebComp-BasicDemoPage-Home.fadeIn {
+  white-space:nowrap;
+  animation:HomeFadeIn 1s cubic-bezier(0, .7, .3, 1) forwards;
 }
 
-#main-content b {
-    color:red;
+.WebComp-BasicDemoPage-Home.fadeOut {
+  white-space:nowrap;
+  animation:HomeFadeOut 1s cubic-bezier(0, .7, .3, 1) forwards;
 }
 
-.WebComp-BgAnim {
-    height:658px;
-    background:url('bg-home.jpg') no-repeat top center;
-    -webkit-animation:homeBgIntro 2s cubic-bezier(.03,.61,.49,.99) forwards;
-    animation:homeBgIntro 2s cubic-bezier(.03,.61,.49,.99) forwards;
+.WebComp-BasicDemoPage-Home.fadeOut .html {
+  white-space:nowrap;
+  animation:HomeFadeOutHtml .2s linear forwards;
 }
 
-/* -- webkit -- */
-
-@-webkit-keyframes loadHome {
-    from { height:250px; }
-    to { height:120px; }
+.WebComp-BasicDemoPage-Home.loaded {
+  width:640px;
 }
 
-@-webkit-keyframes unloadHome {
-    from { height:120px; }
-    to { height:250px; }
+@keyframes HomeFadeIn {
+  from {
+    width:100px;
+  }
+  to {
+    width:640px;
+  }
 }
 
-@-webkit-keyframes homeBgIntro {
-    from { opacity:0; background-position:45% 0%; }
-    to { opacity:1; background-position:50% 0; }
+@keyframes HomeFadeOut {
+  from {
+    width:640px;
+  }
+  to {
+    width:100px;
+  }
 }
 
-/* -- normal -- */
-
-@keyframes loadHome {
-    from { height:250px; }
-    to { height:120px; }
-}
-
-@keyframes unloadHome {
-    from { height:120px; }
-    to { height:250px; }
-}
-
-@keyframes homeBgIntro {
-    from { opacity:0; background-position:45% 0%; }
-    to { opacity:1; background-position:50% 0; }
+@keyframes HomeFadeOutHtml {
+  from {
+    opacity:1;
+  }
+  to {
+    opacity:0;
+  }
 }

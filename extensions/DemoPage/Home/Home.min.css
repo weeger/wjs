@@ -1,0 +1,82 @@
+.WebComp-BasicDemoPage-Home {
+  font-size:25px;
+}
+
+/* Special classes names exists to handle various */
+/* loading statuses : fadeIn, fadeOut, loaded, etc...*/
+
+.WebComp-BasicDemoPage-Home.fadeIn {
+  white-space:nowrap;
+  -webkit-animation:HomeFadeIn 1s cubic-bezier(0, .7, .3, 1) forwards;
+          animation:HomeFadeIn 1s cubic-bezier(0, .7, .3, 1) forwards;
+}
+
+.WebComp-BasicDemoPage-Home.fadeOut {
+  white-space:nowrap;
+  -webkit-animation:HomeFadeOut 1s cubic-bezier(0, .7, .3, 1) forwards;
+          animation:HomeFadeOut 1s cubic-bezier(0, .7, .3, 1) forwards;
+}
+
+.WebComp-BasicDemoPage-Home.fadeOut .html {
+  white-space:nowrap;
+  -webkit-animation:HomeFadeOutHtml .2s linear forwards;
+          animation:HomeFadeOutHtml .2s linear forwards;
+}
+
+.WebComp-BasicDemoPage-Home.loaded {
+  width:640px;
+}
+
+@-webkit-keyframes HomeFadeIn {
+  from {
+    width:100px;
+  }
+  to {
+    width:640px;
+  }
+}
+
+@keyframes HomeFadeIn {
+  from {
+    width:100px;
+  }
+  to {
+    width:640px;
+  }
+}
+
+@-webkit-keyframes HomeFadeOut {
+  from {
+    width:640px;
+  }
+  to {
+    width:100px;
+  }
+}
+
+@keyframes HomeFadeOut {
+  from {
+    width:640px;
+  }
+  to {
+    width:100px;
+  }
+}
+
+@-webkit-keyframes HomeFadeOutHtml {
+  from {
+    opacity:1;
+  }
+  to {
+    opacity:0;
+  }
+}
+
+@keyframes HomeFadeOutHtml {
+  from {
+    opacity:1;
+  }
+  to {
+    opacity:0;
+  }
+}

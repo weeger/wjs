@@ -1,6 +1,9 @@
 (function (WjsProto) {
   'use strict';
   /**
+   * Add a css class then a callback when finished.
+   * If callback is not defined, simply remove the class.
+   * Class should exists in order get complete event.
    * @require JsMethod > eventTransitionName
    */
   WjsProto.register('JsMethod', 'cssAnimateCallback', function (dom, className, callback) {
@@ -10,11 +13,13 @@
         if (e.target === dom) {
           e.stopPropagation();
           dom.removeEventListener(transitionEvent, callbackLocal);
-          if (callback === true) {
-            dom.classList.remove(className);
+          // Execute.
+          if (typeof callback === 'function') {
+            callback = callback(e);
           }
-          else if (callback) {
-            callback(e);
+          // Undefined or true.
+          if (callback === undefined || callback) {
+            dom.classList.remove(className);
           }
         }
       };

@@ -8,17 +8,18 @@ require_once WJS_ROOT . 'php/wjs.inc';
 $page = 'Home';
 if (isset($_GET['DemoPage'])) {
   // DemoPage is an array, get first item.
-  $page = current($_GET['DemoPage']);
+  $page = $_GET['DemoPage'];
 }
 
 // Create a WJS instance,
 // used for both page load and AJAX response.
 $wjs = new Wjs(array(
   // Turn on this option to use core source files.
-  // 'jsCoreFilesVersion' => 'source'
-  'aggregationEnabled' => TRUE,
+  'jsCoreFilesVersion' => 'source',
+  // Turn on this option to aggregate js files in one cached file.
+//  'aggregationEnabled' => TRUE,
   // Define cache folder.
-  'serverPathCache'     => WJS_DEMO_SITE_ROOT . 'cache/',
+  'serverPathCache'    => WJS_DEMO_SITE_ROOT . 'cache/',
   // Add token into aggregated files
   'cacheToken'         => '-' . $page . '-' . date('Y-m-d')
 ));
@@ -42,6 +43,10 @@ if (isset($_GET['wjs'])) {
   $wjs->response($_GET);
 }
 
+// By importing external javascript here
+// we allow wjs to parse requirements, and
+// include it to the startup package.
+$wjs->import('JsLink', 'script.js');
 
-
+// We also import the default main page.
 $wjs->import('DemoPage', $page);
