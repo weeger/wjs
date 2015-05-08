@@ -5,5 +5,6 @@
     this.regEach(this.extRequire[type][name], function (type, name) {
       self.loaders[type][action](name, self.get(type, name));
     });
+    self.loaders[type][action](name, self.get(type, name));
   });
 }(WjsProto));

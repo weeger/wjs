@@ -1,3 +1,11 @@
+WJS - 4.1.2 - 2015-05-08
+------------------------
+- WebPages Requirements
+- Minor debugs
+- New demo page
+- Removed dead files
+- Code style
+
 WJS - 4.1.1 - 2015-05-07
 ------------------------
 - Audio loader

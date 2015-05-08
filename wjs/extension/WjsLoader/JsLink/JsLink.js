@@ -19,11 +19,11 @@
       value = wjs.urlToken(value || name);
       if (!(value instanceof wjs.window.Error)) {
         wjs.onload(domScript, function () {
-          // Append to head.
-          self.enable(name, domScript);
           // Continue.
           self.parseLinkLoaded(name, domScript, process);
         });
+        // Append to head.
+        self.enable(name, domScript);
         // We don't specify type as it is not required in HTML5.
         domScript.setAttribute('src', value);
         // Stop parsing.

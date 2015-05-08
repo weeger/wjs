@@ -7,7 +7,7 @@
   WjsProto.register('DemoPage', 'Overview', {
     optionsDefault: {
       domDestination: '#main-page-body',
-      sharedRequire: {
+      requireStatic: {
         WebComp:['SharedComp']
       }
     }

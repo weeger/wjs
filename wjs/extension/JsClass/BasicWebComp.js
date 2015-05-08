@@ -22,18 +22,29 @@
     options: {
       require: {
         defaults: false,
-        define: function (value) {
-//          log(value);
-//          this.wjs.use(value, {
-//            auto_Instance: this.loader.auto_Instance
-//          });
-        }
-      },
-      requireStatic: {
-        defaults: false,
+        requiredWebComp: [],
         define: function (value) {
           if (value) {
-
+            var self = this;
+            self.wjs.use(value, function () {
+              // Create instance for WebComp
+              if (value.WebComp) {
+                var i = 0, item;
+                while (item = value.WebComp[i++]) {
+                  self.options.require.requiredWebComp.push(self.wjs.loaders.WebComp.instance(item));
+                }
+              }
+            });
+          }
+        },
+        destroy: function (value) {
+          if (value) {
+            var self = this, i = 0, item;
+            while (item = self.options.require.requiredWebComp[i++]) {
+              item.exit(function () {
+                self.wjs.destroy(value);
+              });
+            }
           }
         }
       },
@@ -166,7 +177,7 @@
         /**
          * @require JsMethod > wjsIncludeExit
          */
-        destroy: function (fadeOutComplete) {
+        destroy: function (value, fadeOutComplete) {
           if (this.dom) {
             var self = this, cssClassLoads = self.classLoads;
             // Add fade out class
@@ -330,7 +341,7 @@
         // Options can contain value in place of option parameters.
         if (this.wjs.isPlainObject(option) && option.destroy) {
           // The fadeOutComplete arg is basically for the dom class.
-          option.destroy(fadeOutComplete);
+          option.destroy(option.applied, fadeOutComplete);
         }
       }
       // Protect against further modifications.
