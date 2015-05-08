@@ -12,6 +12,8 @@
 
     __construct: function () {
       this.destroyTimeouts = {};
+      this.pageRequireStatic = [];
+      this.pageInstances = [];
       this.wjs.loaders.WebComp.__construct.call(this);
     },
 
@@ -102,10 +104,8 @@
         // destruction, it can contain asynchronous processes.
         self.wjs.use(this.type, replacement, {
           webPagePreload: true,
-          complete: function (reg) {
+          complete: function () {
             loaded = true;
-
-            log(reg);
             callback();
           }
         });
@@ -120,7 +120,7 @@
     destroyTimeout: function (name) {
       var self = this, callback = function () {
         self.wjs.destroy(self.type, name, {
-          // TODO : Shared dependencies.
+          // Shared dependencies are managed into WebPage.
           dependencies: true
         });
         delete self.destroyTimeouts[name];

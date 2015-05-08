@@ -22,29 +22,14 @@
     options: {
       require: {
         defaults: false,
-        requiredWebComp: [],
         define: function (value) {
           if (value) {
-            var self = this;
-            self.wjs.use(value, function () {
-              // Create instance for WebComp
-              if (value.WebComp) {
-                var i = 0, item;
-                while (item = value.WebComp[i++]) {
-                  self.options.require.requiredWebComp.push(self.wjs.loaders.WebComp.instance(item));
-                }
-              }
-            });
+            this.options.require.requiredWebComp = this.useInstances(value);
           }
         },
         destroy: function (value) {
           if (value) {
-            var self = this, i = 0, item;
-            while (item = self.options.require.requiredWebComp[i++]) {
-              item.exit(function () {
-                self.wjs.destroy(value);
-              });
-            }
+            this.destroyInstances(value, this.options.require.requiredWebComp);
           }
         }
       },
@@ -507,6 +492,44 @@
         // Each option defines a standard variable.
         this.variableInit(optionName, optionValue);
       }
+    },
+
+    useInstances: function (request) {
+      var self = this, instances = [];
+      self.wjs.use(request, function () {
+        // Create instance for WebComp
+        if (request.WebComp) {
+          var i = 0, item;
+          while (item = request.WebComp[i++]) {
+            instances.push(self.wjs.loaders.WebComp.instance(item));
+          }
+        }
+      });
+      return instances;
+    },
+
+    destroyInstances: function (request, instances) {
+      var self = this, i = 0, j = 0, item, type,
+        exitInstances = [];
+      // Search for instance matching with request.
+      while (item = instances[i++]) {
+        type = item.loader.type;
+        if (request[type] && request[type].indexOf(item.type) !== -1) {
+          exitInstances.push(item);
+          delete instances[i++];
+        }
+      }
+      // Exit all instances.
+      for (i = 0; item = exitInstances[i++];) {
+        item.exit(function () {
+          if (++j === exitInstances.length) {
+            // TODO When rolling back before exit, we have to disable destruction
+            // Launch destroy request.
+            self.wjs.destroy(request);
+          }
+        });
+      }
+      return instances;
     }
   });
 }(WjsProto));
