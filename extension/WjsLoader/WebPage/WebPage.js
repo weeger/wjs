@@ -30,13 +30,9 @@
     enable: function (name, value, process) {
       // Create an instance once downloaded.
       // Auto instance can be explicitly activated
-      if (!process.options.webPagePreload) {
+      if (!process || !process.options.webPagePreload) {
         this.instance(name, value);
       }
-    },
-
-    disable: function () {
-
     },
 
     /**
@@ -76,7 +72,6 @@
       }
       else {
         wjs.extEnable(this.type, name);
-        wjs.loaders[this.type].instance(name);
       }
     },
 
@@ -93,9 +88,10 @@
         // and also for new page preload complete.
           callback = function () {
             if (loaded && exited) {
-              self.wjs.extDisable(self.pageCurrent.loader.type, self.pageCurrent.type);
-              // It could be an inherited loader.
-              self.pageCurrent.loader.destroyTimeout(self.pageCurrent.type);
+              var pageCurrent = self.pageCurrent;
+              // Launch destroy for owner loader.
+              pageCurrent.loader.destroyTimeout(pageCurrent.type);
+              self.wjs.extDisable(pageCurrent.loader.type, pageCurrent.type);
               self.pageCurrent = false;
               self.pageHideStarted = false;
               self.pageShow(replacement);
@@ -106,8 +102,10 @@
         // destruction, it can contain asynchronous processes.
         self.wjs.use(this.type, replacement, {
           webPagePreload: true,
-          complete: function () {
+          complete: function (reg) {
             loaded = true;
+
+            log(reg);
             callback();
           }
         });

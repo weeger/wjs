@@ -277,8 +277,8 @@
      * A process pass trough loaders, and let them
      * manage the way to destroy extensions. It can
      * be asynchronous if loader ask for.
-     * @param {string} type
-     * @param {string} name
+     * @param {string|object} type
+     * @param {string=} name
      * @param {?} options
      */
     destroy: function (type, name, options) {

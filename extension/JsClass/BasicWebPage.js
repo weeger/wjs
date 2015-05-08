@@ -16,8 +16,23 @@
       },
       next: {
         defaults: false
+      },
+      requireStatic: {
+        defaults: false,
+        define: function (value, options) {
+          if (value) {
+
+          }
+        }
+      },
+      require: {
+        defaults: false,
+        define: function (value, options) {
+          // Requires dom option.
+          this.optionApply('requireStatic', options);
+          this.__base();
+        }
       }
     }
-
   });
 }(WjsProto));
