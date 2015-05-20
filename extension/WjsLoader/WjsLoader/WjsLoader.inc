@@ -8,6 +8,7 @@ use \Wjs\Loader;
  * Loader to load other WjsLoader loaders !
  */
 class WjsLoader extends JsLink {
+  var $allowRequireJs = TRUE;
 
   function extensionAdd($name, $value) {
     $value = $this->valuePush($name, $value);
@@ -26,7 +27,6 @@ class WjsLoader extends JsLink {
         // so we have to locate loader,
         // according to resolved path of wjs.
         $value['serverPathJs'] = $filePath;
-
       }
     }
     // If only server path to js is found,
@@ -82,6 +82,25 @@ class WjsLoader extends JsLink {
       return $this->extensions[$name][$side];
     }
     return '';
+  }
+
+  function scanFolderExtensions($directory, $globalData = array(), $order = array()) {
+    // Normal scan, but don't register
+    // extension subdirectories in order to have
+    // all new WjsLoaders available on scan.
+    parent::scanFolderExtensions($directory, $globalData, $order);
+    // Now we can search for extra extensions.
+    // Get items ordered.
+    $scan = $this->wjs->scanFolderOrdered($directory, $order);
+    foreach ($scan as $item) {
+      // Avoid all special folders.
+      if ($item{0} !== '.') {
+        $extensionPath = $directory . $item . '/extension/';
+        if (is_dir($extensionPath)) {
+          $this->wjs->scanFolderExtensions($extensionPath);
+        }
+      }
+    }
   }
 
   /**

@@ -96,6 +96,7 @@ $wjs = new \Wjs(array(
   // for cache files naming. Useful to enforce
   // to flush browsers caches.
   'cacheToken'          => $yourCustomCacheToken,
+  'paramInc'            => 'wjs-test'
 ));
 ```
 
@@ -402,7 +403,12 @@ The WebComp type allow to retrieve basic web components, composed by CSS, HTML, 
 Web pages
 ---------
 
-The WebPage type is a subclass of WebComp, designed to update page URL automatically on load.
+The WebPage type is a subclass of WebComp, designed manage advanced pages integration and URL management. This class is used by the Website class as the default objects for page rendering.
+
+Web pages
+---------
+
+Libraries are linked to WebPages and contains extra required features for current loaded page. 
 
 Groups
 ------
@@ -423,6 +429,21 @@ JsClass
 -------
 
 Static class are instantiated only once per page. This is a handy way to define group of function grouped inside one class instance.
+
+Binder
+------
+
+Event listeners object.
+
+Element
+-------
+
+Binder with more features, support plugins.
+
+Plugin
+------
+
+Add functional improvement for binders.
 
 
 
@@ -471,6 +492,13 @@ object = wjs.use('JsObject', 'nameOfExtensionWithDependencies', {
 });
 ```
 
+
+
+
+Website management
+------------------
+
+You can manage full websites with the website class. It will configure wjs for you and play with WebPage extensions.In this case wjs must be always placed under the current working directory root in order to be able to resolve client paths to css and js files.A symlink can be used, but in this case the WESITE_ROOT variable must be defined before to load the core .inc file, as PHP always resolve symlinks, otherwise wesite will not be able to detect it itself.
 
 
 

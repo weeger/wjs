@@ -1,14 +1,16 @@
 /**
  * Base class for WebComp elements.
+ * @require JsClass > BasicWebComp
  */
 (function (WjsProto) {
   'use strict';
   WjsProto.register('JsClass', 'BasicWebPage', {
     classExtends: 'BasicWebComp',
+    type: 'WebPage',
 
     options: {
       urlHistory: {
-        defaults: true,
+        defaults: false,
         unique: true
       },
       previous: {

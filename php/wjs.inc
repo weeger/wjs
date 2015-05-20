@@ -352,6 +352,7 @@ class Wjs extends Router {
     if ($loader && isset($loader->extensions[$extensionName])) {
       return $loader->extensions[$extensionName];
     }
+    return FALSE;
   }
 
   /**
@@ -505,14 +506,16 @@ class Wjs extends Router {
   function initPackage() {
     // Use path option.
     $settings   = array_merge($this->settings, array(
-      'version'      => WJS_VERSION,
-      'clientName'   => $this->optionGet('clientName'),
-      'paramExtra'   => $this->optionGet('paramExtra'),
-      'paramInc'     => $this->optionGet('paramInc'),
-      'paramExc'     => $this->optionGet('paramExc'),
-      'paramToken'   => $this->optionGet('paramToken'),
-      'pathResponse' => $this->optionGet('clientPathResponse'),
-      'cacheToken'   => $this->optionGet('cacheToken'),
+      'version'              => WJS_VERSION,
+      'clientName'           => $this->optionGet('clientName'),
+      'paramExtra'           => $this->optionGet('paramExtra'),
+      'paramInc'             => $this->optionGet('paramInc'),
+      'paramExc'             => $this->optionGet('paramExc'),
+      'paramToken'           => $this->optionGet('paramToken'),
+      'pathResponse'         => $this->optionGet('clientPathResponse'),
+      'pathWebsite'          => $this->optionGet('clientPathWebsite'),
+      'pathRequestDirectory' => $this->optionGet('clientRequestDirectory'),
+      'cacheToken'           => $this->optionGet('cacheToken'),
     ));
     $outputJson = array();
     // Add settings.
@@ -579,6 +582,14 @@ class Wjs extends Router {
     return substr($path, 0, -strlen('.' . $extension)) . '.min.' . $extension;
   }
 
+  function filePathMinExists($path, $extension) {
+    $min = $this->filePathMin($path, $extension);
+    if (file_exists($min)) {
+      return $min;
+    }
+    return $path;
+  }
+
   /**
    * Return the .min.js file path of a given file
    * if exists and current wjs version is master.
@@ -607,7 +618,9 @@ class Wjs extends Router {
     // Names can't contain space, new lines, or backslash.
     preg_match_all('`@require\\s*([^\\s\\r\\n\\\\]*)\\s*>\\s*([^\\s\\r\\n\\\\]*)`', $jsContent, $results);
     foreach ($results[0] as $key => $item) {
-      $this->extensionAddRequire($extensionType, $extensionName, trim($results[1][$key]), trim($results[2][$key]));
+      if ($this->loaderGet($extensionType)->allowRequireJs) {
+        $this->extensionAddRequire($extensionType, $extensionName, trim($results[1][$key]), trim($results[2][$key]));
+      }
     }
   }
 

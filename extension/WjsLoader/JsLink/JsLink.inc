@@ -10,6 +10,7 @@ define('WJS_PUSH_JSLINK_INCLUDED', 'WJS_PUSH_JSLINK_INCLUDED');
  * @package Wjs\Loader
  */
 class JsLink extends Loader {
+  var $allowRequireJs = TRUE;
 
   function extensionAdd($name, $value) {
     $value = $value ? $value : realpath($name);

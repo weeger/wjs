@@ -1,9 +1,9 @@
 /**
  * @require JsClass > BasicWebPage
+ * @require JsClassStatic > QueueManager
  */
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'WebPage', {
     loaderExtends: 'WebComp',
     protoBaseClass: 'BasicWebPage',
@@ -15,6 +15,7 @@
       this.pageRequireStatic = [];
       this.pageInstances = [];
       this.wjs.loaders.WebComp.__construct.call(this);
+      this.queueName = this.type + 'PageLoads';
     },
 
     /**
@@ -25,24 +26,11 @@
       this.pageShow(name);
     },
 
-    parse: function (name, value, process) {
-      return this.wjs.loaders.WebComp.parse.apply(this, arguments);
-    },
-
     enable: function (name, value, process) {
       // Create an instance once downloaded.
-      // Auto instance can be explicitly activated
       if (!process || !process.options.webPagePreload) {
-        this.instance(name, value);
+        this.pageCurrent = this.instance(name, value);
       }
-    },
-
-    /**
-     * Save instance, one page allowed at the same time.
-     */
-    instance: function (name, options) {
-      // Save current page.
-      return this.pageCurrent = this.wjs.loaders.WebComp.instance.apply(this, arguments);
     },
 
     /**
@@ -60,73 +48,163 @@
      * @require JsMethod > extEnable
      */
     pageShow: function (name) {
-      var wjs = this.wjs;
-      if (this.pageCurrent) {
-        this.pageHide(name);
-        return;
-      }
-      // Remove destroy time out.
-      if (this.destroyTimeouts[name]) {
-        this.wjs.window.clearTimeout(this.destroyTimeouts[name]);
-      }
-      if (!wjs.get(this.type, name)) {
-        wjs.use(this.type, name);
-      }
-      else {
-        wjs.extEnable(this.type, name);
-      }
+      var self = this, wjs = self.wjs, type = self.type;
+      wjs.queueAdd(self.queueName, function () {
+        if (self.pageCurrent) {
+          self.pageHide(name);
+          // Remove itself
+          self.wjs.queueNext(self.queueName);
+          return;
+        }
+        // Remove destroy time out if exists.
+        self.destroyTimeoutClear(name);
+        //
+        if (!wjs.get(type, name)) {
+          self.wjs.use(type, name, {
+            complete: function () {
+              self.wjs.queueNext(self.queueName);
+            }
+          });
+        }
+        else {
+          // In case of use JsLinks some CSSStyleSheets
+          // loads can be delayed from the tag append,
+          // so we have to ensure that the "sheet" property
+          // is available before to continue.
+          if (wjs.extRequire[type] &&
+            wjs.extRequire[type][name] &&
+            wjs.extRequire[type][name].CssLink) {
+            var i = 0, item;
+            var check = function () {
+              i = 0;
+              while (item = wjs.extRequire[type][name].CssLink[i++]) {
+                var domLink = wjs.get('CssLink', item);
+                if (domLink.sheet && domLink.sheet.rules) {
+                  wjs.extEnable(type, name);
+                  // Continue queue.
+                  self.wjs.queueNext(self.queueName);
+                }
+                else {
+                  checkRun();
+                }
+              }
+            }, checkRun = function () {
+              wjs.window.setTimeout(check, 100);
+            };
+
+            while (item = wjs.extRequire[type][name].CssLink[i++]) {
+              wjs.loaders.CssLink.enable(item, wjs.get('CssLink', item));
+            }
+            checkRun();
+          }
+          else {
+            wjs.extEnable(type, name);
+            // Continue queue.
+            self.wjs.queueNext(self.queueName);
+          }
+        }
+      });
     },
 
     /**
      * Hide page.
      * @require JsMethod > extDisable
      */
-    pageHide: function (replacement) {
-      // Prevent multiple loads.
-      if (!this.pageHideStarted) {
-        var self = this, pageCurrent = self.pageCurrent,
-          loaded = false, exited = false,
+    pageHide: function (replacement, complete) {
+      var self = this;
+      self.wjs.queueAdd(self.queueName, function () {
+        var pageCurrent = self.pageCurrent,
+          loaded = replacement ? false : true,
+          exited = pageCurrent ? false : true,
         // Wait for current page to be exited
         // and also for new page preload complete.
           callback = function () {
             if (loaded && exited) {
-              var pageCurrent = self.pageCurrent;
-              // Launch destroy for owner loader.
-              pageCurrent.loader.destroyTimeout(pageCurrent.type);
-              self.wjs.extDisable(pageCurrent.loader.type, pageCurrent.type);
+              if (pageCurrent) {
+                // Disable extensions, including removing active CSS.
+                self.wjs.extDisable(pageCurrent.loader.type, pageCurrent.type);
+                // Launch destroy for owner loader.
+                // It will wait before destroying in
+                // case of user returns on this page.
+                pageCurrent.loader.destroyTimeout(pageCurrent.type);
+              }
+              // Reset variables.
               self.pageCurrent = false;
               self.pageHideStarted = false;
-              self.pageShow(replacement);
+              if (complete) {
+                complete();
+              }
+              self.wjs.queueNext(self.queueName);
+              // Display new page.
+              if (replacement) {
+                self.pageShow(replacement);
+              }
             }
           };
-        self.pageHideStarted = true;
-        // Launch loading, don't wait complete element
-        // destruction, it can contain asynchronous processes.
-        self.wjs.use(this.type, replacement, {
-          webPagePreload: true,
-          complete: function () {
-            loaded = true;
+        // Load replacement page.
+        if (replacement) {
+          // Clear destroy timeout if exists.
+          self.destroyTimeoutClear(replacement);
+          // Launch loading, don't wait complete previous element
+          // destruction, it can contain asynchronous processes.
+          self.wjs.use(self.type, replacement, {
+            webPagePreload: true,
+            complete: function () {
+              loaded = true;
+              callback();
+            }
+          });
+        }
+        if (pageCurrent) {
+          // Launch page exit.
+          self.pageCurrent.exit(function () {
+            exited = true;
             callback();
-          }
-        });
-        // Launch page exit.
-        pageCurrent.exit(function () {
-          exited = true;
+          });
+        }
+        // No current page to quit.
+        if (!replacement && !pageCurrent) {
           callback();
-        });
-      }
+        }
+      });
     },
 
+    /**
+     * @require JsMethod > wjsRegDiffName
+     */
     destroyTimeout: function (name) {
       var self = this, callback = function () {
-        self.wjs.destroy(self.type, name, {
-          // Shared dependencies are managed into WebPage.
-          dependencies: true
-        });
+        // Destroy timeout
         delete self.destroyTimeouts[name];
+        // No current page, destroy requirements.
+        if (!self.pageCurrent) {
+          self.wjs.destroy(self.type, name, {
+            // Shared dependencies are managed into WebPage.
+            dependencies: true
+          });
+        }
+        // Page is not the same one.
+        else if (self.pageCurrent.name !== name) {
+          // Page should be from the
+          // same type to work properly.
+          var destroyable = self.wjs.wjsRegDiffName(self.type, name, self.type, self.pageCurrent.type);
+          if (Object.keys(destroyable).length) {
+            destroyable[self.type] = destroyable[self.type] || [];
+            destroyable[self.type].push(name);
+          }
+          else {
+            // Destroy without requirements
+            self.wjs.destroy(self.type, name);
+          }
+        }
       };
-      this.destroyTimeouts[name] = this.wjs.window.setTimeout(callback, this.destroyDelay);
+      self.destroyTimeouts[name] = self.wjs.window.setTimeout(callback, self.destroyDelay);
+    },
+
+    destroyTimeoutClear: function (name) {
+      if (this.destroyTimeouts[name]) {
+        this.wjs.window.clearTimeout(this.destroyTimeouts[name]);
+      }
     }
   });
-  // [-->
 }(WjsProto));

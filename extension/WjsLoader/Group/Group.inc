@@ -8,6 +8,8 @@ use \Wjs\Loader;
  * @package Wjs\Loader
  */
 class Group extends Loader {
+  var $allowRequireJs = TRUE;
+
   function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
     if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {

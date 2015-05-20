@@ -17,16 +17,18 @@
         }
       };
     while (item = includes[i++]) {
-      type = item.getAttribute('type');
-      split = type.split(':');
-      // Avoid exclusions
-      if (!keep || !keep[type]) {
-        // Include tag is just a container
-        // we search for first item.
-        item = this.loaders[split[0]].webCompList[item.childNodes[0].getAttribute('id')];
-        destroyQueue.push(item);
-        if (!queued) {
-          item.exit(localCallback);
+      if (item.firstChild) {
+        type = item.getAttribute('type');
+        split = type.split(':');
+        // Avoid exclusions
+        if (!keep || !keep[type]) {
+          // Include tag is just a container
+          // we search for first item.
+          item = this.loaders[split[0]].webCompList[item.firstChild.getAttribute('id')];
+          destroyQueue.push(item);
+          if (!queued) {
+            item.exit(localCallback);
+          }
         }
       }
     }

@@ -1,6 +1,5 @@
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'JsClassStatic', {
     loaderExtends: 'JsClass',
 
@@ -10,13 +9,11 @@
     },
 
     register: function (type, name, process, value) {
-      var self = this,
       // Parent execute classExtend.
-        output = self.wjs.loaders.JsClass.register.apply(self, arguments);
+      var output = this.wjs.loaders.JsClass.register.apply(this, arguments);
       // Create proto
-      this.staticClasses[name] = new (self.wjs.classProto(name))();
+      this.staticClasses[name] = new (this.wjs.classProto(name))();
       return output;
     }
   });
-  // [-->
 }(WjsProto));

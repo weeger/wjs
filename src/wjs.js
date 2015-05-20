@@ -380,7 +380,7 @@
      * @return {boolean}
      */
     regEach: function (registry, callback) {
-      var self = this, i = 0, j, types = Object.keys(registry), names;
+      var i = 0, j, types = Object.keys(registry), names;
       for (; i < types.length; i++) {
         names = Array.isArray(registry[types[i]]) ? registry[types[i]] : Object.keys(registry[types[i]]);
         for (j = 0; j < names.length; j++) {
@@ -679,17 +679,15 @@
      */
     onload: function (dom, callback) {
       var loaded = false, localCallback = function () {
-        loaded = true;
-        dom.removeEventListener('load', localCallback);
-        callback();
+        if (!loaded) {
+          loaded = true;
+          dom.removeEventListener('load', localCallback);
+          callback();
+        }
       };
       dom.addEventListener('load', localCallback);
       // Protect load errors with a timeout.
-      this.window.setTimeout(function () {
-        if (!loaded) {
-          localCallback();
-        }
-      }, 200);
+      this.window.setTimeout(localCallback, 200);
     },
 
     /**

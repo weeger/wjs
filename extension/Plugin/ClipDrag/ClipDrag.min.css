@@ -1,0 +1,5 @@
+.ClipDragMouseDragging,
+.ClipDragMouseDragging .ClipDragMouseDraggingHandle:hover {
+    cursor:grabbing;
+    cursor:-webkit-grabbing;
+}

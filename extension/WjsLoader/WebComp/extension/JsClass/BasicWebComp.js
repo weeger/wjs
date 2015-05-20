@@ -79,7 +79,9 @@
           className: '',
           attributes: {}
         },
-
+        cssClasses: {
+          defaults: null
+        },
         /**
          * @require JsMethod > isDomNode
          * @require JsMethod > domAttributes
@@ -89,7 +91,9 @@
           // If true, or not specified but html is present.
           value = (value === true || (typeof value !== 'object' && typeof options.html === 'string')) ? 'div' : value;
           if (value) {
-            var i = 0, j, k, dom, item,
+            // Need CSS classes to exists.
+            this.optionApply('cssClasses', options);
+            var i = 0, j, k, dom, item, rules,
               backup = this.options.dom.backup,
               className, classRule, classRuleIE,
               cssNeedTypeGlobalClass = false, cssRule, extRequire = this.wjs.extRequire[this.loader.type],
@@ -117,26 +121,31 @@
               // Get list of links
               for (i = 0; item = cssLinks[i++];) {
                 item = this.wjs.get('CssLink', item);
-                for (j = 0; cssRule = item.sheet.rules[j++];) {
-                  // Selector can be missing into animation sections.
-                  if (cssRule.selectorText) {
-                    for (k = 0; className = this.classLoadsNames[k++];) {
-                      classRule = '.' + this.typeGlobal + '.' + className;
-                      // Internet explorer invert class selectors.
-                      classRuleIE = '.' + className + '.' + this.typeGlobal;
-                      // We test both ie and other.
-                      if (cssRule.selectorText.indexOf(className) !== -1 ||
-                        cssRule.selectorText.indexOf(classRuleIE) !== -1) {
-                        // Check as true if not defined
-                        cssClassLoads[className] =
-                          cssClassLoads[className] !== undefined ?
-                            cssClassLoads[className] : true;
-                        // Need typeGlobal class.
-                        cssNeedTypeGlobalClass = true;
+                if (item.sheet) {
+                  // Css
+                  rules = item.sheet.rules;
+                  for (j = 0; cssRule = rules[j++];) {
+                    // Selector can be missing into animation sections.
+                    if (cssRule.selectorText) {
+                      for (k = 0; className = this.classLoadsNames[k++];) {
+                        classRule = '.' + this.typeGlobal + '.' + className;
+                        // Internet explorer invert class selectors.
+                        classRuleIE = '.' + className + '.' + this.typeGlobal;
+                        // We test both ie and other.
+                        if (cssRule.selectorText.indexOf(className) !== -1 ||
+                          cssRule.selectorText.indexOf(classRuleIE) !== -1) {
+                          // Check as true if not defined
+                          cssClassLoads[className] =
+                            cssClassLoads[className] !== undefined ?
+                              cssClassLoads[className] : true;
+                          // Need typeGlobal class.
+                          cssNeedTypeGlobalClass = true;
+                        }
                       }
                     }
                   }
                 }
+
               }
             }
             // Use typeGlobal class if one of other type is used.
@@ -211,15 +220,16 @@
 
       domDestination: {
         defaults: null,
-        /**
-         * @require JsMethod > isDomNode
-         */
-        define: function (value) {
-          value = value || this.wjs.document.body;
-          if (typeof value === 'string') {
-            value = this.wjs.document.querySelector(value);
+        define: function (value, options) {
+          // Requires html && dom option.
+          this.optionApply('dom', options);
+          if (this.dom && this.dom !== this.wjs.document.body) {
+            value = value || this.wjs.document.body;
+            if (typeof value === 'string') {
+              value = this.wjs.document.querySelector(value);
+            }
+            value.appendChild(this.dom);
           }
-          value.appendChild(this.dom);
         }
       },
 
@@ -244,17 +254,23 @@
     optionsDefault: {},
 
     /**
+     * List of prototypes names to import data from.
+     */
+    mixin: [],
+
+    /**
      * This is the root __construct function.
      * @require JsMethod > isPlainObject
      * @require JsMethod > inheritLinage
      * @require JsMethod > inheritObject
      * @require JsMethod > wjsIncludeInit
+     * @require JsMethod > inheritProperty
      */
     __construct: function (options) {
       var wjs = this.wjs, i = 0, variables, mixin, item,
       // Create a final object combining default data.
         keys, optionsInit = [], optionsDefault = {},
-        selfOptions, option, optionIsObject, loaderCreator = wjs.loaders.WebComp;
+        selfOptions, option, optionIsObject, loaderWebComp = wjs.loaders.WebComp;
       // Merge prototype settings with parent lineage.
       wjs.inheritLinage(this, 'optionsDefault');
       // Merge properties to object (xxx.properties.zzz is accessed by xxx.zzz),
@@ -281,12 +297,12 @@
       this.typeGlobal = wjs.inheritProperty(this, 'type').join('-');
       // Create a unique ID, useful when instances are listed.
       if (this.id === null) {
-        this.id = 'w' + loaderCreator.webCompCounter;
+        this.id = 'w' + loaderWebComp.webCompCounter;
         // Increment counter to ensure unique IDs.
         // We need a global registry for all creator instances.
-        loaderCreator.webCompCounter += 1;
+        loaderWebComp.webCompCounter += 1;
       }
-      loaderCreator.webCompList[this.id] = this;
+      loaderWebComp.webCompList[this.id] = this;
       // Apply options defined with autoInit to true.
       selfOptions = this.options;
       keys = Object.keys(selfOptions);
@@ -467,6 +483,12 @@
         return;
       }
       this.optionsApplied.push(optionName);
+      // Value can be defined in place
+      // of option data (for non objects).
+      if (!isObject) {
+        // Get value from defaults value.
+        option = {defaults: option};
+      }
       // Consider empty values like "" or null as real values.
       if (optionsList[optionName] !== undefined) {
         // Get value from user options.
@@ -475,11 +497,6 @@
       else if (isObject) {
         // Get value from defaults value.
         optionValue = option.defaults;
-      }
-      else {
-        // Value can be defined in place
-        // of option data (for non objects).
-        optionValue = option;
       }
       // Save applied value, before returned.
       option.applied = optionValue;
@@ -523,13 +540,50 @@
       for (i = 0; item = exitInstances[i++];) {
         item.exit(function () {
           if (++j === exitInstances.length) {
-            // TODO When rolling back before exit, we have to disable destruction
             // Launch destroy request.
             self.wjs.destroy(request);
           }
         });
       }
       return instances;
+    },
+
+    /**
+     * Merge descriptions from constructor.
+     */
+    mixinProto: function (name) {
+      // Method must be loaded.
+      var methods = this.wjs.classMethods[name];
+      this.mixinProtoItem(methods, 'variables');
+      this.mixinProtoItem(methods, 'options');
+      this.mixinProtoItem(methods, 'optionsDefault');
+    },
+
+    /**
+     * @require JsMethod > objectFill
+     */
+    mixinProtoItem: function (methods, name) {
+      // variable name can not exists int method,
+      // some variables are created by
+      // inheritance on object instantiation.
+      if (methods[name]) {
+        if (!this[name]) {
+          // Create object if not defined.
+          this[name] = Array.isArray(methods[name]) ? [] : {};
+        }
+        wjs.objectFill(this[name], methods[name], true);
+      }
+    },
+
+    /**
+     * @require JsMethod > inheritProperty
+     */
+    isA: function (type) {
+      return (this.wjs.inheritProperty(this, 'type').indexOf(type) !== -1);
+    },
+
+    error: function (message) {
+      throw new Error(message + ' in ' + this.typeGlobal + ' #' + this.id);
     }
   });
 }(WjsProto));
