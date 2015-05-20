@@ -279,32 +279,31 @@
      * @param {boolean=} silent Set to true avoid callbacks calls.
      */
     loadingComplete: function (silent) {
-      var self = this,
-        wjs = self.wjs,
+      var wjs = this.wjs,
         i = 0,
         processStack,
         parent = wjs.processParent,
         stackIndex;
       // Remove this element from processes.
-      wjs.processes.splice(wjs.processes.indexOf(self), 1);
+      wjs.processes.splice(wjs.processes.indexOf(this), 1);
       // Execute complete callback.
       if (!silent) {
         wjs.processParent = this;
-        wjs.callbacks(self.callbacks, [self.output, self]);
+        wjs.callbacks(this.callbacks, [this.output, this]);
         wjs.processParent = parent;
       }
       // Protect against modification, object
       // should be eligible for garbage collection.
-      Object.freeze(self);
+      Object.freeze(this);
       // Reboot next process from stack.
-      if (self.stacked) {
-        processStack = self.options.processParent ? self.options.processParent.processStack : self.wjs.processStack;
-        stackIndex = processStack.indexOf(self);
+      if (this.stacked) {
+        processStack = this.options.processParent ? this.options.processParent.processStack : this.wjs.processStack;
+        stackIndex = processStack.indexOf(this);
         // Processes can be stackable but not stacked,
         // like startup process who are not booting,
         // only directly starting.
         if (stackIndex !== -1) {
-          processStack.splice(processStack.indexOf(self), 1);
+          processStack.splice(processStack.indexOf(this), 1);
           if (!silent) {
             // Reboot all stack.
             for (i = 0; i < processStack.length; i++) {
@@ -314,8 +313,8 @@
         }
       }
       // Reboot other waiting processes.
-      for (i = 0; i < self.next.length; i++) {
-        self.next[i].boot();
+      for (i = 0; i < this.next.length; i++) {
+        this.next[i].boot();
       }
     },
 
@@ -380,9 +379,8 @@
     },
 
     itemProcess: function (extensionType, extensionName, callback) {
-      var self = this,
-        callbackKey = '#callbacks',
-        extensionData = self.parseQ[extensionType][extensionName];
+      var callbackKey = '#callbacks',
+        extensionData = this.parseQ[extensionType][extensionName];
       // parseQ contains a editable object, we use it to store
       // callbacks, they will wait for parse complete.
       // These callbacks are different from request callbacks,
@@ -392,11 +390,11 @@
         extensionData[callbackKey] = extensionData[callbackKey] || [];
         extensionData[callbackKey].push(callback);
       }
-      if (!self.destroy) {
+      if (!this.destroy) {
         // Process can retrieve already loaded extensions
         // so we have to check again if it already saved.
-        if (!self.wjs.get(extensionType, extensionName)) {
-          self.itemParse(extensionType, extensionName, callback);
+        if (!this.wjs.get(extensionType, extensionName)) {
+          this.itemParse(extensionType, extensionName, callback);
           // We stop to the first matched item.
           // Next treatment should be launched by parsing function.
           // It allows to treat asynchronous parsing, like files.
@@ -404,7 +402,7 @@
         }
       }
       else {
-        self.itemDestroy(extensionType, extensionName, callback);
+        this.itemDestroy(extensionType, extensionName, callback);
         return true;
       }
       return false;

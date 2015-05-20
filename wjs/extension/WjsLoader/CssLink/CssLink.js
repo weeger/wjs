@@ -1,9 +1,12 @@
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'CssLink', {
     processType: 'parse',
 
+    /**
+     * @require WjsLoader > JsMethod
+     * @require JsMethod > cssLinkLoad
+     */
     parse: function (name, value, process) {
       // Link have been included into page head.
       if (value === 'WJS_PUSH_CSSLINK_INCLUDED') {
@@ -11,28 +14,26 @@
         // Then continue parsing.
         return this.wjs.document.head.querySelector('link[href="' + name + '"]') || true;
       }
-      var self = this,
-        domLink = self.wjs.document.createElement('link');
+      var self = this;
       // Url can be sent from server as a key name
       // or from client as a url name.
       value = self.wjs.urlToken(value || name);
       if (!(value instanceof wjs.window.Error)) {
-        self.wjs.onload(domLink, function () {
+        self.wjs.cssLinkLoad(value, function (domLink) {
           // Append to head.
           self.enable(name, domLink);
           // Continue.
           self.parseLinkLoaded(name, domLink, process);
         });
-        // Set attributes.
-        domLink.setAttribute('rel', 'stylesheet');
-        domLink.setAttribute('href', value);
         // Stop parsing.
         return false;
       }
     },
 
     enable: function (name, value) {
-      this.wjs.document.head.appendChild(value);
+      if (!value.parentNode) {
+        this.wjs.document.head.appendChild(value);
+      }
     },
 
     disable: function (name, value) {
@@ -49,5 +50,4 @@
       process.itemParseComplete(this.type, name, domLink);
     }
   });
-  // [-->
 }(WjsProto));

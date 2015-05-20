@@ -9,6 +9,7 @@ use \Wjs\Loader;
  */
 class JsArray extends Loader {
   var $allowJsCache = TRUE;
+  var $allowRequireJs = TRUE;
   /**
    * Append object to the output array.
    */

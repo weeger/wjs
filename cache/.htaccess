@@ -1,3 +1,4 @@
 <Files *>
+    # Disable scripts
     SetHandler default-handler
 </Files>

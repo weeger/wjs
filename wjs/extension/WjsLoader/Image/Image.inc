@@ -5,6 +5,7 @@ namespace Wjs\Loader;
 use \Wjs\Loader;
 
 class Image extends Loader {
+  var $allowRequireJs = TRUE;
   /**
    * Append object to the output array.
    */

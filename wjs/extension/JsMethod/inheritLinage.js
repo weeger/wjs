@@ -49,13 +49,13 @@
    */
   WjsProto.register('JsMethod', 'inheritLinage', function (object, name) {
     var variables = this.inheritProperty(object, name),
-      i = 0;
+      item, i = 0;
     // Reset package.
     object[name] = {};
     // Merge inherited packages.
-    for (; i < variables.length; i++) {
+    while (item = variables[i++]) {
       // Create base constructor for functions.
-      _inheritLinage.call(this, object, object[name], variables[i]);
+      _inheritLinage.call(this, object, object[name], item);
     }
   });
 }(WjsProto));

@@ -9,4 +9,5 @@ use \Wjs\Loader;
  */
 class JsObject extends Loader {
   var $allowJsCache = TRUE;
+  var $allowRequireJs = TRUE;
 }

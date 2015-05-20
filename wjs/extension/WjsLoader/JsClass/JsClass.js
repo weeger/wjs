@@ -1,6 +1,5 @@
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'JsClass', {
     loaderExtends: 'JsMethod',
     wjsShortcuts: false,
@@ -16,10 +15,8 @@
     },
 
     register: function (type, name, process, value) {
-      var self = this;
-      self.wjs.classExtend(name, WjsProto.retrieve(self.type, name));
-      return self.wjs.loaders.JsMethod.register.call(self, type, name, process, value);
+      this.wjs.classExtend(name, WjsProto.retrieve(this.type, name));
+      return this.wjs.loaders.JsMethod.register.call(this, type, name, process, value);
     }
   });
-  // [-->
 }(WjsProto));

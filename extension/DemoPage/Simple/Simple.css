@@ -1,0 +1,35 @@
+.WebComp-WebPage-BasicDemoPage-Simple {
+  padding: 20px;
+}
+.WebComp-WebPage-BasicDemoPage-Simple.fadeIn {
+  animation: SimpleFadeIn .5s cubic-bezier(0, 0.98, 0, 1) forwards;
+}
+.WebComp-WebPage-BasicDemoPage-Simple.fadeOut {
+  animation: SimpleFadeOut .5s cubic-bezier(0, 0.98, 0, 1) forwards;
+}
+.WebComp-WebPage-BasicDemoPage-Simple.loaded {
+  width: 350px;
+  height: 450px;
+}
+
+@keyframes SimpleFadeIn {
+  from {
+    width: 100px;
+    height: 100px;
+  }
+  to {
+    width: 350px;
+    height: 450px;
+  }
+}
+
+@keyframes SimpleFadeOut {
+  from {
+    width: 350px;
+    height: 450px;
+  }
+  to {
+    width: 100px;
+    height: 100px;
+  }
+}

@@ -32,6 +32,7 @@ abstract class Loader extends Router {
    * @var bool
    */
   var $allowJsCache = FALSE;
+  var $allowRequireJs = FALSE;
   /**
    * Loaders have inheritance both in PHP
    * and Javascript, we need for that
@@ -231,7 +232,7 @@ abstract class Loader extends Router {
    * Choose between internal or external
    * value for given extension to push.
    */
-  function valuePush($name, $value) {
+  function valuePush($name, $value = NULL) {
     if ($value === NULL) {
       if (!isset($this->extensions[$name])) {
         return WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME;

@@ -1,3 +1,5 @@
+SetEnv WJS_ENV dev
+
 # Force mime type
 <IfModule mod_mime.c>
   AddType application/x-javascript .js

@@ -3,7 +3,6 @@
  */
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'JsMethod', {
     loaderExtends: 'JsScript',
     addLastComp: null,
@@ -46,5 +45,4 @@
       process.itemParseComplete(this.type, name, value || WjsProto.retrieve(this.type, name));
     }
   });
-  // [-->
 }(WjsProto));

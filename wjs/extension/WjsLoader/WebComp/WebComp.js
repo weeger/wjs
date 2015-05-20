@@ -7,13 +7,11 @@
  */
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'WebComp', {
     protoBaseClass: 'BasicWebComp',
 
     __construct: function () {
-      var self = this;
-      self.wjs.extendObject(this, {
+      this.wjs.extendObject(this, {
         webCompCounter: 0,
         webCompList: {},
         wjsShortcuts: false,
@@ -54,7 +52,7 @@
       if (proto.hasOwnProperty('bundle')) {
         keys = Object.keys(proto.bundle);
         for (i = 0; i < keys.length; i++) {
-          this.addCreatorItem(
+          this.protoAdd(
             // Give a bundler name.
             name + '.' + keys[i],
             // Give part of data.
@@ -73,7 +71,7 @@
       var wjs = this.wjs, protoName = this.protoName(name);
       // Prototype must exists.
       if (!wjs.classMethods[protoName]) {
-        wjs.err('Prototype not found for ' + protoName);
+        wjs.err('Methods not found for ' + protoName);
       }
       options = options || wjs.get(this.type, name) || {};
       options.loader = this;
@@ -87,5 +85,4 @@
       }
     }
   });
-  // [-->
 }(WjsProto));

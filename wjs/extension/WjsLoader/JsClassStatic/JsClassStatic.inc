@@ -8,5 +8,5 @@ use \Wjs\Loader;
  * Transmit a javascript class static method.
  */
 class JsClassStatic extends JsClass {
-
+  var $allowRequireJs = TRUE;
 }

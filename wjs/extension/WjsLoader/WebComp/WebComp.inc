@@ -8,6 +8,9 @@ use \Wjs\Loader;
  * @package Wjs\Loader
  */
 class WebComp extends Loader {
+  var $allowRequireJs = TRUE;
+  var $requireCssLinks = TRUE;
+  var $requireJsLinks = TRUE;
 
   function extensionAdd($name, $data) {
     // If data is only string it's should be the path of
@@ -28,6 +31,11 @@ class WebComp extends Loader {
       $require = $data['require'];
       unset($data['require']);
     }
+    // Load sub extensions
+    $extension = $data['server'] . '/extension/';
+    if (is_dir($extension)) {
+      $this->wjs->scanFolderExtensions($extension);
+    }
     // Normal add.
     parent::extensionAdd($name, $data);
     // Load requirements.
@@ -44,44 +52,46 @@ class WebComp extends Loader {
   function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
     if (!$this->valueIsError($value)) {
-      $data = '';
       if (is_dir($value['server'])) {
-        $data = array(
+        $value         = array_merge($value, array(
           // By default destination is not defined.
-          'dom'       => isset($value['dom']) ? $value['dom'] : FALSE,
+          'dom'   => isset($value['dom']) ? $value['dom'] : FALSE,
           // Html can come from outside.
-          'html'      => isset($value['html']) ? $value['html'] : FALSE,
-          // Define if url query strings are updated on WebComp load.
-          'urlUpdate' => isset($value['urlUpdate']) ? $value['urlUpdate'] : FALSE,
+          'html'  => isset($value['html']) ? $value['html'] : FALSE,
           // We can choose to display only one WebComp of each group at a time.
-          'group'     => isset($value['group']) ? $value['group'] : FALSE,
-        );
-        // Try to load html file if no content defined.
-        if (!$data['html']) {
-          $htmlFile = $value['server'] . $name . '.html';
-          if (is_file($htmlFile)) {
-            $data['html'] = file_get_contents($htmlFile);
-          }
-        }
+          'group' => isset($value['group']) ? $value['group'] : FALSE,
+        ));
+        $value['html'] = $this->htmlLoad($name, $options, $value);
         // Html can be missing.
-        if ($data['html'] !== '') {
+        if ($value['html'] !== '') {
           // Rebase links / images to web component folder.
-          $data['html'] = $this->wjs->htmlRebase($data['html'], $value['client']);
-          $this->wjs->htmlParseIncludeRequire($data['html'], $this->type, $name);
+          $value['html'] = $this->wjs->htmlRebase($value['html'], $value['client']);
+          $this->wjs->htmlParseIncludeRequire($value['html'], $this->type, $name);
         }
         // Search for extra css file,
         // but first search for a min.css version.
-        if (!$this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.min.css', 'css', $this->type, $name)) {
+        if ($this->requireCssLinks && !$this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.min.css', 'css', $this->type, $name)) {
           // Fallback to .css version if no min.
           $this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.css', 'css', $this->type, $name);
         }
-        // Search for extra js file.
-        $this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.js', 'js', $this->type, $name);
+        if ($this->requireJsLinks) {
+          // Search for extra js file.
+          $this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.js', 'js', $this->type, $name);
+        }
+        // Remove unsafe data.
+        unset($value['server']);
       }
-      $value = $data;
     }
     // Save value as true.
     return parent::extensionPush($name, $options, $value);
+  }
+
+  function htmlLoad($name, $options, $value) {
+    $htmlFile = $value['server'] . '/' . $name . '.html';
+    if (is_file($htmlFile)) {
+      return file_get_contents($htmlFile);
+    }
+    return '';
   }
 
   /**

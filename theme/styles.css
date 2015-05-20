@@ -1,0 +1,84 @@
+/* Basics */
+body {
+  background:#F9F9F9;
+  font-family:HelveticaNeue, arial, helvetica, clean, sans-serif;
+  margin:0;
+  overflow-y:scroll;
+  overflow-x:hidden;
+}
+
+a {
+  text-decoration:none;
+}
+
+h1 {
+  display:none;
+  font-family:'Quicksand_Dash', sans-serif;
+  font-size:100px;
+  width:640px;
+  text-align:center;
+  margin:45px auto 60px;
+  font-weight:normal;
+}
+
+h1 a {
+  color:rgba(0, 0, 0, .16);
+}
+
+h1 a:hover {
+  color:rgba(0, 0, 0, .5);
+}
+
+h2 {
+  display:none;
+  width:640px;
+  margin:0 auto;
+  font-family:'Quicksand_Light', sans-serif;
+  text-align:center;
+  opacity:.13;
+  letter-spacing:10px;
+}
+
+#main {
+  position:fixed;
+  display:table;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+}
+
+#main-offset {
+  display:table-cell;
+  text-align:center;
+  vertical-align:middle;
+}
+
+#main-content {
+  position:relative;
+  width:auto;
+  display:inline-block;
+}
+#main-page-body {
+  display:inline-block;
+  /* overflow hidden in html creates a bottom margin */
+  /* float here fixes it */
+  float:left;
+}
+
+/* Class added manually on all page objects */
+.BasicDemoPage {
+  padding:35px;
+  box-sizing:border-box;
+  border:solid #111;
+  border-width:1px 1px;
+  text-align:center;
+  background:#FEFEFE;
+  overflow:hidden;
+  text-shadow:1px 1px 1px rgba(0, 0, 0, .3);
+  letter-spacing:5px;
+  color:#555;
+  min-width:100px;
+  min-height:100px;
+}
+

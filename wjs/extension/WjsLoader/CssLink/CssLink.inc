@@ -10,6 +10,7 @@ define('WJS_PUSH_CSSLINK_INCLUDED', 'WJS_PUSH_CSSLINK_INCLUDED');
  * @package Wjs\Loader
  */
 class CssLink extends Loader {
+  var $allowRequireJs = TRUE;
 
   function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);

@@ -9,7 +9,7 @@
     var i = 0, includes = this.wjsIncludeScan(dom),
       item, split, request = {}, destinations = [];
     while (item = includes[i++]) {
-      if (!item.getAttribute('data-loaded')) {
+      if (!item.getAttribute('data-loaded') && item.getAttribute('type')) {
         item.setAttribute('data-loaded', '1');
         split = item.getAttribute('type').split(':');
         request[split[0]] = request[split[0]] || [];

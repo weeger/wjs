@@ -1,8 +1,6 @@
 (function (WjsProto) {
   'use strict';
-  // <--]
   WjsProto.register('WjsLoader', 'JsScript', {
-
     /**
      * Execute retrieved javascript.
      * @param {string} name
@@ -28,5 +26,4 @@
       return value;
     }
   });
-  // [-->
 }(WjsProto));
