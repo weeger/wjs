@@ -1,59 +1,61 @@
 body {
   background:cyan;
+
 }
 
 .WebComp-WebPage-BasicDemoPage-Home {
   font-size:1rem;
   text-transform:uppercase;
   font-family:Georgia, serif;
-  height:300px;
+  width:800px;
+  height:800px;
 }
 
 /* Special classes names exists to handle various */
 /* loading statuses : fadeIn, fadeOut, loaded, etc...*/
 
-.WebComp-WebPage-BasicDemoPage-Home.fadeIn {
-  white-space:nowrap;
-  animation:HomeFadeIn 1s cubic-bezier(0, .7, .3, 1) forwards;
-}
+/*.WebComp-WebPage-BasicDemoPage-Home.fadeIn {*/
+  /*white-space:nowrap;*/
+  /*animation:HomeFadeIn 1s cubic-bezier(0, .7, .3, 1) forwards;*/
+/*}*/
 
-.WebComp-WebPage-BasicDemoPage-Home.fadeOut {
-  white-space:nowrap;
-  animation:HomeFadeOut 1s cubic-bezier(0, .7, .3, 1) forwards;
-}
+/*.WebComp-WebPage-BasicDemoPage-Home.fadeOut {*/
+  /*white-space:nowrap;*/
+  /*animation:HomeFadeOut 1s cubic-bezier(0, .7, .3, 1) forwards;*/
+/*}*/
 
-.WebComp-WebPage-BasicDemoPage-Home.fadeOut .html {
-  white-space:nowrap;
-  animation:HomeFadeOutHtml .2s linear forwards;
-}
+/*.WebComp-WebPage-BasicDemoPage-Home.fadeOut .html {*/
+  /*white-space:nowrap;*/
+  /*animation:HomeFadeOutHtml .2s linear forwards;*/
+/*}*/
 
-.WebComp-WebPage-BasicDemoPage-Home.loaded {
-  width:300px;
-}
+/*.WebComp-WebPage-BasicDemoPage-Home.loaded {*/
+  /*width:300px;*/
+/*}*/
 
-@keyframes HomeFadeIn {
-  from {
-    width:100px;
-  }
-  to {
-    width:300px;
-  }
-}
+/*@keyframes HomeFadeIn {*/
+  /*from {*/
+    /*width:100px;*/
+  /*}*/
+  /*to {*/
+    /*width:300px;*/
+  /*}*/
+/*}*/
 
-@keyframes HomeFadeOut {
-  from {
-    width:300px;
-  }
-  to {
-    width:100px;
-  }
-}
+/*@keyframes HomeFadeOut {*/
+  /*from {*/
+    /*width:300px;*/
+  /*}*/
+  /*to {*/
+    /*width:100px;*/
+  /*}*/
+/*}*/
 
-@keyframes HomeFadeOutHtml {
-  from {
-    opacity:1;
-  }
-  to {
-    opacity:0;
-  }
-}
+/*@keyframes HomeFadeOutHtml {*/
+  /*from {*/
+    /*opacity:1;*/
+  /*}*/
+  /*to {*/
+    /*opacity:0;*/
+  /*}*/
+/*}*/

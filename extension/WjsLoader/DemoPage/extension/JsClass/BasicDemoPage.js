@@ -21,7 +21,7 @@
     },
 
     options: {
-      audioFile: {
+      /*audioFile: {
         defaults: false,
         define: function (value) {
           var self = this, wjs = self.wjs, previous = self.loader.audioTrackPrevious;
@@ -62,7 +62,7 @@
             this.loader.audioTrackPrevious = this.audioTrack;
           }
         }
-      }
+      }*/
     }
   });
 }(WjsProto));

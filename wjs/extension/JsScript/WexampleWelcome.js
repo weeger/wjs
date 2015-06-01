@@ -1,8 +1,7 @@
 (function () {
   'use strict';
-
-  if (console && console.log) {
-    console.log("\n\n" +
+  if (window.console && window.console.log) {
+    window.console.log("\n\n" +
       "\n" + '                .' +
       "\n" + '           .-=======-.' +
       "\n" + '       .-=======+=======-.' +
@@ -20,8 +19,8 @@
       "\n" + '           ¨-++++===-¨' +
       "\n" + '                +' +
       "\n" + '                 ' +
-      "\n" + '            WEXAMPLE' +
-      "\n" + '            --------' +
+      "\n" + '               WJS' +
+      "\n" + '               ---' +
       "\n" + '' +
       "\n" + '    Welcome to the source code' + "\n\n\n\n\n");
   }

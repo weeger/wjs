@@ -5,16 +5,21 @@ namespace Wjs\Loader\WebPage;
 use \Wjs;
 use \Wjs\Loader\WjsLibrary\Library;
 use \Wjs\Website;
+use \Wjs\Loader;
 
 class Page {
   /**
-   * @var \Wjs\Website
+   * @var Website
    */
   var $website;
   /**
-   * @var \Wjs
+   * @var Wjs
    */
   var $wjs;
+  /**
+   * @var Loader\WebComp
+   */
+  var $loader;
   var $title = 'Page';
   var $extensionType = 'undefined';
   var $extensionName = 'undefined';
@@ -27,12 +32,14 @@ class Page {
   var $librariesHookCurrent = '';
   var $serverPath = '';
   var $clientPath = '';
+  var $urlAlias = FALSE;
 
-  function __construct($type, $name, $options, Wjs $wjs, Website $website = NULL) {
+  function __construct($type, $name, $options, Wjs $wjs, Loader $loader, Website $website = NULL) {
     $this->extensionType = $type;
     $this->extensionName = $name;
     // Load own wjs instance.
     $this->wjs     = $wjs;
+    $this->loader  = $loader;
     $this->website = $website;
     // Init wjs as normal library.
     $this->libraryLoad('Wjs', array('wjs' => $this->wjs));
@@ -154,6 +161,12 @@ class Page {
   function push($options = array()) {
     // Send freshly created page instance.
     $options['instance'] = $this;
+    if (!isset($options['html'])) {
+      $options['html'] = $this->render();
+    }
+    if ($this->urlAlias) {
+      $options['urlAlias'] = $this->urlAlias;
+    }
     // Rendering is made during push.
     $this->wjs->extensionPush($this->extensionType, $this->extensionName, $options);
   }
@@ -169,9 +182,9 @@ class Page {
    * Launched by loader on push.
    * Contained into "html" into output data.
    */
-  function render($html = '', $params = array()) {
+  function render($params = array()) {
     // Find template name.
-    $this->rendered = $this->renderBody($html, $params);
+    $this->rendered = $this->renderBody($params);
     return $this->rendered;
   }
 
@@ -187,7 +200,8 @@ class Page {
     return $this->wjs->renderCssInclude($file);
   }
 
-  function renderBody($html, $params) {
+  function renderBody($params = array()) {
+    $html     = $this->loader->htmlLoad($this->extensionName);
     $output   = '';
     $template = $this->serverPath . $this->extensionName . '.tpl.inc';
     if (is_file($template)) {
@@ -200,8 +214,7 @@ class Page {
     else {
       $output .= $html;
     }
-    // To override.
-    return $output;
+    return $this->loader->htmlParse($this->extensionName, $output);
   }
 
   function renderTemplate($path, $param = array()) {

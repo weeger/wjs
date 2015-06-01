@@ -1,7 +1,12 @@
-(function (context) {
+(function (WjsProto) {
   'use strict';
-  // This is an example code.
-  if (context.console && context.console.info) {
-    context.console.info('Welcome to the default wjs web page.');
-  }
-}(this));
+  // Class object of page.
+  WjsProto.register('WebPage', 'wjsDefault', {
+    webPageInit:function() {
+      // This is an example code.
+      if (window.console && window.console.info) {
+        window.console.info('Welcome to the default wjs web page.');
+      }
+    }
+  });
+}(WjsProto));

@@ -12,7 +12,7 @@
     __construct: function () {
       this.wjs.extendObject(this, {
         domStyle: {},
-        domStyleAll: {},
+        cssSheetLoadQueue: [],
         classSaved: {},
         classLists: {},
         cssClassCounter: 0,
@@ -23,77 +23,87 @@
       this.wjs.loaders.WebComp.__construct.call(this);
     },
 
-    /**
-     * Create dom style objects and classes
-     * for the specified binder.
-     * @param binder
-     * @param toggle
-     * @returns {*}
-     */
-    cssInit: function (binder, toggle) {
-      this.cssDomInit(binder, toggle);
-      return this.cssClassInit(binder, toggle);
+    parse: function (name, value, process) {
+      var type = this.type,
+        output = this.wjs.loaders.WebComp.parse.apply(this, arguments),
+        protoName = this.protoName(name);
+      if (value.css) {
+        this.cssDomInit(protoName, value.css, true);
+        this.cssClassInit(protoName, true);
+        this.cssSheetLoadAll(function () {
+          process.itemParseComplete(type, name, output);
+        });
+        return false;
+      }
+      return output;
+    },
+
+    cssSheetLoadAll: function (complete) {
+      var self = this, check = function () {
+        var domCss = self.cssSheetLoadQueue.shift();
+        if (domCss) {
+          self.wjs.cssSheetLoad(domCss, check);
+        }
+        else if (complete) {
+          complete();
+        }
+      };
+      check();
     },
 
     /**
      * Initialize binder according to all its
      * object classes dependencies.
-     * @param binder
-     * @param toggle
      */
-    cssDomInit: function (binder, toggle) {
-      var i = 0, lineage;
-      // Get classes attached to element.
-      lineage = this.wjs.inheritProperty(binder, 'type');
-      for (; i < lineage.length; i++) {
-        this.cssDomInitType(lineage[i], toggle);
+    cssDomInit: function (protoName, cssData, toggle) {
+      var i = 0, name, lineage = this.wjs.classProtoLineage(protoName);
+      while (name = lineage[i++]) {
+        this.cssDomInitType(this.protoName(name), cssData, toggle);
       }
     },
 
     /**
      * Create a dom "style" element for the specified
      * binder type, if css data are stored into definition.
-     * @param name
-     * @param toggle
      */
-    cssDomInitType: function (name, toggle) {
+    cssDomInitType: function (protoName, cssData, toggle) {
       // One CSS file per type, named with
       // the name of main object.
-      var data = this.wjs.get(this.type, name),
-        domStyle = this.domStyle;
+      var domStyle = this.domStyle,
+        cssDomItems = this.cssDomItems;
       if (toggle) {
-        this.cssDomItems[name] = this.cssDomItems[name] || 0;
-        this.cssDomItems[name]++;
+        cssDomItems[protoName] = cssDomItems[protoName] || 0;
+        cssDomItems[protoName]++;
         // Create CSS for whole bundle if not exists.
-        if (data && data.css && !domStyle[name]) {
+        if (cssData && !domStyle[protoName]) {
           // Append new style tag
-          domStyle[name] = this.wjs.document.createElement('style');
+          domStyle[protoName] = this.wjs.document.createElement('style');
           // Place CSS into it.
-          // Add client binder path to URLs, if no http://.
-          domStyle[name].innerHTML = data.css.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + data.client);
+          // Add client path to relative URLs.
+          domStyle[protoName].innerHTML = cssData.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + cssData.client);
+          // Add to load queue
+          this.cssSheetLoadQueue.push(domStyle[protoName]);
           // Append to head.
-          this.wjs.document.head.appendChild(domStyle[name]);
+          this.wjs.document.head.appendChild(domStyle[protoName]);
         }
       }
       else {
-        this.cssDomItems[name]--;
-        if (this.cssDomItems[name] === 0 && domStyle[name]) {
-          domStyle[name].parentNode.removeChild(domStyle[name]);
-          delete domStyle[name];
+        cssDomItems[protoName]--;
+        if (cssDomItems[protoName] === 0 && domStyle[protoName]) {
+          domStyle[protoName].parentNode.removeChild(domStyle[protoName]);
+          delete domStyle[protoName];
         }
       }
     },
 
-    cssClassInit: function (binder, toggle) {
+    cssClassInit: function (protoName, toggle) {
       var i = 0,
         insideBinder = false,
         typeCss,
         typePart,
-        lineage,
+        lineage = this.wjs.classProtoLineage(protoName),
         lineagePart = [],
-        typeGlobal = binder.typeGlobal;
-      // Get classes attached to element.
-      lineage = this.wjs.inheritProperty(binder, 'type');
+        typeGlobal = lineage.join('-');
       for (; i < lineage.length; i++) {
         // Append to class name.
         lineagePart.push(lineage[i]);
@@ -130,10 +140,6 @@
           }
         }
       }
-      // Save full class for binder.
-      binder.classGlobal = this.classSaved[typeGlobal];
-      // Return list of used classes.
-      return this.classLists[typeGlobal];
     },
 
     cssClassAdd: function (typePart, typeGlobal) {
@@ -174,6 +180,7 @@
         // Replace .className by .cX class name generated.
         new RegExp('\\.' + type + '(?=[\\s*|{|,|.|-|:])', 'g'),
         '.' + className);
+      this.cssSheetLoadQueue.push(domStyle);
     }
   });
 }(WjsProto));

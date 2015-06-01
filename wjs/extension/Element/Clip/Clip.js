@@ -4,7 +4,7 @@
  */
 (function (WjsProto) {
   'use strict';
-  WjsProto.register('Element','Clip', {
+  WjsProto.register('Element', 'Clip', {
     classExtends: 'BasicElement\\Sprite',
     variables: {
       top: 0,
@@ -57,6 +57,9 @@
     renderDom: function (renderData) {
       if (this.dom) {
         renderData = this.positionAdjust(renderData);
+        // Use margin positioning system to center clip
+        // It allow to center it into a "non element" dom object
+        // which can have a changing with / height.
         var i = 0, properties = ['top', 'left', 'width', 'height'];
         for (; i < properties.length; i++) {
           this.dom.style[properties[i]] = renderData[properties[i]] + 'px';

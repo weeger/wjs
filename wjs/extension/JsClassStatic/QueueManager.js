@@ -15,6 +15,7 @@
       this.queues[name] = this.queues[name] || [];
       this.queues[name].push(callback);
       this.queueStart(name);
+
     },
 
     queueStart: function (name) {

@@ -122,11 +122,13 @@
         if (process && process !== self) {
           // Add current process to the waiting list.
           process.next.push(self);
+          // Allow to reboot later.
+          self.booted = false;
           // Stop iteration.
           return false;
         }
       })) {
-        self.booted = false;
+        // Stop process.
         return;
       }
       // Verify if all extension need to be
@@ -352,12 +354,12 @@
       var self = this, wjs = self.wjs;
       // Breaking stack prevent overflows.
       wjs.window.setTimeout(function () {
-        var extNext, ObjectKeys = Object.keys, queue = self.parseQ;
+        var extNext, objectKeys = Object.keys, queue = self.parseQ;
         // This is a trick to not delete loaders before
         // to delete all extensions. In place of that
         // we should create sub processes (like in parse function)
         // according to objects dependencies.
-        if (self.destroy && queue.WjsLoader && ObjectKeys(queue).length > 1) {
+        if (self.destroy && queue.WjsLoader && objectKeys(queue).length > 1) {
           queue = wjs.extendObject({}, queue, true);
           delete queue.WjsLoader;
         }
@@ -371,7 +373,7 @@
         // At the end of loading, queue must be empty.
         // If not, may be an unknown script is present in
         // the returned package.
-        if (ObjectKeys(queue).length > 0) {
+        if (objectKeys(queue).length > 0) {
           self.wjs.err('Parse queue not empty.');
         }
         self.loadingComplete();

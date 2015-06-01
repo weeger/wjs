@@ -7,14 +7,17 @@
    * @param add
    * @returns {}
    */
-  WjsProto.register('JsMethod', 'inheritMethodLinage', function (object, baseMethod, addMethod) {
+  WjsProto.register('JsMethod', 'inheritMethodLinage', function (object, baseMethod, addMethod, extraArgs) {
     // Base method is called with __base() function.
     return function () {
-      var baseSaved = object.__base,
-        result;
+      var baseSaved = object.__base, result, args = arguments;
       object.__base = (typeof baseMethod === 'function') ? baseMethod : function () {
       };
-      result = addMethod.apply(object, arguments);
+      if (extraArgs) {
+        // Convert arguments into an array.
+        args = Array.prototype.slice.call(args).concat(extraArgs);
+      }
+      result = addMethod.apply(object, args);
       object.__base = baseSaved;
       return result;
     };

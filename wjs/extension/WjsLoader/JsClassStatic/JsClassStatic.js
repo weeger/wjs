@@ -8,11 +8,17 @@
       this.wjs.loaders.JsClass.__construct.call(this);
     },
 
+    enable: function (name, value) {
+      this.wjs.loaders.JsClass.enable.apply(this, arguments);
+      // TODO this.wjs[name] =
+    },
+
     register: function (type, name, process, value) {
       // Parent execute classExtend.
       var output = this.wjs.loaders.JsClass.register.apply(this, arguments);
       // Create proto
-      this.staticClasses[name] = new (this.wjs.classProto(name))();
+      this.wjs[name] =
+        this.staticClasses[name] = new (this.wjs.classProto(name))();
       return output;
     }
   });

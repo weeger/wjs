@@ -17,7 +17,7 @@
     for (i in add) {
       if (add.hasOwnProperty(i)) {
         if (typeof add[i] === 'function') {
-          // We don't use inherit_method, we already got list of
+          // We don't use inheritMethod, we already got list of
           // inherited property into the main inheritLinage method.
           result[i] = this.inheritMethodLinage(object, result[i], add[i]);
         }

@@ -6,7 +6,7 @@
    * @require JsMethod > wjsIncludeInit
    */
   context.WjsProto.ready(function () {
-    // Search for <wjs-include> tags.
+    // Search for <div data-wjsInclude="..."> tags.
     this.wjsIncludeInit(this.window.document.body);
     // You can place extra javascript here
     // after the main site initialisation.

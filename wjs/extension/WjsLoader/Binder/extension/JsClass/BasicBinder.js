@@ -17,21 +17,17 @@
       stateConnected: {},
       stateListener: {}
     },
+
     states: {},
 
     options: {
-      // Binder can define css styles
-      // without to have a dom element.
-      // It overrides web components
-      // defaults css classes.
       cssClasses: {
-        define: function () {
-          // Initialize css classes
-          this.cssClasses = this.loader.cssInit(this, true);
-        },
-        destroy: function () {
-          // Remove loader data.
-          this.loader.cssInit(this, false);
+        define: function (value) {
+          value = value || [];
+          if (this.loader.classLists[this.typeGlobal]) {
+            // Return list of used classes.
+            this.cssClasses = value.concat(this.loader.classLists[this.typeGlobal]);
+          }
         }
       }
     },
@@ -45,6 +41,21 @@
       // Once created, we can trigger variables changes
       // by overriding parent's state wrapper.
       this.variableSetWrapper = this._variableSetWrapper;
+
+    },
+
+    cssRulesClassInit: function () {
+      var hasCssKeyRule = this.wjs.inheritMethod(this, 'cssRulesClassInit', arguments),
+        i = 0, item, protoName = this.loader.protoName(this.type),
+        domStyle = this.loader.domStyle[protoName];
+      if (domStyle) {
+        while (item = this.loader.classLists[this.typeGlobal][i++]) {
+          if (this.cssRulesClassSearch(domStyle.sheet, item)) {
+            hasCssKeyRule = true;
+          }
+        }
+      }
+      return hasCssKeyRule;
     },
 
     callbackFind: function (callback, group) {
@@ -185,17 +196,11 @@
     listen: function (target, eventName, callback) {
       callback = this.callbackFind(callback, 'listen');
       // Get callback function.
-      if (target.listenerAdd(eventName, this, callback)) {
-        return true;
-      }
-      return false;
+      return target.listenerAdd(eventName, this, callback) ? true : false;
     },
 
     forget: function (target, eventName) {
-      if (target.listenerRemove(eventName, this)) {
-        return true;
-      }
-      return false;
+      return target.listenerRemove(eventName, this) ? true : false;
     },
 
     hasListener: function (eventName, binder) {

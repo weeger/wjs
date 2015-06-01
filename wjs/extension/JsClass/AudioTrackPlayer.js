@@ -105,7 +105,7 @@
           this.trackSync(track);
         }
         else {
-          this.trackSync(track, .1);
+          this.trackSync(track, 0.1);
         }
       }
       this.beatCount++;
@@ -114,9 +114,9 @@
         // Compute the next stamp, using start stamp
         // and current music speed, it is much more average
         // than using a static value.
-        (this.playStampStart + (this.beatCount * this.bpmMiliseconds))
+        (this.playStampStart + (this.beatCount * this.bpmMiliseconds)) -
           // Remove current value.
-          - new Date().getTime());
+          new Date().getTime());
     },
 
     hook: function (method) {
