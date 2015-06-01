@@ -270,7 +270,25 @@ class Wjs extends Router {
    */
   function response($get = NULL) {
     if ($get !== NULL) {
-      $this->extensionPushRequest($get);
+      // Parse get request.
+      $requests = $this->queryExplode($get[$this->optionGet('paramInc')]);
+      // Exclude must be boolean or array,
+      // param for true is "1".
+      if (isset($get[$this->optionGet('paramExc')])) {
+        $exclude = $get[$this->optionGet('paramExc')];
+        if (is_array($exclude)) {
+          $exclude = $this->queryExplode($exclude);
+        }
+        else {
+          $exclude = TRUE;
+        }
+      }
+      else {
+        $exclude = array();
+      }
+      $this->extensionExclude = $exclude;
+      // Push array of extension.
+      $this->extensionPushRequest($requests);
     }
     header('Content-Type: application/json');
     print $this->responsePackage();
@@ -425,24 +443,8 @@ class Wjs extends Router {
    * @param $requestArray
    */
   function extensionPushRequest($requestArray) {
-    $requests = $this->queryExplode($requestArray[$this->optionGet('paramInc')]);
-    // Exclude must be boolean or array,
-    // param for true is "1".
-    if (isset($requestArray[$this->optionGet('paramExc')])) {
-      $exclude = $requestArray[$this->optionGet('paramExc')];
-      if (is_array($exclude)) {
-        $exclude = $this->queryExplode($exclude);
-      }
-      else {
-        $exclude = TRUE;
-      }
-    }
-    else {
-      $exclude = array();
-    }
-    $this->extensionExclude = $exclude;
     // Iterate over types.
-    foreach ($requests as $type => $items) {
+    foreach ($requestArray as $type => $items) {
       // Iterate over items.
       foreach ($items as $name) {
         $this->extensionPush($type, $name);
@@ -513,7 +515,9 @@ class Wjs extends Router {
       'paramExc'             => $this->optionGet('paramExc'),
       'paramToken'           => $this->optionGet('paramToken'),
       'pathResponse'         => $this->optionGet('clientPathResponse'),
+      'pathFull'             => $this->optionGet('clientPathFull'),
       'pathWebsite'          => $this->optionGet('clientPathWebsite'),
+      'pathRequest'          => $this->optionGet('clientPathRequest'),
       'pathRequestDirectory' => $this->optionGet('clientRequestDirectory'),
       'cacheToken'           => $this->optionGet('cacheToken'),
     ));
@@ -640,6 +644,7 @@ class Wjs extends Router {
     $linkFilePath = $this->findLinksClassFile($classPath, $type);
     if ($linkFilePath) {
       $clientPath = $this->pathClient($linkFilePath);
+
       // Add && Push.
       $this->extensionAdd($requireType, $clientPath, array(
         'server' => $linkFilePath,
@@ -800,9 +805,9 @@ class Wjs extends Router {
 
   function htmlParseIncludeRequire($html, $extensionType, $extensionName, $options = array()) {
     $result = array();
-    // Search for <wjs-include type="type:name" (/> | </wjs-include>
+    // Search for <div data-wjsInclude="...">
     // Get text content if present.
-    preg_match_all('`<wjs-include[^<]*type="([^"]*)\:([^"]*)"([^>|\/>])*(?:\/>|(?!\/)>([\s\S]*?)<\/wjs-include>)`', $html, $result);
+    preg_match_all('`<div[^<]*data\\-wjsInclude="([^"]*)\:([^"]*)"([^>|\/>])*(?:\/>|(?!\/)>([\s\S]*?)<\/div>)`i', $html, $result);
     foreach ($result[1] as $key => $requireType) {
       $this->extensionAddRequire($extensionType, $extensionName, $requireType, $result[2][$key], $options);
     }

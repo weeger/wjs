@@ -130,9 +130,9 @@
       var cacheToken = this.settings.cacheToken;
       if (cacheToken) {
         // Append ?
-        return (url.indexOf('?') === -1 ? url + '?' : url)
+        return (url.indexOf('?') === -1 ? url + '?' : url) +
           // Add token.
-          + '&' + cacheToken;
+          '&' + cacheToken;
       }
       return url;
     },
@@ -380,11 +380,11 @@
      * @return {boolean}
      */
     regEach: function (registry, callback) {
-      var i = 0, j, types = Object.keys(registry), names;
-      for (; i < types.length; i++) {
-        names = Array.isArray(registry[types[i]]) ? registry[types[i]] : Object.keys(registry[types[i]]);
-        for (j = 0; j < names.length; j++) {
-          if (callback.call(self, types[i], names[j]) === false) {
+      var i = 0, j, type, name, types = Object.keys(registry), names;
+      while (type = types[i++]) {
+        names = Array.isArray(registry[type]) ? registry[type] : Object.keys(registry[type]);
+        for (j = 0; name = names[j++];) {
+          if (callback.call(this, type, name) === false) {
             return false;
           }
         }

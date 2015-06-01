@@ -12,7 +12,7 @@
       // If value is not a function, it came from
       // the not cached json response, so
       // we are forced to evaluate it.
-      if (!(typeof value === 'function')) {
+      if (typeof value !== 'function') {
         // wjs, process and loader variables
         // can be used by scripts to register data.
         // We have to add local vars here, this allow to give

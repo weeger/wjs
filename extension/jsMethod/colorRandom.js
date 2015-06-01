@@ -363,8 +363,7 @@
         r = v, g = p, b = q;
         break;
     }
-    var result = [Math.floor(r * 255), Math.floor(g * 255), Math.floor(b * 255)];
-    return result;
+    return [Math.floor(r * 255), Math.floor(g * 255), Math.floor(b * 255)];
   }
 
   function HSVtoHSL(hsv) {

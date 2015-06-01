@@ -4,14 +4,16 @@ namespace Wjs\Loader;
 
 require_once 'WebPage.class.inc';
 
+define('WJS_PUSH_WEBPAGE_PRELOADED', 'WJS_PUSH_WEBPAGE_PRELOADED');
+
 use \Wjs\Loader;
-use \Wjs\Website;
 
 /**
  * @package Wjs\Loader
  */
 class WebPage extends WebComp {
   var $lastAdded;
+  var $requireCssLinks = FALSE;
 
   function extensionAdd($name, $data) {
     parent::extensionAdd($name, $data);
@@ -49,7 +51,10 @@ class WebPage extends WebComp {
     // Treat value as a classic WebComp
     $output = parent::extensionPush($name, $options, $value);
     if (isset($options['urlHistory'])) {
-      $output['#data']['urlHistory'] = TRUE;
+      $output['#data']['urlHistory'] = $options['urlHistory'];
+    }
+    if (isset($options['urlAlias'])) {
+      $output['#data']['urlAlias'] = $options['urlAlias'];
     }
     // Add extra parameters sent at declaration.
     if (isset($value['previous'])) {
@@ -61,14 +66,13 @@ class WebPage extends WebComp {
     return $output;
   }
 
-  function htmlLoad($name, $options, $value) {
-    $html = parent::htmlLoad($name, $options, $value);
-    // Get template parameters.
-    $params = isset($options['params']) ? $options['params'] : array();
-    /* @var \Wjs\Loader\WebPage\Page $page */
-    $page = $options['instance'];
-    // Execute rendering.
-    return $page->render($html, $params);
+  function htmlLoad($name, $options = array(), $value = array()) {
+    if (isset($options['html'])) {
+      return $options['html'];
+    }
+    else {
+      return parent::htmlLoad($name, $options, $value);
+    }
   }
 
   function instance($name, $options = array(), $wjs = NULL, $website = NULL) {
@@ -80,12 +84,16 @@ class WebPage extends WebComp {
     if (!class_exists($className)) {
       $className = '\\Wjs\\Loader\\WebPage\\Page';
     }
-    $options = array_merge($options, $this->valuePush($name));
-    // Use current wjs if not defined.
-    if ($wjs === NULL) {
-      $wjs = $this->wjs;
+    $value = $this->valuePush($name);
+    if (!$this->valueIsError($value)) {
+      $options = array_merge($options, $value);
+      // Use current wjs if not defined.
+      if ($wjs === NULL) {
+        $wjs = $this->wjs;
+      }
+      // Create page class.
+      return new $className($this->type, $name, $options, $wjs, $this, $website);
     }
-    // Create page class.
-    return new $className($this->type, $name, $options, $wjs, $website);
+    return FALSE;
   }
 }

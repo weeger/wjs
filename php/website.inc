@@ -44,6 +44,9 @@ class Website extends Router {
   var $page;
   var $pageClassType = 'WebPage';
   var $websiteInfo = array();
+  var $pageSummary = array();
+  var $pageAliases = array();
+  var $extensionGlobal = array();
 
   function __construct($callerFile = '') {
     // Save the raw path to the website root (allow symlinks).
@@ -85,7 +88,9 @@ class Website extends Router {
     // Scan specific extensions.
     // We have to use unresolved symlink
     // to build relative client paths.
-    $wjs->scanFolderExtensions($wjs->optionGet('serverPathWebsite') . 'extension/');
+    $order                       = array();
+    $order[$this->pageClassType] = $this->pageSummary;
+    $wjs->scanFolderExtensions($wjs->optionGet('serverPathWebsite') . 'extension/', array(), $order);
     return $wjs;
   }
 
@@ -98,26 +103,44 @@ class Website extends Router {
   function pageInstance($webPageName, $options = array()) {
     /** @var \Wjs\Loader\WebPage $loader */
     $loader = $this->wjs->loaderGet($this->pageClassType);
-    return $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
+    // Return new page
+    $page = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
+    $aliases = array_flip($this->pageAliases);
+    if (isset($aliases[$webPageName])) {
+      $page->urlAlias = $aliases[$webPageName];
+    }
+    // Check if exists.
+    if (!$page) {
+      print 'Not found page ' . $webPageName;
+      exit;
+    }
+    return $page;
   }
 
   function renderDefault($webPageName = 'wjsDefault', $params = array()) {
     if (isset($_GET[$this->pageClassType])) {
       $webPageName = $_GET[$this->pageClassType];
     }
+    // Search for aliases.
+    elseif (isset($_GET['q']) && isset($this->pageAliases[$_GET['q']])) {
+      $webPageName = $this->pageAliases[$_GET['q']];
+    }
     return $this->render($webPageName, $params);
   }
 
-  function render($webPageName = 'wjsDefault', $params = array()) {
-
+  function render($webPageName = 'wjsDefault') {
     // Define if we are on an AJAX page or not.
     $ajaxKey = $this->wjs->optionGet('paramInc');
-
+    $options = array();
+    // Query come from an AJAX call.
     if (isset($_GET[$ajaxKey])) {
       // Use page specific wjs.
       if (isset($_GET[$ajaxKey][$this->pageClassType])) {
+        // Create page.
         $this->page = $this->pageInstance($_GET[$ajaxKey][$this->pageClassType]);
-        $this->renderPage($_GET[$ajaxKey][$this->pageClassType], $params);
+        // Push.
+        $this->page->push($options);
+        // Remove page from query.
         unset($_GET[$ajaxKey][$this->pageClassType]);
         // Use the page wjs.
         $this->page->wjs->response($_GET);
@@ -125,54 +148,33 @@ class Website extends Router {
       // Or use the global wjs.
       $this->wjs->response($_GET);
     }
-
+    // Create main page.
     $this->page = $this->pageInstance($webPageName);
-    $this->renderPage($webPageName, $params);
-    if (!$this->page) {
-      return 'Not found page ' . $webPageName;
-    }
-
-    $content  = '<div id="wjs-preloaded-' . $this->pageClassType . '-' . $webPageName . '">' . '</div>';
-    $template = $this->page->wjs->optionGet('serverPathWebsite') . 'theme/page.html';
-    if (is_file($template)) {
-      $content = str_replace('{{content}}', $content, file_get_contents($template));
-    }
-
+    // Add extra libraries.
+    $this->pagePreloadInit();
+    $options = array_merge(array(
+      // Enable url update on page changes
+      'urlHistory' => TRUE,
+      // Define html body as preloaded.
+      'html'       => WJS_PUSH_WEBPAGE_PRELOADED
+    ), $options);
+    // Push into own wjs.
+    $this->page->push($options);
     return $this->renderDoctype() . '<html>' .
     $this->renderHead($this->page->websiteRenderHead()) .
-    $this->renderBody($content) .
+    $this->renderBody() .
     '</html>';
   }
 
-  function renderPage($webPageName, $params = array()) {
-    if ($this->wjs->extensionGet($this->pageClassType, $webPageName)) {
-      // Add website root css if present.
-      $css = $this->page->wjs->optionGet('serverPathWebsite') . 'theme/styles.css';
-      if (is_file($css)) {
-        $this->page->wjs->import('CssLink', 'theme/styles.css', array(
-          'client' => 'theme/styles.css',
-          'server' => $css,
-        ));
-      }
-      // Add website root js if present.
-      $css = $this->page->wjs->optionGet('serverPathWebsite') . 'theme/script.js';
-      if (is_file($css)) {
-        $this->page->wjs->import('JsLink', 'theme/script.js');
-      }
-      // Push page.
-      $this->page->push(array(
-        // Enable url update on page changes
-        'urlHistory' => TRUE,
-        // Preload only for non AJAX pages.
-        'preloaded'  => !isset($_GET[$this->wjs->optionGet('paramInc')]),
-        // Parameters used into template rendering.
-        'params'     => $params
-      ));
-      // Add extra website data.
-      $this->page->librariesHook('WebsiteInfo', $this->websiteInfo);
-      $this->page->wjs->import('JsObject', 'WebsiteInfo', $this->websiteInfo);
-    }
-    return $this->page;
+  function pagePreloadInit() {
+    // Add extra website data.
+    $this->page->librariesHook('WebsiteInfo', $this->websiteInfo);
+    $this->page->wjs->import('JsObject', 'WebsiteInfo', $this->websiteInfo);
+    $this->page->wjs->extensionPushRequest($this->extensionGlobal);
+  }
+
+  function pageRenderParams() {
+    return array();
   }
 
   /**
@@ -197,10 +199,14 @@ class Website extends Router {
     '</head>';
   }
 
-  function renderBody($content) {
-    return '<body>' .
-    $content .
-    '</body>';
+  function renderBody() {
+    $output = '<body>';
+    $output .= '<div id="' . $this->page->extensionName . '-preloaded">' .
+      '<div class="html">' .
+      $this->page->render($this->pageRenderParams()) .
+      '</div>' .
+      '</div>';
+    $output .= '<body>';
+    return $output;
   }
-
 }

@@ -62,17 +62,14 @@ class WebComp extends Loader {
           'group' => isset($value['group']) ? $value['group'] : FALSE,
         ));
         $value['html'] = $this->htmlLoad($name, $options, $value);
-        // Html can be missing.
-        if ($value['html'] !== '') {
-          // Rebase links / images to web component folder.
-          $value['html'] = $this->wjs->htmlRebase($value['html'], $value['client']);
-          $this->wjs->htmlParseIncludeRequire($value['html'], $this->type, $name);
-        }
         // Search for extra css file,
         // but first search for a min.css version.
-        if ($this->requireCssLinks && !$this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.min.css', 'css', $this->type, $name)) {
-          // Fallback to .css version if no min.
-          $this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.css', 'css', $this->type, $name);
+        if ($this->requireCssLinks) {
+          $cssPath = realpath($value['server']) . '/' . $name;
+          if (!$this->wjs->requireLinksClassFile($cssPath . '.min.css', 'css', $this->type, $name)) {
+            // Fallback to .css version if no min.
+            $this->wjs->requireLinksClassFile($cssPath . '.css', 'css', $this->type, $name);
+          }
         }
         if ($this->requireJsLinks) {
           // Search for extra js file.
@@ -86,12 +83,21 @@ class WebComp extends Loader {
     return parent::extensionPush($name, $options, $value);
   }
 
-  function htmlLoad($name, $options, $value) {
+  function htmlLoad($name, $options = array(), $value = array()) {
+    $value    = $this->valuePush($name);
     $htmlFile = $value['server'] . '/' . $name . '.html';
     if (is_file($htmlFile)) {
-      return file_get_contents($htmlFile);
+      return $this->htmlParse($name, file_get_contents($htmlFile));
     }
-    return '';
+    return FALSE;
+  }
+
+  function htmlParse($name, $html) {
+    $value = $this->valuePush($name);
+    // Rebase links / images to web component folder.
+    $html = $this->wjs->htmlRebase($html, $value['client']);
+    $this->wjs->htmlParseIncludeRequire($html, $this->type, $name);
+    return $html;
   }
 
   /**

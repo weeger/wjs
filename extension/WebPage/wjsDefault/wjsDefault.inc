@@ -3,8 +3,8 @@
 namespace Wjs\Loader\WebPage;
 
 class wjsDefault extends Page {
-  function renderBody($html, $params = array()) {
-    return parent::renderBody($html, $params) .
+  function renderBody($params = array()) {
+    return parent::renderBody($params) .
     '<section>... and also custom php classes overrides</section>';
   }
 }

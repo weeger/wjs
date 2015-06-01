@@ -25,7 +25,7 @@
       }
     };
     callback = function () {
-      var timeRemain = timeEnd - (new Date).getTime();
+      var timeRemain = timeEnd - (new Date()).getTime();
       if (timeRemain < interval) {
         step(1);
         if (options.complete) {

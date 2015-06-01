@@ -10,6 +10,10 @@ use \Wjs\Loader;
  * @package Wjs\Loader
  */
 class WjsLibrary extends WebComp {
+  var $allowRequireJs = TRUE;
+  var $requireCssLinks = TRUE;
+  var $requireJsLinks = TRUE;
+
   /**
    * Library instances are created on extension add.
    * PHP Library content is loaded separately by page.

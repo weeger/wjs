@@ -5,7 +5,7 @@
 
     /**
      * @require WjsLoader > JsMethod
-     * @require JsMethod > cssLinkLoad
+     * @require JsMethod > cssSheetLoad
      */
     parse: function (name, value, process) {
       // Link have been included into page head.
@@ -14,17 +14,26 @@
         // Then continue parsing.
         return this.wjs.document.head.querySelector('link[href="' + name + '"]') || true;
       }
-      var self = this;
+      var self = this,
+        domLink = self.wjs.document.createElement('link');
       // Url can be sent from server as a key name
       // or from client as a url name.
       value = self.wjs.urlToken(value || name);
-      if (!(value instanceof wjs.window.Error)) {
-        self.wjs.cssLinkLoad(value, function (domLink) {
-          // Append to head.
-          self.enable(name, domLink);
-          // Continue.
-          self.parseLinkLoaded(name, domLink, process);
+      if (!(value instanceof self.wjs.window.Error)) {
+        self.wjs.onload(domLink, function () {
+          // Wait for CSS rules to be loaded.
+          self.wjs.cssSheetLoad(domLink, function (domLink) {
+            // Continue.
+            self.parseLinkLoaded(name, domLink, process);
+          });
         });
+        // This argument is required to register link
+        // into document.styleSheets list.
+        domLink.setAttribute('rel', 'stylesheet');
+        // Append to head.
+        self.enable(name, domLink);
+        // Launch loading.
+        domLink.setAttribute('href', value);
         // Stop parsing.
         return false;
       }

@@ -1,7 +1,6 @@
 (function (WjsProto) {
   'use strict';
   WjsProto.register('Plugin', 'ClipDrag', {
-    classExtends: 'BasicPlugin',
     states: {
       mousePosition: {},
       dragdropPressed: false,
@@ -21,27 +20,25 @@
       }
     },
 
-    __construct: function () {
-      this.wjs.inheritMethod(this, '__construct', arguments);
+    binderInit: function (binder) {
       if (this.autoStart) {
-        this.domListen(this.binder.dom, 'mousedown', 'clipMouseDown');
+        this.domListen(binder.dom, 'mousedown', 'clipMouseDown');
       }
     },
 
-    exit: function () {
+    binderExit: function (binder) {
       if (!this.autoStart) {
-        this.domForget(this.binder.dom, 'mousedown', 'clipMouseDown');
+        this.domForget(binder.dom, 'mousedown', 'clipMouseDown');
       }
-      this.wjs.inheritMethod(this, 'exit', arguments);
     },
 
-    dragdropPress: function (x, y) {
+    dragdropPress: function (binder, x, y) {
       // Save it to compute offset.
       this.mouseStartX = x;
       this.mouseStartY = y;
-      this.clipStartX = this.binder.left;
-      this.clipStartY = this.binder.top;
-      this.binder.stage.dom.classList.add('ClipDragMouseDragging');
+      this.clipStartX = binder.left;
+      this.clipStartY = binder.top;
+      binder.stage.dom.classList.add('ClipDragMouseDragging');
       if (this.handle) {
         this.handle.classList.add('ClipDragMouseDraggingHandle');
       }
@@ -49,13 +46,13 @@
       this.stateSet('dragdropPressed', true);
     },
 
-    dragdropRelease: function () {
+    dragdropRelease: function (binder) {
       // Save it to compute offset.
       this.mouseStartX =
         this.mouseStartY =
           this.clipStartX =
             this.clipStartY = null;
-      this.binder.stage.dom.classList.remove('ClipDragMouseDragging');
+      binder.stage.dom.classList.remove('ClipDragMouseDragging');
       if (this.handle) {
         this.handle.classList.remove('ClipDragMouseDraggingHandle');
       }
@@ -83,23 +80,25 @@
       domListen: {
         clipMouseDown: function (e) {
           e.preventDefault();
-          this.dragdropPress(e.clientX, e.clientY);
+          this.dragdropPress(this.wjs.loaders.WebComp.webCompList[e.target.id], e.clientX, e.clientY);
         },
 
         dragdropPressedMouseMove: function (e) {
           e.preventDefault();
-          var mouseX = e.clientX, mouseY = e.clientY, i = 0, direction = this.direction;
-          if (direction === 'xy' || direction === 'y') {
-            this.binder.top = this.clipStartY - (this.mouseStartY - mouseY);
-          }
-          if (direction === 'xy' || direction === 'x') {
-            this.binder.left = this.clipStartX - (this.mouseStartX - mouseX);
-          }
-          this.binder.render();
+          var self = this, mouseX = e.clientX, mouseY = e.clientY, direction = this.direction;
+          this.bindersEach(function (binder) {
+            if (direction === 'xy' || direction === 'y') {
+              binder.top = self.clipStartY - (self.mouseStartY - mouseY);
+            }
+            if (direction === 'xy' || direction === 'x') {
+              binder.left = self.clipStartX - (self.mouseStartX - mouseX);
+            }
+            binder.frameNextEnable();
+          });
         },
 
         dragdropPressedMouseUp: function (e) {
-          this.dragdropRelease();
+          this.dragdropRelease(this.wjs.loaders.WebComp.webCompList[e.target.id]);
         }
       }
     }

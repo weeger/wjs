@@ -1,3 +1,14 @@
+WJS - 4.2.1 - 2015-05-21
+------------------------
+- Binder CSS Managment
+- CSS Loading precision
+- Website rendering changes
+- Elements importation improvements
+- Elements animation
+- Base 3D management functions
+- Various debug
+- Code style
+
 WJS - 4.2.0 - 2015-05-20
 ------------------------
 - Lot of new features

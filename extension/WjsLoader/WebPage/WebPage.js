@@ -16,6 +16,18 @@
       this.pageInstances = [];
       this.wjs.loaders.WebComp.__construct.call(this);
       this.queueName = this.type + 'PageLoads';
+      this.wjs.window.addEventListener('popstate', this.onPopState.bind(this));
+    },
+
+    /**
+     * @require JsMethod > urlQueryParse
+     * @param e
+     */
+    onPopState: function () {
+      var query = this.wjs.urlQueryParse();
+      if (query[this.type]) {
+        this.pageHide(query[this.type]);
+      }
     },
 
     /**
@@ -46,23 +58,25 @@
     /**
      * Display loaded page, launch load animations.
      * @require JsMethod > extEnable
+     * @require JsMethod > cssSheetRules
      */
-    pageShow: function (name) {
+    pageShow: function (name, complete) {
       var self = this, wjs = self.wjs, type = self.type;
       wjs.queueAdd(self.queueName, function () {
         if (self.pageCurrent) {
-          self.pageHide(name);
+          self.pageHide(name, complete);
           // Remove itself
-          self.wjs.queueNext(self.queueName);
+          wjs.queueNext(self.queueName);
           return;
         }
         // Remove destroy time out if exists.
         self.destroyTimeoutClear(name);
         //
         if (!wjs.get(type, name)) {
-          self.wjs.use(type, name, {
+          wjs.use(type, name, {
             complete: function () {
-              self.wjs.queueNext(self.queueName);
+              self.pageShow(name, complete);
+              wjs.queueNext(self.queueName);
             }
           });
         }
@@ -78,11 +92,15 @@
             var check = function () {
               i = 0;
               while (item = wjs.extRequire[type][name].CssLink[i++]) {
-                var domLink = wjs.get('CssLink', item);
-                if (domLink.sheet && domLink.sheet.rules) {
+                var domLink = wjs.get('CssLink', item),
+                  rules = wjs.cssSheetRules(domLink.sheet);
+                if (domLink.sheet && rules) {
                   wjs.extEnable(type, name);
+                  if (complete) {
+                    complete();
+                  }
                   // Continue queue.
-                  self.wjs.queueNext(self.queueName);
+                  wjs.queueNext(self.queueName);
                 }
                 else {
                   checkRun();
@@ -91,7 +109,6 @@
             }, checkRun = function () {
               wjs.window.setTimeout(check, 100);
             };
-
             while (item = wjs.extRequire[type][name].CssLink[i++]) {
               wjs.loaders.CssLink.enable(item, wjs.get('CssLink', item));
             }
@@ -100,7 +117,7 @@
           else {
             wjs.extEnable(type, name);
             // Continue queue.
-            self.wjs.queueNext(self.queueName);
+            wjs.queueNext(self.queueName);
           }
         }
       });
@@ -131,14 +148,14 @@
               // Reset variables.
               self.pageCurrent = false;
               self.pageHideStarted = false;
-              if (complete) {
+              // Display new page.
+              if (replacement) {
+                self.pageShow(replacement, complete);
+              }
+              else if (complete) {
                 complete();
               }
               self.wjs.queueNext(self.queueName);
-              // Display new page.
-              if (replacement) {
-                self.pageShow(replacement);
-              }
             }
           };
         // Load replacement page.

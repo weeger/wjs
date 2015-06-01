@@ -13,9 +13,9 @@
 
     options: {
       children: {
-        define: function (value, optionsList) {
+        define: function (value, options) {
           // Ensure to load stage before loading children.
-          this.optionApply('stage', optionsList);
+          this.optionApply('stage', options);
           // Ball base function.
           this.__base.apply(this, arguments);
         }
@@ -23,6 +23,7 @@
       stage: {
         define: function (value, options) {
           if (!value) {
+            this.optionApply('dom', options);
             // Search from parent
             if (options.parent) {
               // Parent is a stage.
@@ -38,10 +39,18 @@
           if (typeof value !== 'object' || !value || !value.isA('Stage')) {
             // this.error('No stage defined (' + value + ')');
             value = this.wjs.loaders.Element.instance('Stage', {
-              dom: this.wjs.document.body
+              dom: this.wjs.document.body,
+              playPlayer: true,
+              autoPlay: true
             });
+            // Stage can be not the parent if defined as an option,
+            // but in this case sprite looks orphan.
+            if (!options.parent) {
+              value.elementAppend(this);
+            }
           }
-          this.stage = value;
+          this.stage =
+            this.playPlayer = value;
         }
       },
       // Sprite name is for creator usage,

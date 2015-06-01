@@ -24,9 +24,7 @@
     parse: function (name, value, process) {
       // If a js file is attached, it have been already
       // loaded, and registered items are waiting to be parsed.
-      var type = this.type;
-      // Create class extensions.
-      this.protoAdd(name, WjsProto.retrieve(type, name), name);
+      this.protoAdd(name, WjsProto.retrieve(this.type, name), name);
       // Enable.
       WjsProto.proto.Loader.parse.apply(this, arguments);
       return value;
@@ -39,6 +37,9 @@
       return this.protoBaseClass + (name && name !== this.protoBaseClass ? '\\' + name : '');
     },
 
+    /**
+     * @require JsMethod > classProtoLineage
+     */
     protoAdd: function (name, proto, pack) {
       var i, keys, protoName = this.protoName(name);
       // Set type
@@ -48,6 +49,7 @@
       proto.pack = pack;
       proto.classExtends = (!proto.hasOwnProperty('classExtends') ? this.protoBaseClass : proto.classExtends);
       this.wjs.classExtend(protoName, proto);
+      proto.typeGlobal = this.wjs.classProtoLineage(protoName).join('-');
       // Apply types names for sub packages.
       if (proto.hasOwnProperty('bundle')) {
         keys = Object.keys(proto.bundle);
@@ -83,6 +85,14 @@
       if (--this.instancesCount[binder.type] === 0) {
         delete this.instancesCount[binder.type];
       }
+    },
+
+    wjsInclude: function (type, name, dom) {
+      var options = this.wjs.get(type, name);
+      options.dom = dom;
+      options.domImported = true;
+      // Create instance.
+      this.instance(name, options);
     }
   });
 }(WjsProto));
