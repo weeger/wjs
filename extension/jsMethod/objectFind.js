@@ -14,11 +14,11 @@
     // We use "arguments" variable to allow to defined false values.
       valueExists = (arguments.length === 4);
     path = path.split('.');
-    while (path.length > 0) {
+    while (path.length) {
       item = path.shift();
       if (base.hasOwnProperty(item)) {
         // We are on the last item.
-        if (path.length === 0) {
+        if (!path.length) {
           if (result) {
             result.key = item;
             result.container = base;

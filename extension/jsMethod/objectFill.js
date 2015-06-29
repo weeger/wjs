@@ -18,7 +18,7 @@
     }
   };
   /**
-   * Fill recursively an object with data from another ony,
+   * Fill recursively an object with data from another one,
    * override only missing properties.
    */
   WjsProto.register('JsMethod', 'objectFill', function (objectToFill, objectWith) {

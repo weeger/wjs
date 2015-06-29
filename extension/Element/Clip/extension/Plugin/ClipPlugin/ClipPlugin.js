@@ -2,7 +2,7 @@
   'use strict';
   WjsProto.register('Plugin', 'ClipPlugin', {
     optionsDefault: {
-      binderType: 'Clip'
+      elementType: 'Clip'
     }
   });
 }(WjsProto));

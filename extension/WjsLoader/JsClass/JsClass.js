@@ -15,8 +15,10 @@
     },
 
     register: function (type, name, process, value) {
+      // Extend prototype.
       this.wjs.classExtend(name, WjsProto.retrieve(this.type, name));
-      return this.wjs.loaders.JsMethod.register.call(this, type, name, process, value);
+      // Normal treatment.
+      return this.wjs.loaders.JsMethod.register.apply(this, arguments);
     }
   });
 }(WjsProto));

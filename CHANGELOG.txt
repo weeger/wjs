@@ -1,4 +1,10 @@
-WJS - 4.2.1 - 2015-05-21
+WJS - 4.2.2 - 2015-06-04
+------------------------
+- Performance improvements
+- Core debugs
+- Elements rewriting
+
+WJS - 4.2.1 - 2015-06-01
 ------------------------
 - Binder CSS Managment
 - CSS Loading precision

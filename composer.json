@@ -2,7 +2,7 @@
   "name":"weeger\/wjs",
   "type":"library",
   "description":"An assets loader from server to browser.",
-  "version":"4.2.1",
+  "version":"4.2.2",
   "keywords":[
     "wjs",
     "extension",

@@ -1,12 +1,12 @@
 /**
- * @require JsClass > BasicWebPage
+ * @require JsScript > SchemeWebPage
  * @require JsClassStatic > QueueManager
  */
 (function (WjsProto) {
   'use strict';
   WjsProto.register('WjsLoader', 'WebPage', {
-    loaderExtends: 'WebComp',
-    protoBaseClass: 'BasicWebPage',
+    loaderExtends: 'WebCom',
+    protoBaseClass: 'WebPage',
     pageCurrent: null,
     destroyDelay: 5000,
 
@@ -14,14 +14,13 @@
       this.destroyTimeouts = {};
       this.pageRequireStatic = [];
       this.pageInstances = [];
-      this.wjs.loaders.WebComp.__construct.call(this);
+      this.wjs.loaders.WebCom.__construct.call(this);
       this.queueName = this.type + 'PageLoads';
       this.wjs.window.addEventListener('popstate', this.onPopState.bind(this));
     },
 
     /**
      * @require JsMethod > urlQueryParse
-     * @param e
      */
     onPopState: function () {
       var query = this.wjs.urlQueryParse();

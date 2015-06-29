@@ -11,7 +11,7 @@ use \Wjs\Loader;
 /**
  * @package Wjs\Loader
  */
-class WebPage extends WebComp {
+class WebPage extends WebCom {
   var $lastAdded;
   var $requireCssLinks = FALSE;
 
@@ -48,7 +48,7 @@ class WebPage extends WebComp {
         'client' => $value['client'],
       ));
     }
-    // Treat value as a classic WebComp
+    // Treat value as a classic WebCom
     $output = parent::extensionPush($name, $options, $value);
     if (isset($options['urlHistory'])) {
       $output['#data']['urlHistory'] = $options['urlHistory'];

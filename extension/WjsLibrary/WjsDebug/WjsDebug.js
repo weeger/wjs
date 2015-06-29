@@ -17,5 +17,9 @@
   context.warn = function (msg) {
     console.warn(msg);
   };
+
+  context.info = function (msg) {
+    console.info(msg);
+  };
 }(this));
 

@@ -104,7 +104,8 @@ class Website extends Router {
     /** @var \Wjs\Loader\WebPage $loader */
     $loader = $this->wjs->loaderGet($this->pageClassType);
     // Return new page
-    $page = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
+    /** @var \Wjs\Loader\WebPage\Page $page */
+    $page    = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
     $aliases = array_flip($this->pageAliases);
     if (isset($aliases[$webPageName])) {
       $page->urlAlias = $aliases[$webPageName];
@@ -154,7 +155,7 @@ class Website extends Router {
     $this->pagePreloadInit();
     $options = array_merge(array(
       // Enable url update on page changes
-      'urlHistory' => TRUE,
+//    TODO RE  'urlHistory' => TRUE,
       // Define html body as preloaded.
       'html'       => WJS_PUSH_WEBPAGE_PRELOADED
     ), $options);
@@ -168,9 +169,14 @@ class Website extends Router {
 
   function pagePreloadInit() {
     // Add extra website data.
+    $this->websiteInfo = $this->websiteInfoGet();
     $this->page->librariesHook('WebsiteInfo', $this->websiteInfo);
     $this->page->wjs->import('JsObject', 'WebsiteInfo', $this->websiteInfo);
     $this->page->wjs->extensionPushRequest($this->extensionGlobal);
+  }
+
+  function websiteInfoGet() {
+    return array();
   }
 
   function pageRenderParams() {

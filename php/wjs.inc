@@ -33,14 +33,15 @@ class Wjs extends Router {
     'clientPathCache'     => '', // Cache directory.
     'staticFilesEnabled'  => FALSE, // Name of aggregated wjs file.
     'staticFilesFlush'    => FALSE, // Allow to override existing files.
+    'autoResponse'        => FALSE, // When true, execute ajax() method on Wjs instance.
     // These options will be transmitted to JS,
     // that's why some parameters are shorts.
     'aggregationFileName' => FALSE, // Name of aggregated wjs file.
     'clientName'          => 'wjs', // Wjs javascript object name like window.wjs.
     'paramExtra'          => '', // Parameters appended to AJAX requests.
     'paramInc'            => 'wjs', // Name of AJAX parameter.
-    'paramExc'            => 'wjs-exc', // Name of AJAX parameter (exclusions)
-    'paramToken'          => 'wjs-tok', // Name of URL extra token (AJAX and cache flush)
+    'paramExc'            => 'wjs-exc', // Name of AJAX parameter (exclusions).
+    'paramToken'          => 'wjs-tok', // Name of URL extra token (AJAX and cache flush).
   );
   /**
    * Contain loaders objects.
@@ -82,7 +83,7 @@ class Wjs extends Router {
    * Define which js files to use.
    * @var string
    */
-  var $jsCoreFilesVersion;
+  var $subversion;
   /**
    * Contain list of excluded extension
    * from output package.
@@ -100,8 +101,8 @@ class Wjs extends Router {
    * Initialize wjs.
    * Can take multiple options types, if no option, try
    * to detect current wjs location path, if a string is
-   * given, consider it as location path. in other case
-   * user argument as options collection.
+   * given, consider it as location path, otherwise
+   * user argument is an options collection.
    */
   function __construct($options = array()) {
     parent::__construct($options);
@@ -179,7 +180,7 @@ class Wjs extends Router {
     }
 
     // Define core version.
-    $this->jsCoreFilesVersion = isset($options['jsCoreFilesVersion']) ? $options['jsCoreFilesVersion'] : 'master';
+    $this->subversion = isset($options['subversion']) ? $options['subversion'] : 'master';
 
     // Add core loaders.
     $filePath                   = 'extension/WjsLoader/WjsLoader/WjsLoader';
@@ -195,10 +196,13 @@ class Wjs extends Router {
     // Scan core extensions.
     $this->scanFolderExtensions(WJS_ROOT . 'extension/', array(), array(
       'WjsLoader' => array(
+        // Specify some loading priorities.
         'WjsLoader',
         'JsLink',
         'JsScript',
         'JsMethod',
+        'JsClass',
+        'Formula',
       )
     ));
 
@@ -227,6 +231,11 @@ class Wjs extends Router {
         // Trigger error.
         $this->error('Path cache not found or not writable : ' . $serverPathCache);
       }
+    }
+
+    // Auto create response.
+    if ($this->optionGet('autoResponse')) {
+      $this->ajax();
     }
   }
 
@@ -564,7 +573,7 @@ class Wjs extends Router {
     $basePath = $this->optionGet($side . 'PathWjs');
     // Add core file.
     $files = array();
-    foreach ($this->jsCoreFiles[$this->jsCoreFilesVersion] as $file) {
+    foreach ($this->jsCoreFiles[$this->subversion] as $file) {
       $files[] = $basePath . $file;
     }
     /* @var \Wjs\Loader $loader */
@@ -599,7 +608,7 @@ class Wjs extends Router {
    * if exists and current wjs version is master.
    */
   function jsFileVersioned($jsFile) {
-    if ($this->jsCoreFilesVersion === 'master') {
+    if ($this->subversion === 'master') {
       // Use minified files if exists.
       $jsMin = $this->filePathMin($jsFile, 'js');
       if (is_file($jsMin)) {
@@ -729,7 +738,7 @@ class Wjs extends Router {
    * @return string
    */
   function renderJsUnpacker() {
-    return 'new ' . ($this->jsCoreFilesVersion === 'jQuery' ? 'jQuery' : 'window') . '.WjsProto(' . $this->initPackage() . ');';
+    return 'new ' . ($this->subversion === 'jQuery' ? 'jQuery' : 'window') . '.WjsProto(' . $this->initPackage() . ');';
   }
 
   /**

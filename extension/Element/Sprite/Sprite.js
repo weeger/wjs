@@ -8,22 +8,34 @@
   WjsProto.register('Element', 'Sprite', {
 
     variables: {
-      name: ''
+      name: '',
+      autoPlay:false
     },
 
     options: {
-      children: {
-        define: function (value, options) {
-          // Ensure to load stage before loading children.
-          this.optionApply('stage', options);
+      parent: {
+        define: function (com, value, options) {
+          // Ensure to load stage before.
+          com.optionApply('stage', options);
+          if (com.stage && !value) {
+            value = com.stage;
+          }
           // Ball base function.
-          this.__base.apply(this, arguments);
+          this.wjs.inheritMethod(this, 'define', [com, value, options]);
+        }
+      },
+      children: {
+        define: function (com, value, options) {
+          // Ensure to load stage before loading children.
+          com.optionApply('stage', options);
+          // Ball base function.
+          this.wjs.inheritMethod(this, 'define', arguments);
         }
       },
       stage: {
-        define: function (value, options) {
+        define: function (com, value, options) {
           if (!value) {
-            this.optionApply('dom', options);
+            com.optionApply('dom', options);
             // Search from parent
             if (options.parent) {
               // Parent is a stage.
@@ -37,20 +49,18 @@
             }
           }
           if (typeof value !== 'object' || !value || !value.isA('Stage')) {
-            // this.error('No stage defined (' + value + ')');
-            value = this.wjs.loaders.Element.instance('Stage', {
-              dom: this.wjs.document.body,
+            value = com.wjs.loaders.Element.instance('Stage', {
+              dom: com.wjs.document.body,
               playPlayer: true,
               autoPlay: true
             });
             // Stage can be not the parent if defined as an option,
-            // but in this case sprite looks orphan.
+            // but in com case sprite looks orphan.
             if (!options.parent) {
-              value.elementAppend(this);
+              value.elementAppend(com);
             }
           }
-          this.stage =
-            this.playPlayer = value;
+          com.stage = options.playPlayer = value;
         }
       },
       // Sprite name is for creator usage,

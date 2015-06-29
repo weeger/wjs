@@ -21,7 +21,7 @@ class JsLink extends Loader {
       $value['client'] = $this->wjs->pathClient(realpath($value['server']));
     }
     // Use minified files for master versions.
-    if ($this->wjs->jsCoreFilesVersion !== 'source' && isset($value['server'])) {
+    if ($this->wjs->subversion !== 'source' && isset($value['server'])) {
       // Get minified path.
       $minJs = $this->wjs->filePathMin($value['server'], 'js');
       // Minified file must exists.

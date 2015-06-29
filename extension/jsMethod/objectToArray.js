@@ -5,9 +5,8 @@
    */
   WjsProto.register('JsMethod', 'objectToArray', function (object) {
     // Convert object to array.
-    var i, output = [], keys = Object.keys(object);
-    for (i = 0; i < keys.length; i++) {
-      output.push(object[keys[i]]);
+    for (var i = 0, key, output = [], keys = Object.keys(object); key = keys[i++];) {
+      output.push(object[key]);
     }
     return output;
   });

@@ -4,13 +4,12 @@
  * deleting extensions. It may use process to help it, but keep
  * in mind that processes can load and parse multiple scripts
  * in the same time.
- * @param {WjsProto} wjs
  */
 (function (WjsProto) {
   'use strict';
   // <--]
   // Save declaration statically into wjs proto.
-  WjsProto.proto.Loader = {
+  WjsProto.lib.Loader = {
     type: '',
     preventReload: true,
     processType: 'server',
@@ -24,12 +23,11 @@
       // loader may add extra entry if needed, so
       // entry name is not deeply linked to loader name.
       // Entry can also be declared previously than loader.
-      WjsProto.common[this.type] = WjsProto.common[this.type] || {};
+      WjsProto.reg.WjsLoader[this.type] = WjsProto.reg.WjsLoader[this.type] || {};
     },
 
-    __destruct: function () {
-      // To override...
-    },
+    // To override...
+    __destruct: WjsProto._e,
 
     /**
      * Called after ajax call, ask loader
@@ -44,17 +42,16 @@
     /**
      * Fired when a listened element is registered
      * during parse. Should be initialised with listenRegister.
+     * To override... (type, name, process)
      */
-    register: function (type, name, process) {
-      // To override...
-    },
+    register: WjsProto._e,
 
     /**
      * Called when a user click on a link
      * containing a wjs://type:name data link.
      */
     link: function (name) {
-      // To override...
+      // By default just load extension.
       this.wjs.use(this.type, name);
     },
 
@@ -68,21 +65,17 @@
       return true;
     },
 
-    enable: function (name, value, process) {
-      // To override...
-      return true;
-    },
+    // To override... (name, value, process)
+    enable: WjsProto._e,
 
-    disable: function (name, value) {
-      // To override...
-      return true;
-    },
+    // To override... (name, value)
+    disable: WjsProto._e,
 
     /**
      * Launched on extension use request,
      * create data for process.
      * @param {string} name
-     * @param {WjsProto.proto.Process} process
+     * @param {WjsProto.lib.Process} process
      */
     requestUse: function (name, process) {
       return {
@@ -96,7 +89,7 @@
      * Launched on extension use request,
      * create data for process.
      * @param {string} name
-     * @param {WjsProto.proto.Process} process
+     * @param {WjsProto.lib.Process} process
      */
     requestDestroy: function (name, process) {
       return {

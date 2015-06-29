@@ -25,7 +25,7 @@
 //        // Firefox need to disable onclick for some links.
 //        wjsLinks[i].onclick = disable;
 //        wjsLinks[i].setAttribute('data-wjs-link', href);
-//        wjsLinks[i].addEventListener('click', this.linksClick.bind(this));
+//        wjsLinks[i].addEventListener('mouseup', this.linksClick.bind(this));
 //      }
 //    },
 //
