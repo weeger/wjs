@@ -48,7 +48,8 @@ Features :
   - States connections between objects
   - Basic Clip / Sprite / Stage objects
     - Centered position
-    - CSS animation fades    - 3D features
+    - CSS animation fades
+    - 3D features
 - Advanced HTML elements (beta)
   - Plugins support
   - Parent / children management
@@ -98,14 +99,50 @@ The quickest method to start is to instantiate wjs with no arguments.
 
 On server side : 
 ```php
-[CONF_WJS_INSTANCE_QUICK]
+$wjs = new Wjs();
 ```
 
 Otherwise you can define more configuration settings.
 
 On server side : 
 ```php
-[CONF_WJS_INSTANCE]
+// Add only option that you explicitly need,
+// any option are required.
+$wjs = new \Wjs(array(
+  // Optional, by default use "master" version (minified),
+  // Accepts also "jQuery" or "source" for debug mode.
+  'subversion'          => $subversion,
+  // Response path define the URL used by AJAX
+  // to retrieve extensions on your server, you
+  // obviously need to handle the path on server
+  // side, see bellow.
+  'clientPathResponse'  => $yourCustomResponsePath,
+  // If you want to use static cache, you have
+  // to specify route for the local directory,
+  // it will be filled by all aggregated javascript and responses.
+  'serverPathCache'     => $yourCustomCacheDirectory,
+  // Caching will generate aggregated javascript
+  // file and will place it into given directory
+  // according to pushed data for requested url.
+  'staticFilesEnabled'  => $staticFilesEnabled,
+  // Force to regenerate existing files.
+  'staticFilesFlush'    => $staticFilesFlush,
+  // Allow to merge all preloaded extensions
+  // and core js files into one js file.
+  'aggregationEnabled'  => $aggregationEnabled,
+  'aggregationFlush'    => $aggregationFlush,
+  // You can specify a file for main
+  // javascript file for complete page rendering,
+  // All files will be aggregated into one file,
+  // remember that this file content can completely change
+  // from one page to another, so think to name it accordingly.
+  'aggregationFileName' => $yourCustomCacheFileName,
+  // You can also specify a extra string
+  // for cache files naming. Useful to enforce
+  // to flush browsers caches.
+  'cacheToken'          => $yourCustomCacheToken,
+  'paramInc'            => 'wjs-test'
+));
 ```
 
 
@@ -118,7 +155,9 @@ Registered data is also depending of each loader behavior, more information on l
 
 On server side : 
 ```php
-[CONF_EXT_ADD]
+$this->wjs->extensionAdd('JsArray', 'myJsArrayCustomName', array(
+  0 => 'MyItem',
+));
 ```
 
 
@@ -128,19 +167,20 @@ Linking Javascript
 Adding javascript into your html page make the connexion between server and client environment. Due to the variation of loaders, preloaded extensions, or platforms where wjs can be included, the files included can change a lot from on page to another. Some tools are included into wjs to help you to achieve this point. To start the most quickly with wjs, just put this PHP code into your document "head" :
 
 ```php
-[INIT_WJS_QUICK]
+print $wjs->renderHeader(4);
 ```
 
 If you want more control on the way you integrates the links, there is a mor detailed method to use :
 ```php
-[PULL_INIT_JS_FILES_PHP]
+// Retrieve list of files used by core
+$files = $wjs->jsFiles();
 ```
 This method will return js files used by core, depending of the core version used, the loaders defined, and required.
 
 You can now include these links into your html page. The next point is to init wjs. This action will unpack pushed content from PHP, and execute startup function (see "ready" method).
 On client side : 
 ```javascript
-[PULL_INIT_JS_FILES_JS_INIT]
+new WjsProto(<?php print $wjs->initPackage(); ?>);
 ```
 
 
@@ -150,11 +190,19 @@ Handle requests
 
 You have now connected client to server wjs instances, you have also defined which data you allow to transfer. Great. Now, you can handle requests from client to serve required data. Requests from wjs are made by GET method using query string names defined into settings. A simple method has been made for quickly handle client requests, but always think about filtering data from get before to use it.
 ```php
-[HANDLE_REMOTE_REQUEST]
+$wjs->response($_GET);
 ```
 So you can filter and manage returned content.
 ```php
-[REQUEST_CONTENT_PUSH]
+// Think about always make some verification on requested content.
+if (isset($_GET['wjs']['JsArray']) && $_GET['wjs']['JsArray'] === 'myJsArrayName') {
+  // Manage which data to retrieve.
+  $wjs->import('JsArray', 'myJsArrayName');
+  // When response is ready to be sent,
+  // this function will add json headers,
+  // print package content, then exit.
+  $wjs->response();
+}
 ```
 
 
@@ -172,11 +220,19 @@ Simple Javascript Object
 
 On server side : 
 ```php
-[PULL_JSOBJECT_PHP]
+// Add array as a JsObject.
+$this->wjs->extensionAdd('JsObject', 'testObject', array(
+  'thisIs'        => 'ATest',
+  'thisIsAlso'    => 'AnOtherTest',
+  'thisIsANumber' => 123,
+  'thisIsAnArray' => array('foo' => 'bar')
+));
 ```
 On client side : 
 ```javascript
-[PULL_JSOBJECT_JS]
+wjs.use('JsObject', 'testObject', function () {
+  continueCallback();
+});
 ```
 
 
@@ -187,11 +243,19 @@ Like objects, you can also append data as javascript arrays. Note that array key
 
 On server side : 
 ```php
-[PULL_JSARRAY_PHP]
+$this->wjs->extensionAdd('JsArray', 'myJsArrayName', array(
+  0           => 'ATest',
+  1           => 'AnOtherTest',
+  'keysWill'  => 123,
+  'disappear' => array(0 => 'bar')
+));
 ```
 On client side : 
 ```javascript
-[PULL_JSARRAY_JS]
+// Will return : ["ATest", "AnOtherTest", 123, Array[1]]
+wjs.use('JsArray', 'myJsArrayName', function (arrayContent) {
+  continueYourScript(arrayContent);
+});
 ```
 
 
@@ -202,11 +266,25 @@ You can easily add simple javascript code for your own usage.
 
 On server side : 
 ```php
-[PULL_JSSCRIPT_PHP]
+// Add a remote file.
+$this->wjs->extensionAdd('JsScript', 'testScriptFile', $filePath);
+// Add an inline code.
+$this->wjs->extensionAdd('JsScript', 'testScriptInline', 'window.jsScriptInlineLoaded = true;');
+// Add reloadable script,
+// it will increment global var at each pull, with the reload:true option.
+$this->wjs->extensionAdd('JsScript', 'jsScriptReloadable', 'window.jsScriptReloadCount===undefined ? window.jsScriptReloadCount = 0 : window.jsScriptReloadCount++;');
 ```
 On client side : 
 ```javascript
-[PULL_JSSCRIPT_JS]
+// If loader do not exists, it will be loaded first.
+wjs.use('JsScript', 'testScriptFile', function () {
+  console.log(window.jsScriptFileLoaded); // true
+  // Inline script will be executed as well.
+  wjs.use('JsScript', 'testScriptInline', function () {
+    console.log(window.jsScriptInlineLoaded); // true
+    continueYourScript();
+  });
+});
 ```
 
 
@@ -217,7 +295,8 @@ You can load simple javascript methods with wjs, asynchronously or not, and exec
 
 On server side : 
 ```php
-[PULL_JSMETHOD_PHP]
+// Add javascript method from a file.
+$this->wjs->extensionAdd('JsMethod', 'testMethod', $path);
 ```
 Your Js file must also be wrapped, it allows wjs to catch it :
 
@@ -227,7 +306,22 @@ Your Js file must also be wrapped, it allows wjs to catch it :
 
 On client side : 
 ```javascript
-[PULL_JSMETHOD_JS]
+// The retrieved method will return the length of an object.
+var length = wjs.use('JsMethod', 'testMethod', function (reg) {
+  var length;
+  var method = reg.JsMethod.testMethod;
+  //console.log(reg);
+  var testObject = {
+    'lorem': 'ipsum',
+    'dolor': 'sit',
+    'amet': 'poireau'
+  };
+  // Return 3
+  length = method(testObject);
+  // Or
+  length = wjs.testMethod(testObject);
+  continueYourScript();
+});
 ```
 
 
@@ -239,7 +333,10 @@ You can also use wjs to retrieve images, and use it only when load complete. Ima
 
 On client side : 
 ```javascript
-[PULL_IMAGE]
+// We load the HTML5 Image Logo
+wjs.use('Image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
+  complete: yourCustomCallback
+});
 ```
 
 
@@ -250,7 +347,10 @@ You can also use wjs to retrieve audio, and use it only when load complete. Imag
 
 On client side : 
 ```javascript
-[PULL_AUDIO]
+// We load an mp3 or ogg file.
+wjs.use('Audio', audioUrl, {
+  complete: yourCustomCallback
+});
 ```
 
 
@@ -261,14 +361,24 @@ wjs is also able to append script links into your pages.
 
 On client side : 
 ```javascript
-[PULL_JSLINK]
+// We load an external js.
+wjs.use('JsLink', pathToYourJsFile, {
+  complete: yourCustomCallback
+});
 ```
 
 
 But also several links, if you need to add them in a specific order
 On client side : 
 ```javascript
-[PULL_JSLINK_MULTIPLE]
+// If several links are declared from an array,
+// All links are loaded, in order. Each link wait for
+// the previous one to be loaded.
+wjs.use({JsLink: [
+  pathToYourJsFile2,
+  pathToYourJsFile3
+]
+}, yourCustomCallback2);
 ```
 
 
@@ -279,13 +389,22 @@ Like .js, you can also retireve css links, as link tags. They will be appended t
 
 On client side : 
 ```javascript
-[PULL_CSSLINK]
+// We load an external js.
+wjs.use('CssLink', pathToYourCssFile, {
+  complete: yourCustomCallback
+});
 ```
 
 
 And for multiple css. On client side : 
 ```javascript
-[PULL_CSSLINK_MULTIPLE]
+// If several links are declared from an array,
+// All links are loaded, in order. Each link wait for
+// the previous one to be loaded,
+// wrong css links do not block the process.
+wjs.use({
+  CssLink: [pathToYourCssFile2, pathToYourCssFile3]
+}, yourCustomCallback2);
 ```
 
 
@@ -300,7 +419,14 @@ On server side :
 ```
 On client side : 
 ```javascript
-[PULL_WJSLOADER_JS]
+// First we load loader,
+// this action is also for example,
+// in real life, wjs make this action
+// automatically when using a script.
+wjs.use('WjsLoader', 'JsArray', function (reg) {
+  // Then we load script.
+  wjs.use('JsArray', 'load_wjsLoader_testArray', continueCallback);
+});
 ```
 Obviously you should declare your loader into a separated javascript file. See into wjs core for more info.
 
@@ -373,7 +499,9 @@ A simple function allows you to connect an extension to another one.
 
 On server side : 
 ```php
-[EXTENSION_ADD_REQUIRE]
+// Extension of type JsObject > testObject,
+// will be loaded with  JsObject > testObject2 when asked.
+$this->wjs->extensionAddRequire('JsObject', 'nameOfJsObjectWithDependencies', 'JsObject', 'nameOfJsObjectWithDependencies2');
 ```
 
 
@@ -384,12 +512,24 @@ A dangerous point with dependencies is to retrieve multiple times the same exten
 
 On client side : 
 ```javascript
-[EXCLUDE_DEPENDENCIES_ALL]
+// We don't want any dependency.
+object = wjs.use('JsObject', 'nameOfExtensionWithDependencies', {
+  exclude: true,
+  complete: continueCallback
+});
 ```
 
 Or more precisely. On client side : 
 ```javascript
-[EXCLUDE_DEPENDENCIES_FILTER]
+// We don't want multiple dependencies, but we allow others.
+object = wjs.use('JsObject', 'nameOfExtensionWithDependencies', {
+  // We don't want these dependencies.
+  exclude: {
+    JsObject: ['nameOfExtensionWithDependencies2'],
+    JsArray: ['nameOfArrayWithDependencies2']
+  },
+  complete: continueCallback
+});
 ```
 
 
