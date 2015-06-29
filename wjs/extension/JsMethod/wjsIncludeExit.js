@@ -6,8 +6,7 @@
   WjsProto.register('JsMethod', 'wjsIncludeExit', function (dom, callback, queued, keep) {
     var i = 0, includes = this.wjsIncludeScan(dom), destroyQueue = [], type,
       item, split, localCallbackCount = 0, localCallback = function () {
-        if ((destroyQueue.length === 0 || ++localCallbackCount === destroyQueue.length) &&
-          callback) {
+        if (!destroyQueue.length || ++localCallbackCount === destroyQueue.length) {
           complete();
         }
       },
@@ -23,7 +22,7 @@
       if (!keep || !keep[type]) {
         // Include tag is just a container
         // we search for first item.
-        item = this.loaders.WebComp.webCompList[item.getAttribute('id')];
+        item = this.loaders.WebCom.webComList[item.getAttribute('id')];
         destroyQueue.push(item);
         if (!queued) {
           item.exit(localCallback);

@@ -9,11 +9,9 @@
     addLastCompCallback: null,
     wjsShortcuts: true,
 
-    destroy: function (name) {
-      if (this.wjsShortcuts && this.wjs[name]) {
-        delete this.wjs[name];
-      }
-      return true;
+    __construct: function () {
+      this.items = {};
+      this.wjs.loaders.JsScript.__construct.call(this);
     },
 
     /**
@@ -22,7 +20,7 @@
      * manage handling with add.
      * @param {string} name
      * @param {string} value
-     * @param {WjsProto.proto.Process} process
+     * @param {WjsProto.lib.Process} process
      * @return {?}
      */
     parse: function (name, value, process) {
@@ -35,14 +33,41 @@
     },
 
     register: function (type, name, process, value) {
-      var wjs = this.wjs;
-      // Add shortcut into wjs[name].
-      if (this.wjsShortcuts === true && !wjs[name]) {
-        wjs[name] = (WjsProto.retrieve(this.type, name)).bind(wjs);
+      // Get method
+      value = value || WjsProto.retrieve(this.type, name);
+      // Localize functions to wjs.
+      if (typeof value === 'function') {
+        value = value.bind(this.wjs);
       }
+      // Save method internally, loaders sub classes
+      // may have already created entry.
+      if (!this.items[name]) {
+        this.items[name] = value;
+      }
+      // Activate.
+      this.enable(name);
       // Continue parsing.
       // Allow child prototypes to force saved value.
-      process.itemParseComplete(this.type, name, value || WjsProto.retrieve(this.type, name));
+      process.itemParseComplete(this.type, name, value);
+    },
+
+    destroy: function (name) {
+      this.disable(name);
+      return true;
+    },
+
+    enable: function (name) {
+      // Add shortcut into wjs[name].
+      if (this.wjsShortcuts === true && !this.wjs[name]) {
+        this.wjs[name] = this.items[name];
+      }
+    },
+
+    disable: function (name) {
+      // Remove shortcut from wjs[name].
+      if (this.wjsShortcuts === true && this.wjs[name]) {
+        delete this.wjs[name];
+      }
     }
   });
 }(WjsProto));

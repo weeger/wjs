@@ -1,6 +1,2 @@
 # Ignore cached content
 cache/*
-# This file holds cache folder
-!../demo/cache/README.txt
-# Little security protection
-!cache/.htaccess

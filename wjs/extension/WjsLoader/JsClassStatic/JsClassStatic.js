@@ -2,24 +2,31 @@
   'use strict';
   WjsProto.register('WjsLoader', 'JsClassStatic', {
     loaderExtends: 'JsClass',
-
-    __construct: function () {
-      this.staticClasses = {};
-      this.wjs.loaders.JsClass.__construct.call(this);
-    },
-
-    enable: function (name, value) {
-      this.wjs.loaders.JsClass.enable.apply(this, arguments);
-      // TODO this.wjs[name] =
-    },
+    wjsShortcuts: true,
 
     register: function (type, name, process, value) {
-      // Parent execute classExtend.
-      var output = this.wjs.loaders.JsClass.register.apply(this, arguments);
+      // Get method
+      value = value || WjsProto.retrieve(this.type, name);
+      // Extend prototype.
+      this.wjs.classExtend(name, value);
       // Create proto
-      this.wjs[name] =
-        this.staticClasses[name] = new (this.wjs.classProto(name))();
-      return output;
+      this.items[name] = new (this.wjs.classProto(name))();
+      // Activate.
+      this.enable(name);
+      // Continue parsing.
+      // Allow child prototypes to force saved value.
+      process.itemParseComplete(this.type, name, value);
+    },
+
+    destroy: function (name, data, process) {
+      // Destruct class.
+      if (this.items[name].__destruct) {
+        this.items[name].__destruct();
+      }
+      // Remove entry.
+      delete this.items[name];
+      // Remove JsClass parts.
+      return this.wjs.loaders.JsClass.destroy.call(this, name, data, process);
     }
   });
 }(WjsProto));

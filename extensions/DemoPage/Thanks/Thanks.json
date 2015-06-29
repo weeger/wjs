@@ -1,0 +1,12 @@
+{
+  "destination": "#message",
+  "client": "extensions/DemoPage/Thanks/",
+  "GitHub": true,
+  "require": {
+    "WebComp": [
+      "linksBottom",
+      "SideLinks"
+    ]
+  }
+}
+

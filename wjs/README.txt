@@ -4,11 +4,60 @@ Introduction
 ============
 
 ![Alt text](logo.png?raw=true "The discreet library")
-The aim of Wjs is to bring a new user experience to web clients, by reducing the distance between client browser and server, and enter in the world of a full dynamic navigation. 
+Wjs is a front end development toolkit designed to bring a new user experience to web clients, by increasing interactions between browser and server, supporting a full dynamic navigation with no pages loads, and providing an advanced object oriented programming interface supporting plugins, keyframe rendering, and so on... Wjs is still in development, all features are not fully working actually.
 
 Check out the <a target="_blank" href="http://wjs.wexample.com">demo website</a>
 
-You can see a live demo here, and discover the source code here. Wjs is the open source part of the Wexample project. It is actually written in Javascript for the client part, and PHP for the server part. It is also ready to be translated into every other server side languages, depending of needs. 
+It is actually written in Javascript for the client part, and PHP for the server part. It is also ready to be translated into every other server side languages, depending of needs. 
+
+Features :
+- AJAX Loading with server side package management
+  - Dependencies declaration
+  - Dependencies auto loading
+  - Automated HTML head links generation
+  - Page preloaded extensions support
+  - Preloaded files caching
+  - Preloaded files aggregation
+  - Several types of loaders : CSS, JS, Files, etc...
+  - Native useful methods
+    - AudioTrackPlayer
+    - AudioTrackPlayerTrack
+    - MathEuler
+    - MathMatrix4
+    - MathQuaternion
+    - MathVector3
+    - ThreeCamera
+    - ThreeObject3d
+    - DisableCtrlS
+    - Math
+    - MousePositionListener
+    - QueueManager
+    - webPageKeyboardChange
+- Web components management
+  - Separated folders for each component
+  - Support simple HTML / CSS data
+  - Extra files paths rewriting
+  - Hybrid API for objects description
+    - Parsed to real javascript inherited objects
+  - Construct / destruct methods
+  - Local setters and getters
+  - Options management system
+  - Events listeners
+  - Methods inheritance
+  - Multiples states management
+  - States connections between objects
+  - Basic Clip / Sprite / Stage objects
+    - Centered position
+    - CSS animation fades    - 3D features
+- Advanced HTML elements (beta)
+  - Plugins support
+  - Parent / children management
+  - Keyframe animation management
+  - Formula object support
+- Website OOP class (beta)
+  - Dynamic page loading
+  - Libraries loading
+- Source version or minified- Headless support (no server side)
 
 Wjs is made for you if : 
 - You are a very special person
@@ -304,6 +353,11 @@ Plugin
 ------
 
 Add functional improvement for elements.
+
+Formula
+-------
+
+Used as arguments, formulas can define variable numeric values, ie : mouse position
 
 
 

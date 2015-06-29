@@ -2,13 +2,15 @@
 
 namespace Wjs\Loader;
 
-require_once WJS_ROOT . 'extension/WjsLoader/WebComp/WebComp.inc';
+require_once WJS_ROOT . 'extension/WjsLoader/WebCom/WebCom.inc';
 
-class Binder extends WebComp {
-  // Do not use WebComp css links detection.
+class Binder extends WebCom {
+  // Do not use WebCom css links detection.
   var $requireCssLinks = FALSE;
-  function extensionPush($name, $excludeRequire = FALSE, $value = NULL) {
+  function extensionPush($name, $excludeRequire = array(), $value = NULL) {
+    // Get values.
     $value  = $this->valuePush($name, $value);
+    // Push as a webcom.
     $output = parent::extensionPush($name, $excludeRequire, $value);
     if (!$this->valueIsError($value)) {
       // CSS

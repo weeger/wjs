@@ -1,13 +1,14 @@
 /**
- * @require WjsLoader > WebComp
- * @require JsClass > BasicBinder
+ * @require WjsLoader > WebCom
+ * @require JsScript > SchemeBinder
  */
 (function (WjsProto) {
   'use strict';
   WjsProto.register('WjsLoader', 'Binder', {
     // Extends full named loader class.
-    loaderExtends: 'WebComp',
-    protoBaseClass: 'BasicBinder',
+    loaderExtends: 'WebCom',
+    protoBaseClass: 'Binder',
+    regReplaceSlashes: new RegExp('\\.', 'g'),
 
     __construct: function () {
       this.wjs.extendObject(this, {
@@ -17,25 +18,38 @@
         classLists: {},
         cssClassCounter: 0,
         cssDomItems: {},
-        cssRewritten: {},
-        regReplaceSlashes: new RegExp('\\.', 'g')
+        cssRewritten: {}
       });
-      this.wjs.loaders.WebComp.__construct.call(this);
+      this.wjs.loaders.WebCom.__construct.call(this);
     },
 
     parse: function (name, value, process) {
       var type = this.type,
-        output = this.wjs.loaders.WebComp.parse.apply(this, arguments),
+        output = this.wjs.loaders.WebCom.parse.apply(this, arguments),
         protoName = this.protoName(name);
+      // Reset queue.
+      this.cssSheetLoadQueue = [];
+      // Css data only.
       if (value.css) {
-        this.cssDomInit(protoName, value.css, true);
-        this.cssClassInit(protoName, true);
-        this.cssSheetLoadAll(function () {
-          process.itemParseComplete(type, name, output);
-        });
-        return false;
+        // Create a <style> tag associated to dom
+        this.cssDomInitType(protoName, value.css, true);
       }
-      return output;
+      // New <style> tag are async loaded.
+      this.cssSheetLoadAll(function () {
+        // Complete loading.
+        process.itemParseComplete(type, name, output);
+      });
+      // Wait for load complete.
+      return false;
+    },
+
+    protoAddPart:function(name) {
+      var protoName = this.protoName(name);
+
+      this.wjs.loaders.WebCom.protoAddPart.apply(this, arguments);
+      // Create CSS classes for dom,
+      // css can be inherited from parent.
+      this.cssClassInit(protoName, true);
     },
 
     cssSheetLoadAll: function (complete) {
@@ -49,17 +63,6 @@
         }
       };
       check();
-    },
-
-    /**
-     * Initialize binder according to all its
-     * object classes dependencies.
-     */
-    cssDomInit: function (protoName, cssData, toggle) {
-      var i = 0, name, lineage = this.wjs.classProtoLineage(protoName);
-      while (name = lineage[i++]) {
-        this.cssDomInitType(this.protoName(name), cssData, toggle);
-      }
     },
 
     /**
@@ -81,8 +84,8 @@
           // Place CSS into it.
           // Add client path to relative URLs.
           domStyle[protoName].innerHTML = cssData.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + cssData.client);
-          // Add to load queue
-          this.cssSheetLoadQueue.push(domStyle[protoName]);
+          // Add to load queue.
+          this.cssSheetLoadQueueAppend(domStyle[protoName]);
           // Append to head.
           this.wjs.document.head.appendChild(domStyle[protoName]);
         }
@@ -96,26 +99,34 @@
       }
     },
 
+    cssSheetLoadQueueAppend: function (domStyle) {
+      // Add to load queue
+      if (this.cssSheetLoadQueue.indexOf(domStyle) === -1) {
+        this.cssSheetLoadQueue.push(domStyle);
+      }
+    },
+
     cssClassInit: function (protoName, toggle) {
-      var i = 0,
+      var i = 0, item,
         insideBinder = false,
         typeCss,
         typePart,
         lineage = this.wjs.classProtoLineage(protoName),
         lineagePart = [],
-        typeGlobal = lineage.join('-');
-      for (; i < lineage.length; i++) {
+        typeGlobal = lineage.join('-'),
+        cssRewritten = this.cssRewritten;
+      while (item = lineage[i++]) {
         // Append to class name.
-        lineagePart.push(lineage[i]);
+        lineagePart.push(item);
         // Exclude types before binder,
         // which not using css.
-        if (lineage[i] === 'Binder') {
+        if (item === 'Binder') {
           insideBinder = true;
         }
         // We can search for classes and css rules.
         if (insideBinder) {
           // Replace dots by underscores into global name.
-          typeCss = lineage[i].replace(this.regReplaceSlashes, '_');
+          typeCss = item.replace(this.regReplaceSlashes, '_');
           typePart = lineagePart.join('-');
           // Add or remove.
           if (toggle) {
@@ -123,16 +134,16 @@
             this.cssClassAdd(typePart, typeGlobal);
             // Replace full class name by shorten version.
             this.cssRewriteAll(typeCss, this.classSaved[typePart]);
-            this.cssRewritten[typePart] = this.cssRewritten[typePart] || 0;
-            this.cssRewritten[typePart]++;
+            cssRewritten[typePart] = cssRewritten[typePart] || 0;
+            cssRewritten[typePart]++;
             if (this.classLists[typeGlobal].indexOf(this.classSaved[typePart]) === -1) {
               // Add only class when css rules has been detected.
               this.classLists[typeGlobal].push(this.classSaved[typePart]);
             }
           }
           else {
-            this.cssRewritten[typePart]--;
-            if (this.cssRewritten[typePart] === 0) {
+            cssRewritten[typePart]--;
+            if (!cssRewritten[typePart]) {
               // Replace shorten class name by full version.
               this.cssRewriteAll(this.classSaved[typePart], typeCss);
               this.cssClassRemove(typePart, typeGlobal);
@@ -180,7 +191,7 @@
         // Replace .className by .cX class name generated.
         new RegExp('\\.' + type + '(?=[\\s*|{|,|.|-|:])', 'g'),
         '.' + className);
-      this.cssSheetLoadQueue.push(domStyle);
+      this.cssSheetLoadQueueAppend(domStyle);
     }
   });
 }(WjsProto));

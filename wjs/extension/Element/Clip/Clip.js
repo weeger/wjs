@@ -5,7 +5,7 @@
 (function (WjsProto) {
   'use strict';
   WjsProto.register('Element', 'Clip', {
-    classExtends: 'BasicElement\\Sprite',
+    classExtends: 'Element\\Sprite',
     variables: {
       top: 0,
       left: 0
@@ -26,6 +26,7 @@
       // Clip must have a parent to be repositioned.
       if (this.parent) {
         var relativeRect,
+          // TODO Calc once by rendered frame
           rect = this.parent.dom.getBoundingClientRect(),
           output = {
             top: positionData.top + (rect.height - positionData.height) / 2,
@@ -33,7 +34,7 @@
             width: positionData.width,
             height: positionData.height
           };
-        // Adjust according given binder.
+        // Adjust according given element.
         if (relativeToBinder) {
           relativeRect = relativeToBinder.dom.getBoundingClientRect();
           output.top += relativeRect.top;
@@ -47,10 +48,10 @@
     renderReset: function () {
       // We not extend base who is an empty object.
       return {
-        top: this.top,
-        left: this.left,
-        width: this.width,
-        height: this.height
+        top: this.result(this.top),
+        left: this.result(this.left),
+        width: this.result(this.width),
+        height: this.result(this.height)
       };
     },
 
@@ -60,16 +61,16 @@
         // Use margin positioning system to center clip
         // It allow to center it into a "non element" dom object
         // which can have a changing with / height.
-        var i = 0, properties = ['top', 'left', 'width', 'height'];
-        for (; i < properties.length; i++) {
-          this.dom.style[properties[i]] = renderData[properties[i]] + 'px';
+        var i = 0, item, properties = ['top', 'left', 'width', 'height'];
+        while (item = properties[i++]) {
+          this.dom.style[item] = renderData[item] + 'px';
         }
       }
     },
 
     bundle: {
       Null: {
-        classExtends: 'BasicElement\\Clip'
+        classExtends: 'Element\\Clip'
       }
     }
   });

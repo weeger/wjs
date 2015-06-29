@@ -1,6 +1,8 @@
 (function (WjsProto) {
   'use strict';
   /**
+   * Imported from ThreeJS
+   * https://github.com/mrdoob/three.js/
    * @require JsClassStatic > Math
    */
   WjsProto.register('JsClass', 'MathEuler', {
@@ -46,7 +48,7 @@
     },
 
     onChangeCallback: function () {
-    },
+    }
 
   });
 }(WjsProto));

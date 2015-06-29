@@ -7,7 +7,7 @@
    * @returns {Array}
    */
   WjsProto.register('JsMethod', 'inheritProperty', function (object, property) {
-    var base = Object.getPrototypeOf(object),
+    var base = object,
       output = [];
     // Use hasOwnProperty to define if we are out of
     // inherited objects.

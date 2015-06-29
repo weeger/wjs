@@ -5,7 +5,7 @@
      * Execute retrieved javascript.
      * @param {string} name
      * @param {string|Function} value
-     * @param {WjsProto.proto.Process} process
+     * @param {WjsProto.lib.Process} process
      * @return {?}
      */
     parse: function (name, value, process) {

@@ -1,0 +1,11 @@
+{
+  "destination": "#message",
+  "client": "extensions/DemoPage/Overview/",
+  "Menu": true,
+  "require": {
+    "Image": {
+      "liveHtml": "extensions/DemoPage/Overview/live_html.gif"
+    },
+    "WebComp": ["BgAnim"]
+  }
+}

@@ -17,7 +17,7 @@ class Page {
    */
   var $wjs;
   /**
-   * @var Loader\WebComp
+   * @var Loader\WebCom
    */
   var $loader;
   var $title = 'Page';

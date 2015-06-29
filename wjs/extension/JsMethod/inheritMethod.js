@@ -4,17 +4,17 @@
 (function (WjsProto) {
   'use strict';
   var inheritMethodCallback = function (object, method, passes, objectCurrentMethod) {
-      return function () {
-        // We rise pass level.
-        passes[method] += 1;
-        // We execute function.
-        var output = objectCurrentMethod.apply(object, arguments);
-        // We lower pass level.
-        passes[method] -= 1;
-        // The return output content.
-        return output;
-      };
+    return function () {
+      // We rise pass level.
+      passes[method] += 1;
+      // We execute function.
+      var output = objectCurrentMethod.apply(object, arguments);
+      // We lower pass level.
+      passes[method] -= 1;
+      // The return output content.
+      return output;
     };
+  };
 
   /**
    * Call super method of the given object and method, searching for
@@ -58,7 +58,7 @@
     while (base !== null && done !== true) {
       // Get method info
       descriptor = Object.getOwnPropertyDescriptor(base, method);
-      if (descriptor !== undefined) {
+      if (descriptor) {
         // We search for current object method to define inherited part of chain.
         if (descriptor.value === objectCurrentMethod) {
           // Further loops will be considered as inherited function.
@@ -71,12 +71,12 @@
           // inheritance. But we also need to save reference to "base" who to
           // contain parent class, it will be used into this function startup
           // begin at the right chain position. First we create method entry.
-          if (bases[method] === undefined) {
+          if (!bases[method]) {
             passes[method] = 0;
             bases[method] = [];
           }
           // Then we create pass entry.
-          if (bases[method][passIndex] === undefined) {
+          if (!bases[method][passIndex]) {
             bases[method][passIndex] = [];
           }
           // We store base object.
@@ -91,11 +91,11 @@
           // inheritMethod() is launched. Reference is not useful anymore.
           bases[method][passIndex].pop();
           // Cleanup array.
-          if (bases[method][passIndex].length === 0) {
+          if (!bases[method][passIndex].length) {
             this.arrayDeleteByIndex(bases[method], passIndex);
           }
           // Delete empty array.
-          if (bases[method].length === 0) {
+          if (!bases[method].length) {
             delete bases[method];
             delete passes[method];
           }
@@ -107,7 +107,7 @@
       base = Object.getPrototypeOf(base);
     }
     // Cleanup temp variable.
-    if (Object.keys(bases).length === 0) {
+    if (!Object.keys(bases).length) {
       delete object._inheritMethodBases;
       delete object._inheritMethodPass;
     }

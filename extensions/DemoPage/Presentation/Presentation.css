@@ -1,0 +1,58 @@
+b { color:orange; }
+
+#menu-content .menu-presentation a {
+    background:orange;
+    color:black;
+}
+
+.WebComp-BgAnim {
+    height:658px;
+    background:url('bg-presentation.jpg') no-repeat top center;
+    -webkit-animation:homeBgIntro 2s cubic-bezier(.03, .61, .49, .99) forwards;
+    animation:homeBgIntro 2s cubic-bezier(.03, .61, .49, .99) forwards;
+}
+
+#main-content {
+    height:250px;
+    -webkit-animation:loadPage1 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
+    animation:loadPage1 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
+}
+
+#main.unload #main-content {
+    -webkit-animation:unloadPage1 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
+    animation:unloadPage1 .5s cubic-bezier(.78, 1.69, .12, .62) forwards;
+}
+
+/* -- webkit -- */
+
+@-webkit-keyframes loadPage1 {
+    from { height:250px; }
+    to { height:300px; }
+}
+
+@-webkit-keyframes unloadPage1 {
+    from { height:300px; }
+    to { height:250px; }
+}
+
+@-webkit-keyframes homeBgIntro {
+    from { opacity:0; background-position:50% 0%; }
+    to { opacity:1; background-position:50% -10%; }
+}
+
+/* -- normal -- */
+
+@keyframes loadPage1 {
+    from { height:250px; }
+    to { height:300px; }
+}
+
+@keyframes unloadPage1 {
+    from { height:300px; }
+    to { height:250px; }
+}
+
+@keyframes homeBgIntro {
+    from { opacity:0; background-position:50% 0%; }
+    to { opacity:1; background-position:50% -10%; }
+}

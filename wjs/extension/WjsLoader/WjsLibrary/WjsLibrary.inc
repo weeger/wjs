@@ -9,7 +9,7 @@ use \Wjs\Loader;
 /**
  * @package Wjs\Loader
  */
-class WjsLibrary extends WebComp {
+class WjsLibrary extends WebCom {
   var $allowRequireJs = TRUE;
   var $requireCssLinks = TRUE;
   var $requireJsLinks = TRUE;
@@ -47,7 +47,7 @@ class WjsLibrary extends WebComp {
       /* @var \Wjs\Loader\WjsLibrary\Library $library */
       $library = new $value['className']($page, $options, $value);
       $value   = $library->push($options, array(
-        // Let only values use by WebComp parent loader.
+        // Let only values use by WebCom parent loader.
         'server' => $value['server']
       ));
       // Add requirements for library.
@@ -63,7 +63,7 @@ class WjsLibrary extends WebComp {
   }
 
   /**
-   * Register WebComp from a folder content.
+   * Register WebCom from a folder content.
    */
   function scanFolderItem($directory, $item, $globalData) {
     // Resolve path to support symlinks.

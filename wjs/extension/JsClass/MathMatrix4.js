@@ -1,6 +1,8 @@
 (function (WjsProto) {
   'use strict';
   /**
+   * Imported from ThreeJS
+   * https://github.com/mrdoob/three.js/
    * @require JsClass > MathVector3
    */
   WjsProto.register('JsClass', 'MathMatrix4', {
@@ -256,6 +258,6 @@
       this.scale(scale);
       this.setPosition(position);
       return this;
-    },
+    }
   });
 }(WjsProto));
