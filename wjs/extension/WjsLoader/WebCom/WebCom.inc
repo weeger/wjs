@@ -53,23 +53,24 @@ class WebCom extends Loader {
     $value = $this->valuePush($name, $value);
     if (!$this->valueIsError($value)) {
       if (is_dir($value['server'])) {
-        $value         = array_merge($value, array(
-          // By default destination is not defined.
-          'dom'   => isset($value['dom']) ? $value['dom'] : FALSE,
-          // Html can come from outside.
-          'html'  => isset($value['html']) ? $value['html'] : FALSE,
-          // We can choose to display only one WebCom of each group at a time.
-          'group' => isset($value['group']) ? $value['group'] : FALSE,
-        ));
-        $value['html'] = $this->htmlLoad($name, $options, $value);
+        // Search for a json file.
+        $json = $value['server'] . '/' . $name . '.json';
+        if (is_file($json)) {
+          $conf  = json_decode(file_get_contents($json), JSON_FORCE_OBJECT);
+          $value = array_merge($value, $conf);
+        }
+        // Html can come from outside.
+        $html = $this->htmlLoad($name, $options, $value);
+        if ($html) {
+          $value['html'] = $html;
+        }
+        // Set dom value.
         // Search for extra css file,
         // but first search for a min.css version.
         if ($this->requireCssLinks) {
           $cssPath = realpath($value['server']) . '/' . $name;
-          if (!$this->wjs->requireLinksClassFile($cssPath . '.min.css', 'css', $this->type, $name)) {
-            // Fallback to .css version if no min.
-            $this->wjs->requireLinksClassFile($cssPath . '.css', 'css', $this->type, $name);
-          }
+          // Loads css or min.css
+          $this->wjs->requireLinksClassFile($cssPath . '.css', 'css', $this->type, $name);
         }
         if ($this->requireJsLinks) {
           // Search for extra js file.
@@ -96,7 +97,7 @@ class WebCom extends Loader {
     $value = $this->valuePush($name);
     // Rebase links / images to web component folder.
     $html = $this->wjs->htmlRebase($html, $value['client']);
-    $this->wjs->htmlParseIncludeRequire($html, $this->type, $name);
+    $this->wjs->htmlParseIncludeRequire($html, $this->type, $name, array(), TRUE);
     return $html;
   }
 

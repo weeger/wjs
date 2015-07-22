@@ -4,11 +4,11 @@
  */
 (function (WjsProto) {
   'use strict';
+  var regReplaceSlashes = new RegExp('\\.', 'g');
   WjsProto.register('WjsLoader', 'Binder', {
     // Extends full named loader class.
     loaderExtends: 'WebCom',
     protoBaseClass: 'Binder',
-    regReplaceSlashes: new RegExp('\\.', 'g'),
 
     __construct: function () {
       this.wjs.extendObject(this, {
@@ -24,28 +24,28 @@
     },
 
     parse: function (name, value, process) {
-      var type = this.type,
-        output = this.wjs.loaders.WebCom.parse.apply(this, arguments),
+      var type = this.type, self = this, args = arguments,
         protoName = this.protoName(name);
       // Reset queue.
       this.cssSheetLoadQueue = [];
       // Css data only.
       if (value.css) {
         // Create a <style> tag associated to dom
-        this.cssDomInitType(protoName, value.css, true);
+        this.cssDomInitType(protoName, value, true);
       }
       // New <style> tag are async loaded.
       this.cssSheetLoadAll(function () {
         // Complete loading.
-        process.itemParseComplete(type, name, output);
+        process.itemParseComplete(type, name,
+          // Parse components.
+          self.wjs.loaders.WebCom.parse.apply(self, args));
       });
       // Wait for load complete.
       return false;
     },
 
-    protoAddPart:function(name) {
+    protoAddPart: function (name) {
       var protoName = this.protoName(name);
-
       this.wjs.loaders.WebCom.protoAddPart.apply(this, arguments);
       // Create CSS classes for dom,
       // css can be inherited from parent.
@@ -69,7 +69,7 @@
      * Create a dom "style" element for the specified
      * binder type, if css data are stored into definition.
      */
-    cssDomInitType: function (protoName, cssData, toggle) {
+    cssDomInitType: function (protoName, data, toggle) {
       // One CSS file per type, named with
       // the name of main object.
       var domStyle = this.domStyle,
@@ -78,12 +78,12 @@
         cssDomItems[protoName] = cssDomItems[protoName] || 0;
         cssDomItems[protoName]++;
         // Create CSS for whole bundle if not exists.
-        if (cssData && !domStyle[protoName]) {
+        if (data.css && !domStyle[protoName]) {
           // Append new style tag
           domStyle[protoName] = this.wjs.document.createElement('style');
           // Place CSS into it.
           // Add client path to relative URLs.
-          domStyle[protoName].innerHTML = cssData.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + cssData.client);
+          domStyle[protoName].innerHTML = data.css.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + data.client);
           // Add to load queue.
           this.cssSheetLoadQueueAppend(domStyle[protoName]);
           // Append to head.
@@ -126,7 +126,7 @@
         // We can search for classes and css rules.
         if (insideBinder) {
           // Replace dots by underscores into global name.
-          typeCss = item.replace(this.regReplaceSlashes, '_');
+          typeCss = item.replace(regReplaceSlashes, '_');
           typePart = lineagePart.join('-');
           // Add or remove.
           if (toggle) {

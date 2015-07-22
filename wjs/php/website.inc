@@ -29,6 +29,7 @@ class Website extends Router {
    * Define the environment name.
    */
   var $env;
+  var $envDefault = FALSE;
   /**
    * Une one instance to load pages.
    * This instance is not exported in client side.
@@ -43,9 +44,11 @@ class Website extends Router {
    */
   var $page;
   var $pageClassType = 'WebPage';
+  var $pathAliasQuery = 'q';
   var $websiteInfo = array();
   var $pageSummary = array();
   var $pageAliases = array();
+  var $pageLibraries = array();
   var $extensionGlobal = array();
 
   function __construct($callerFile = '') {
@@ -59,7 +62,10 @@ class Website extends Router {
     if ($this->envKey) {
       // Load env.
       $this->env = getenv($this->envKey);
-      if ($this->env === FALSE) {
+      if (!$this->env) {
+        $this->env = $this->envDefault;
+      }
+      if (!$this->env) {
         print 'No env found for ' . $this->envKey;
         exit;
       }
@@ -69,6 +75,10 @@ class Website extends Router {
     }
     // Init router.
     parent::__construct($settings);
+    // Append options from environment settings.
+    if (is_array($this->optionGet('pageLibraries'))) {
+      $this->pageLibraries = array_merge($this->pageLibraries, $this->optionGet('pageLibraries'));
+    }
     // Create wjs instance.
     $this->wjs = $this->wjsInstance($this->optionGet('wjs'));
   }
@@ -84,14 +94,26 @@ class Website extends Router {
    */
   function wjsInstance($options = array()) {
     $options['serverPathWebsite'] = $this->serverPathWebsiteRoot;
-    $wjs                          = new Wjs($options);
+    $wjs                          = new \Wjs($options);
     // Scan specific extensions.
     // We have to use unresolved symlink
     // to build relative client paths.
     $order                       = array();
     $order[$this->pageClassType] = $this->pageSummary;
     $wjs->scanFolderExtensions($wjs->optionGet('serverPathWebsite') . 'extension/', array(), $order);
+    $request = $wjs->optionGet('clientRequest');
+    $request = $this->urlToFilename($request ? $request : 'home') . '.js';
+    $wjs->optionSet('aggregationFileName', $request);
     return $wjs;
+  }
+
+  function urlToFilename($file) {
+    // Remove anything which isn't a word, whitespace, number
+    // or any of the following caracters -_~,;:[]().
+    $file = preg_replace('([^\w\s\d\-_~,;:\[\]\(\).])', '', $file);
+    // Remove any runs of periods
+    $file = preg_replace('([\.]{2,})', '', $file);
+    return $file;
   }
 
   /**
@@ -103,28 +125,28 @@ class Website extends Router {
   function pageInstance($webPageName, $options = array()) {
     /** @var \Wjs\Loader\WebPage $loader */
     $loader = $this->wjs->loaderGet($this->pageClassType);
-    // Return new page
+    // Return new page.
     /** @var \Wjs\Loader\WebPage\Page $page */
-    $page    = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
-    $aliases = array_flip($this->pageAliases);
-    if (isset($aliases[$webPageName])) {
-      $page->urlAlias = $aliases[$webPageName];
-    }
+    $page = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
     // Check if exists.
     if (!$page) {
       print 'Not found page ' . $webPageName;
       exit;
     }
+    // Add global libraries.
+    $page->libraryLoadMultiple($this->pageLibraries);
+    // Return instance.
     return $page;
   }
 
   function renderDefault($webPageName = 'wjsDefault', $params = array()) {
-    if (isset($_GET[$this->pageClassType])) {
-      $webPageName = $_GET[$this->pageClassType];
+    // Search first for aliases.
+    if (isset($_GET[$this->pathAliasQuery]) && isset($this->pageAliases[$_GET[$this->pathAliasQuery]])) {
+      $webPageName = $this->pageAliases[$_GET[$this->pathAliasQuery]];
     }
-    // Search for aliases.
-    elseif (isset($_GET['q']) && isset($this->pageAliases[$_GET['q']])) {
-      $webPageName = $this->pageAliases[$_GET['q']];
+    // Search for query string.
+    else if (isset($_GET[$this->pageClassType])) {
+      $webPageName = $_GET[$this->pageClassType];
     }
     return $this->render($webPageName, $params);
   }
@@ -149,25 +171,42 @@ class Website extends Router {
       // Or use the global wjs.
       $this->wjs->response($_GET);
     }
+    // Test is a page is specified as as default
+    // webcom arguments like WebPage=MyPage
+    if (isset($_GET[$this->pageClassType])) {
+      $webPageName = $_GET[$this->pageClassType];
+    }
     // Create main page.
     $this->page = $this->pageInstance($webPageName);
     // Add extra libraries.
     $this->pagePreloadInit();
     $options = array_merge(array(
-      // Enable url update on page changes
-//    TODO RE  'urlHistory' => TRUE,
       // Define html body as preloaded.
-      'html'       => WJS_PUSH_WEBPAGE_PRELOADED
+      'html' => WJS_PUSH_WEBPAGE_PRELOADED
     ), $options);
     // Push into own wjs.
     $this->page->push($options);
+    $body = $this->renderBody();
     return $this->renderDoctype() . '<html>' .
     $this->renderHead($this->page->websiteRenderHead()) .
-    $this->renderBody() .
+    $body .
     '</html>';
   }
 
   function pagePreloadInit() {
+    // Add website root css if present.
+    $css = $this->page->wjs->optionGet('serverPathWebsite') . 'theme/styles.css';
+    if (is_file($css)) {
+      $this->page->wjs->import('CssLink', 'theme/styles.css', array(
+        'client' => 'theme/styles.css',
+        'server' => $css,
+      ));
+    }
+    // Add website root js if present.
+    $css = $this->page->wjs->optionGet('serverPathWebsite') . 'theme/script.js';
+    if (is_file($css)) {
+      $this->page->wjs->import('JsLink', 'theme/script.js');
+    }
     // Add extra website data.
     $this->websiteInfo = $this->websiteInfoGet();
     $this->page->librariesHook('WebsiteInfo', $this->websiteInfo);
@@ -176,7 +215,9 @@ class Website extends Router {
   }
 
   function websiteInfoGet() {
-    return array();
+    return array(
+      'pageTitle' => $this->optionGet('pageTitle')
+    );
   }
 
   function pageRenderParams() {
@@ -194,6 +235,14 @@ class Website extends Router {
     return array();
   }
 
+  function htmlFileGetContent($path) {
+    $path = $this->page->wjs->optionGet('serverPathWebsite') . $path;
+    if (is_file($path)) {
+      return file_get_contents($path);
+    }
+    return '';
+  }
+
   function renderDoctype() {
     return '<!DOCTYPE html>';
   }
@@ -206,13 +255,15 @@ class Website extends Router {
   }
 
   function renderBody() {
-    $output = '<body>';
-    $output .= '<div id="' . $this->page->extensionName . '-preloaded">' .
-      '<div class="html">' .
-      $this->page->render($this->pageRenderParams()) .
-      '</div>' .
+    // Use global template.
+    $template     = $this->htmlFileGetContent('theme/page.html');
+    $output       = '<body>';
+    $output .= '<div id="' . $this->page->extensionName . '-preloaded" style="display:none">' .
+      '<div class="html">' . $this->page->render($this->pageRenderParams()) . '</div>' .
+      $template .
       '</div>';
-    $output .= '<body>';
+    $output .= '</body>';
+    // Return final HTML.
     return $output;
   }
 }

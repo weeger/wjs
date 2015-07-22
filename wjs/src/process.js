@@ -81,9 +81,12 @@
      * Start process boot phases.
      */
     boot: function () {
-      this.phase = this.phase || 0;
+      // Phase must return true if not async,
+      // otherwise it will reboot itself.
       if (this[this.phases[this.phase]]()) {
+        // Ask for nex phase.
         this.phase++;
+        // Reboot.
         this.boot();
       }
     },
@@ -113,7 +116,7 @@
       if (wjs.regEach(this.request, function (type, name) {
         var i = 0, key, keys, output = self.output,
           extensionData = wjs.get(type, name);
-        // Append data to output if already exists,
+        // Append data directly to process output if already exists,
         // no extra processing will be made for it.
         if (extensionData && !self.destroy) {
           output[type] = output[type] || {};
@@ -136,7 +139,7 @@
               // A process is about to parse requested extension,
               // We enforce process to parse it now before launching this one again.
               processQueued.itemProcess(type, name, self.reboot);
-              // Stops boot process.
+              // Stop iteration.
               return false;
             }
           }
@@ -146,9 +149,10 @@
         }
       })) {
         this.request = requestFiltered;
+        // Returning true continue boot process.
         return true;
       }
-      // return null will stop boot process.
+      // Returning nothing will stop boot process.
     },
 
     bootGetLoaders: function () {

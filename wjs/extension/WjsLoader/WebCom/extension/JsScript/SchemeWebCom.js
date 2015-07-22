@@ -1,5 +1,8 @@
 (function (WjsProto) {
   'use strict';
+  // Search for {{markups}} or encoded %7B%7Bmarkups%7D%7D
+  var regHtmlVariable = new RegExp('(?:{|%7B){2}((?:.(?!{|%7B))*)(?:}|%7D){2}', 'g');
+
   WjsProto.register('WebComScheme', 'SchemeWebCom', {
     classExtends: null,
     type: 'WebCom',
@@ -9,64 +12,61 @@
       optionsInternal: {},
       optionsApplied: {},
       optionsDestroyed: {},
+      optionsData: {},
       domChildren: {},
-      classLoadsNames: ['fadeIn', 'loaded', 'fadeOut'],
+      domIncludes: [],
+      classLoadsNames: ['fadeIn', 'loaded', 'fadeOut', 'fadeOutChildren'],
       // Defines if javascript has to add
       // css classes in different status,
       // created
       classLoads: {typeGlobal: true},
-      readyCallbacks: []
+      cssStyleNames: {},
+      readyCallbacks: [],
+      requiredInstances: {},
+      webComConstruct: false
     },
 
     options: {
       require: {
         defaults: false,
-        define: function (com, value) {
+        define: function (com, value, options) {
+          com.optionApply('dom', options);
           if (value) {
-            this.requiredWebCom = this.useInstances(value);
+            com.requiredInstances = com.createInstances(value);
           }
         },
         destroy: function (com, value) {
           if (value) {
-            this.destroyInstances(value, this.requiredWebCom);
+            com.destroyInstances(value, com.requiredInstances);
           }
         }
-      },
-      urlAlias: {
-        defaults: false
       },
       urlHistory: {
         defaults: false,
         unique: false,
         /**
          * @require JsMethod > urlQueryParse
-         * @require JsMethod > urlQueryBuild
-         * @require JsMethod > urlQueryUpdate
+         * @require JsMethod > urlQueryReplace
          */
         define: function (com, value) {
           if (value) {
-            var wjs = this.wjs,
-              state = '/' + wjs.settings.pathFull;
-            if (!this.urlAlias) {
-              com.optionApply('urlAlias');
-              // Load used class.
-              var loaderType = com.loader.type,
-                params = wjs.urlQueryParse();
-              params[loaderType] = params[loaderType] || {};
-              if (this.unique && params[loaderType] !== com.type) {
+            var wjs = this.wjs;
+            // Load used class.
+            var loaderType = com.loader.type,
+              params = wjs.urlQueryParse();
+            params[loaderType] = params[loaderType] || {};
+            if (this.unique) {
+              if (params[loaderType] !== com.type) {
                 params[loaderType] = com.type;
               }
-              // Avoid multiple insertion.
-              else {
-                params[loaderType][com.id] = com.type;
-              }
-              state += '?' + wjs.urlQueryBuild(params);
             }
-            else if (com.urlAlias !== '[root]') {
-              state += com.urlAlias;
+            // Avoid multiple insertion.
+            else {
+              params[loaderType][com.id] = com.type;
             }
-            // TODO : pushState for new page, replace for first loaded page.
-            wjs.window.history.replaceState(null, null, state);
+            // We use only query string,
+            // so full path does not change.
+            wjs.urlQueryReplace(params);
           }
         },
         /**
@@ -74,15 +74,15 @@
          * @require JsMethod > urlQueryBuild
          */
         destroy: function (com) {
-          if (this.applied) { // TODO WHY ?
-            var loaderType = com.loader.type, params = this.wjs.urlQueryParse();
-            if (params[loaderType]) {
-              if (this.unique) {
-                delete params[loaderType];
-              }
-              // TODO Send replacement path for page nav (exit arguments + exit improvment).
-              // wjs.window.history.replaceState(null, null, '?' + wjs.urlQueryBuild(params));
+          var loaderType = com.loader.type, params = this.wjs.urlQueryParse();
+          if (params[loaderType]) {
+            if (this.unique) {
+              delete params[loaderType];
             }
+            else {
+              delete params[loaderType][com.id];
+            }
+            this.wjs.window.history.replaceState(null, null, '?' + this.wjs.urlQueryBuild(params));
           }
         }
       },
@@ -105,13 +105,13 @@
         /**
          * @require JsMethod > isDomNode
          * @require JsMethod > domAttributes
-         * @require JsMethod > cssAnimateCallback
          */
         define: function (com, value, options) {
           // If true, or not specified but html is present.
           value = (value === true || (typeof value !== 'object' && typeof options.html === 'string')) ? 'div' : value;
           if (value) {
             // Need CSS classes to exists.
+            com.optionApply('cssSheets', options);
             com.optionApply('cssClasses', options);
             com.optionApply('cssClassInteraction', options);
             com.optionApply('domImported', options);
@@ -155,7 +155,7 @@
               }
             }
             // If dom has been created on define.
-            if (com.domImported || backup.domCreated) {
+            if (com.domImported || com.optionsData.dom.domCreated) {
               // Destroy it.
               com.dom.parentNode.removeChild(com.dom);
             }
@@ -164,8 +164,8 @@
       },
 
       domImported: {
-        // Define if dom is imported
-        // so it have to be destroyed with object,
+        // Define if dom is imported, if yes
+        // it have to be destroyed with object,
         // like if it was internally created.
         defaults: false
       },
@@ -190,6 +190,7 @@
 
       html: {
         defaults: false,
+        autoInit: false,
         define: function (com, value, options) {
           if (typeof value === 'string') {
             // Requires dom option.
@@ -199,27 +200,54 @@
         }
       },
 
+      cssSheets: {
+        defaults: [],
+        define: function (com, value) {
+          var extRequire = com.wjs.extRequire[com.loader.type];
+          return extRequire && extRequire[com.type] ? extRequire[com.type].CssLink : value;
+        }
+      },
+
       cssFadeIn: {
         defaults: false,
         define: function (com, value, options) {
           com.optionApply('dom', options);
           if (com.dom) {
-            var classLoads = com.classLoads, hasTypeGlobal = classLoads.typeGlobal,
-              hasCssKeyRule = com.cssRulesClassInit(),
-              fadeInComplete = function () {
-                com.domClassLoadAdd('loaded');
-                if (value) {
-                  value.call(com);
+            // Treat CSS fades.
+            var classLoads = com.classLoads,
+              i, item,
+              cssSheets = com.cssSheets;
+            // There is CSS Sheets attached to element
+            // which can contain CSS rule matching to this type.
+            if (cssSheets.length) {
+              // Get list of links.
+              for (i = 0; item = cssSheets[i++];) {
+                // Get dom <style> element.
+                item = this.wjs.get('CssLink', item);
+                // Search for declared CSS rules.
+                if (com.cssRulesClassSearch(item.sheet, com.typeGlobal)) {
+                  // If one rule exists, we need to add "typeGlobal" class name.
+                  classLoads.typeGlobal = true;
                 }
-              };
-            // Use typeGlobal class if one of other type is used.
-            hasTypeGlobal =
-              classLoads.typeGlobal = hasTypeGlobal !== undefined ? hasTypeGlobal : hasCssKeyRule;
-            if (hasTypeGlobal) {
+              }
+            }
+            // Global class name needed.
+            if (classLoads.typeGlobal) {
               com.dom.classList.add(com.typeGlobal);
             }
+            var fadeInComplete = function () {
+              // Fade in is complete.
+              com.domClassLoadRemove('fadeIn');
+              // Mark as loaded with a css class.
+              com.domClassLoadAdd('loaded');
+              // Value is a callback.
+              if (value) {
+                value.call(com);
+              }
+            };
+            // Launch fade in if not false and more than 0.
             if (classLoads.fadeIn) {
-              this.wjs.cssAnimateCallback(com.dom, 'fadeIn', fadeInComplete);
+              com.domClassLoadAdd('fadeIn', fadeInComplete);
             }
             else {
               // Execute asynchronously.
@@ -234,12 +262,16 @@
         define: function (com, value) {
           com.optionsData.cssFadeOut = value;
         },
+        /**
+         * @require JsMethod > webComExit
+         */
         fadeOut: function (com) {
           // Async dom actions.
           if (com.dom) {
             // Add fade out class
             com.domClassLoadAdd('fadeOutChildren');
-            var fadeOutCallback = function () {
+            var self = this, fadeOutCallback = function () {
+              // Do not remove fadeOut class to avoid changes.
               // Execute fadeout callback.
               if (com.optionsData.cssFadeOut) {
                 com.optionsData.cssFadeOut();
@@ -248,17 +280,17 @@
               com.__destructFadeOutOptionComplete();
             };
             // Search for <div data-wjsInclude="..."> tags.
-            this.wjs.wjsIncludeExit(com.dom, function () {
-              // Launch fadeOut.
-              if (com.classLoads.fadeOut) {
-                com.__destructOptionsWaiting = true;
-                com.wjs.cssAnimateCallback(com.dom, 'fadeOut', function () {
+            self.wjs.wjsIncludeExit(com.domIncludes, function () {
+              self.wjs.webComExit(com.requiredInstances, function () {
+                // Launch fadeOut.
+                if (typeof com.classLoads.fadeOut === 'number') {
+                  com.__destructOptionsWaiting = true;
+                  com.domClassLoadAdd('fadeOut', fadeOutCallback);
+                }
+                else {
                   fadeOutCallback();
-                });
-              }
-              else {
-                fadeOutCallback();
-              }
+                }
+              });
             });
           } else {
             // Execute complete destroy.
@@ -274,11 +306,6 @@
      * fill values of options.optionName.defaults.
      */
     optionsDefault: {},
-
-    /**
-     * Local object to store options data.
-     */
-    optionsData: {},
 
     /**
      * List of prototypes names to import data from.
@@ -340,92 +367,13 @@
       }
       // Apply.
       this.optionApplyMultiple(optionsNames, optionsDefault);
+      // Apply html at end, it allows
+      // to use all defined variables into
+      // parsed html templates.
+      this.optionApply('html', optionsDefault);
+      this.webComConstruct = true;
       // Send modified options to sub instance.
       return optionsDefault;
-    },
-
-    /**
-     * Call super method of current object.
-     * Lighten implementation than JsMethod > inheritMethod,
-     * but do not support complex super imbrication.
-     */
-    __super: function (method, args) {
-      // Backup current context.
-      var output, superBackup = this.__superProtos[method], base = superBackup || this, superProto = base;
-      do {
-        // Get parent prototype.
-        if (!(superProto = Object.getPrototypeOf(superProto))) {
-          // Reached last parent.
-          return;
-        }
-      }
-        // Prototype must be owner of a method with this name,
-        // but not the same method from the current caller.
-      while (!Object.getOwnPropertyDescriptor(superProto, method) || superProto[method] === base[method]);
-      // Change global super context.
-      this.__superProtos[method] = superProto;
-      // Execute.
-      output = this.__superProtos[method][method].apply(this, args);
-      // Reset context, or set undefined.
-      this.__superProtos[method] = superBackup;
-      // Return content.
-      return output;
-    },
-
-    exit: function (callback) {
-      this.__destruct(callback);
-    },
-
-    cssRulesClassInit: function () {
-      // Treat CSS fades.
-      var hasCssKeyRule = false, i, item,
-        extRequire = this.wjs.extRequire[this.loader.type],
-        cssLinks = extRequire && extRequire[this.type] ? extRequire[this.type].CssLink : false;
-      if (cssLinks) {
-        // Get list of links
-        for (i = 0; item = cssLinks[i++];) {
-          item = this.wjs.get('CssLink', item);
-          // Sheet should be checked as existing
-          // by the CSSLink loader.
-          if (this.cssRulesClassSearch(item.sheet, this.typeGlobal)) {
-            hasCssKeyRule = true;
-          }
-        }
-      }
-      return hasCssKeyRule;
-    },
-
-    /**
-     * Save enabled keywords classes detected into a StyleSheet.
-     * Main class name must be specified.
-     * List of kay class names are stored into this.classLoads
-     * @require JsMethod > cssSheetRules
-     */
-    cssRulesClassSearch: function (sheet, mainClassName) {
-      var rules, i, j, hasRule = false, className, classRule,
-        classRuleIE, cssRule, classLoads = this.classLoads;
-      rules = this.wjs.cssSheetRules(sheet);
-      for (i = 0; cssRule = rules[i++];) {
-        // Selector can be missing into animation sections.
-        if (cssRule.selectorText) {
-          for (j = 0; className = this.classLoadsNames[j++];) {
-            classRule = '.' + mainClassName + '.' + className;
-            // Internet explorer invert class selectors.
-            classRuleIE = '.' + className + '.' + mainClassName;
-            // We test both ie and other.
-            if (cssRule.selectorText.indexOf(classRule) !== -1 ||
-              cssRule.selectorText.indexOf(classRuleIE) !== -1) {
-              // Check as true if not defined
-              classLoads[className] =
-                classLoads[className] !== undefined ?
-                  classLoads[className] : true;
-              // Need typeGlobal class.
-              hasRule = true;
-            }
-          }
-        }
-      }
-      return hasRule;
     },
 
     /**
@@ -487,6 +435,110 @@
       });
     },
 
+    /**
+     * Call super method of current object.
+     * Lighten implementation than JsMethod > inheritMethod,
+     * but do not support complex super imbrication.
+     */
+    __super: function (method, args) {
+      // Backup current context.
+      var output, superBackup = this.__superProtos[method], base = superBackup || this, superProto = base;
+      do {
+        // Get parent prototype.
+        if (!(superProto = Object.getPrototypeOf(superProto))) {
+          // Reached last parent.
+          return;
+        }
+      }
+        // Prototype must be owner of a method with this name,
+        // but not the same method from the current caller.
+      while (!Object.getOwnPropertyDescriptor(superProto, method) || superProto[method] === base[method]);
+      // Change global super context.
+      this.__superProtos[method] = superProto;
+      // Execute.
+      output = this.__superProtos[method][method].apply(this, args);
+      // Reset context, or set undefined.
+      this.__superProtos[method] = superBackup;
+      // Return content.
+      return output;
+    },
+
+    exit: function (callback) {
+      this.__destruct(callback);
+    },
+
+    /**
+     * Save enabled keywords classes detected into a StyleSheet.
+     * Main class name must be specified.
+     * List of keys class names are stored into this.classLoads
+     * TODO Do that into loader on prototype creation (with option)
+     * @require JsMethod > cssSheetRules
+     */
+    cssRulesClassSearch: function (sheet, mainClassName) {
+      var rules, i, j, hasRule = false, className, classRule,
+        classRuleIE, cssRule, classLoads = this.classLoads, classRuleFound, duration;
+      rules = this.wjs.cssSheetRules(sheet);
+      for (i = 0; cssRule = rules[i++];) {
+        // Selector can be missing into animation sections.
+        if (cssRule.selectorText) {
+          for (j = 0; className = this.classLoadsNames[j++];) {
+            classRuleFound = false;
+            classRule = '.' + mainClassName + '.' + className;
+            // Internet explorer invert class selectors.
+            classRuleIE = '.' + className + '.' + mainClassName;
+            // Search
+            if (cssRule.selectorText.indexOf(classRule) !== -1) {
+              classRuleFound = classRule;
+            }
+            // Search for IE
+            else if (cssRule.selectorText.indexOf(classRuleIE) !== -1) {
+              classRuleFound = classRuleIE;
+            }
+            // We test both ie and other.
+            // Check as true if not defined, false allow to disable.
+            if (classRuleFound && classLoads[className] !== false) {
+              // Save animation duration as value.
+              classLoads[className] = classLoads[className] || 0;
+              // Need typeGlobal class.
+              hasRule = true;
+              var regIsDirect = new RegExp('[\\s\\S]*' + classRuleFound.split('.').join('\\.') + '[^.]*$');
+              duration = this.cssRuleDuration(cssRule);
+              // Add CSS animation duration if defined.
+              if (regIsDirect.test(cssRule.selectorText)) {
+                classLoads[className] = duration;
+              }
+              // Use the longer animation of any children.
+              else if (duration > classLoads[className]) {
+                classLoads[className] = duration;
+              }
+            }
+          }
+        }
+      }
+      return hasRule;
+    },
+
+    cssRuleDuration: function (cssRule) {
+      var output = 0, value;
+      // Duration.
+      output += (value = this.cssRuleNumberValue(cssRule, 'animationDuration')) ? value : 0;
+      // Delay.
+      output += (value = this.cssRuleNumberValue(cssRule, 'animationDelay')) ? value : 0;
+      // Yeah.
+      return output;
+    },
+
+    cssRuleNumberValue: function (cssRule, name) {
+      var time;
+      name = this.wjs.cssVendorPrefix(name);
+      if (cssRule.style[name]) {
+        // Treat string numeric value.
+        time = parseFloat(cssRule.style[name].replace(',', '.'));
+        return (!isNaN(time)) ? time : 0;
+      }
+      return false;
+    },
+
     method: function (path) {
       return this[this.methodName(path)];
     },
@@ -529,32 +581,57 @@
      * @require JsMethod > wjsHrefInit
      */
     domChildFill: function (name, content) {
-      var dom = this.domChildGet(name);
+      var dom = this.domChildGet(name), result;
       // Content can be already defined.
       if (content) {
+        while (result = regHtmlVariable.exec(content)) {
+          content = content.substring(0, result.index) + this[result[1]] + content.substring(result.index + result[0].length);
+        }
         dom.innerHTML = content;
       }
       // Parse all node to search for wjs links.
       this.wjs.wjsHrefInit(dom);
+      // Parse dom.
+      this.domParseInclude();
+    },
+
+    domParseInclude: function (options) {
+      options = options || {};
+      // Define destination (no parent allowed for simple web com)
+      options.domDestination = options.domDestination || this.dom;
       // Search for <div data-wjsInclude="..."> tags.
-      this.wjs.wjsIncludeInit(this.dom);
+      this.domIncludes = this.domIncludes.concat(this.wjs.wjsIncludeInit(this.dom, options));
     },
 
     /**
      * Add a class if allowed, it can be
      * defined by constructor or automatically detected
      * when defined into stylesheet.
-     * @param className
+     * @require JsMethod > cssAnimateCallback
      */
-    domClassLoadAdd: function (className) {
-      if (this.classLoads[className]) {
+    domClassLoadAdd: function (className, animationCallback) {
+      // Class type must be declared, or detected into css sheet.
+      if (typeof this.classLoads[className] === 'number') {
+        // Add a listener if complete callback specified.
+        if (animationCallback) {
+          this.wjs.cssAnimateCallback(this.dom, animationCallback, this.classLoads[className] * 1000);
+        }
+        // Adding class will launch animation.
         this.dom.classList.add(className);
       }
     },
 
+    /**
+     * @require JsMethod > cssAnimateStop
+     */
     domClassLoadRemove: function (className) {
-      if (this.classLoads[className]) {
-        this.dom.classList.remove(className);
+      var domHtml = this.domChildGet('html');
+      // Simply remove class.
+      this.dom.classList.remove(className);
+      // Dom may be disabled.
+      if (domHtml) {
+        // Shutdown all animation into html (not into children).
+        this.wjs.cssAnimateStop(domHtml);
       }
     },
 
@@ -613,6 +690,10 @@
       this[name] = value;
     },
 
+    variableGet: function (name) {
+      return this[name];
+    },
+
     __variableGet: function (name) {
       return this.variables[name];
     },
@@ -648,35 +729,38 @@
       option.optionDestroy(this);
     },
 
-    useInstances: function (request) {
+    createInstances: function (request) {
       var self = this, instances = [];
-      self.wjs.use(request, function () {
-        // Create instance for WebCom
-        if (request.WebCom) {
-          var i = 0, item;
-          while (item = request.WebCom[i++]) {
-            instances.push(self.wjs.loaders.WebCom.instance(item));
-          }
-        }
+      self.wjs.regEach(request, function (type, name) {
+        instances.push(self.createInstance(type, name));
       });
       return instances;
     },
 
-    destroyInstances: function (request, instances) {
-      var self = this, i = 0, j = 0, item, type,
+    createInstance: function (type, name, options) {
+      options = options || {};
+      // Define destination (no parent allowed for simple web com)
+      options.domDestination = options.domDestination || this.dom;
+      return this.wjs.loaders[type].instance(name, options);
+    },
+
+    destroyInstances: function (instances) {
+      var self = this, i = 0, j = 0, item, type, length = instances.length,
         exitInstances = [];
-      // Search for instance matching with request.
-      while (item = instances[i++]) {
-        type = item.loader.type;
-        if (request[type] && request[type].indexOf(item.type) !== -1) {
-          exitInstances.push(item);
-          delete instances[i++];
-        }
-      }
+
+// TODO
+//      // Search for instance matching with request.
+//      while (item = instances[i++]) {
+//        type = item.loader.type;
+//        if (request[type] && request[type].indexOf(item.type) !== -1) {
+//          exitInstances.push(item);
+//          delete instances[i++];
+//        } T
+//      }
       // Exit all instances.
-      for (i = 0; item = exitInstances[i++];) {
+      for (i = 0; item = instances[i++];) {
         item.exit(function () {
-          if (++j === exitInstances.length) {
+          if (++j === length) {
             // Launch destroy request.
             self.wjs.destroy(request);
           }

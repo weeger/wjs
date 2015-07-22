@@ -1,3 +1,7 @@
+WJS - 4.2.4 - 2015-07-02
+------------------------
+- Various element improvements
+
 WJS - 4.2.3 - 2015-06-29
 ------------------------
 - Minor improvement

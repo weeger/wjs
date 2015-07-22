@@ -40,7 +40,7 @@
     },
 
     enable: function (name, value) {
-      if (!value.parentNode) {
+      if (value.nodeType && !value.parentNode) {
         this.wjs.document.head.appendChild(value);
       }
     },
@@ -48,7 +48,7 @@
     disable: function (name, value) {
       // Parent node can be missing in case of
       // deletion of an unknown dom item.
-      if (value.parentNode) {
+      if (value.nodeType && value.parentNode) {
         // Remove child from dom.
         value.parentNode.removeChild(value);
       }

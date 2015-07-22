@@ -1,22 +1,35 @@
 (function (WjsProto) {
   'use strict';
   /**
-   * Apply a animation delay for each items selected.
+   * Forked from http://davidwalsh.name/vendor-prefix
+   * @type {CssStyle|CSSStyleDeclaration}
    */
-  WjsProto.register('JsMethod', 'cssVendorPrefix', function (name, domStyle) {
-    // If property is not undefined, no prefix needed.
-    if (domStyle && domStyle[name] !== undefined) {
-      return name;
+  var styles = WjsProto.context.window.getComputedStyle(WjsProto.context.window.document.documentElement, ''),
+    prefix = (Array.prototype.slice
+      .call(styles)
+      .join('')
+      .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
+      )[1], buffer = {}, prefixBuild = function (name) {
+      switch (name) {
+        case 'animationDuration':
+        case 'animationDelay':
+        case 'transform':
+          // No mozClassName
+          if (prefix === 'moz') {
+            return name;
+          }
+          break;
+      }
+      return prefix + name.charAt(0).toUpperCase() + name.slice(1);
+    };
+  /**
+   * Return prefixed name of the given CSS property.
+   * Only supports methods used internally by wjs.
+   */
+  WjsProto.register('JsMethod', 'cssVendorPrefix', function (name) {
+    if (!buffer[name]) {
+      buffer[name] = prefixBuild(name);
     }
-    if (!this._cssVendorPrefix) {
-      // Forked from http://davidwalsh.name/vendor-prefix
-      var styles = this.window.getComputedStyle(this.document.documentElement, '');
-      this._cssVendorPrefix = (Array.prototype.slice
-        .call(styles)
-        .join('')
-        .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
-        )[1];
-    }
-    return this._cssVendorPrefix + name.charAt(0).toUpperCase() + name.slice(1);
+    return buffer[name];
   });
 }(WjsProto));

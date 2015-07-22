@@ -38,25 +38,21 @@
      * @require JsMethod > inheritMethodLinage
      * @require JsMethod > inheritObject
      */
-    __construct: function () {
+    __construct: function (options) {
       // Add required plugins TODO IN PROTO.
       this.required = this.wjs.inheritObject(this, 'required', true);
       // Base construction.
       this.__super('__construct', arguments);
       // User friendly init.
-      this.initPlugin();
+      this.initPlugin(options);
     },
 
-    /* TODO DEL ?  __destruct: function () {
-     // Detach all methods of plugins on element.
-     var i = 0, key, keys = Object.keys(this.methods);
-     while (key = keys[i++]) {
-     if (key !== 'variables') {
-     delete this.element[key];
-     }
-     }
-     this.wjs.inheritMethod(this, '__destruct', arguments);
-     },*/
+    __destruct: function () {
+      // User friendly
+      this.exitPlugin();
+      // Super.
+      this.__super('__destruct', arguments);
+    },
 
     elementAdd: function (element) {
       if (!element || !element.isA(this.elementType)) {
@@ -64,6 +60,9 @@
           ' not allowed for plugin ' + this.type +
           ', expected ' + this.elementType);
       }
+      // Use callback from listened element
+      // for formula attached to current variables.
+      this.formulaChangeCallback = element.formulaChangeCallback;
       // First add requirements.
       // Check if any plugin of each type, included
       // extended plugins, is present.
@@ -101,6 +100,9 @@
 
     // To override.
     initPlugin: WjsProto._e,
+
+    // To override.
+    exitPlugin: WjsProto._e,
 
     elementsCall: function (method, args) {
       this.elementsEach(args ? function (element) {

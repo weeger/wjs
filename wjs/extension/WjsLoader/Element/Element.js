@@ -6,18 +6,18 @@
   'use strict';
   WjsProto.register('WjsLoader', 'Element', {
     loaderExtends: 'Binder',
-    protoBaseClass: 'Element'
+    protoBaseClass: 'Element',
+    stageDefault: null,
 
-//    protoParseAlterable: function (proto, scheme) {
-//      var keys = Object.keys(scheme.alterable), key, i = 0, keyRef;
-//      this.methodsFlatten(proto, scheme, 'alterable');
-//      while (key = keys[i++]) {
-//        keyRef = key;
-//TODO
-//        proto[key] = function () {
-//          return this.pluginShared(keyRef, arguments, this[this.methodName('alterable.' + keyRef)]);
-//        };
-//      }
-//    }
+    stageDefaultCreate: function (domDestination) {
+      // One global stage only.
+      if (!this.stageDefault) {
+        this.stageDefault = this.instance('Stage', {
+          // Allow to change destination.
+          domDestination: domDestination
+        });
+      }
+      return this.stageDefault;
+    }
   });
 }(WjsProto));

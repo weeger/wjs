@@ -13,7 +13,6 @@
       this._w = ( w !== undefined ) ? w : 1;
     },
 
-
     get x() {
       return this._x;
     },

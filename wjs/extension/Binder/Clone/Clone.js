@@ -23,11 +23,11 @@
           // - Phases
 
 //          value.__variableSet = function() {
-//log('YO ' + name + ' ' + value)
+//            lo g(name + ' ' + value)
 //          };
 
 //          value.__variableGet = function(name) {
-////            log('YO ' + name)
+////            lo g('YO ' + name)
 //            return com.optionsData.target.__variableGet.call(value,name);
 //          };
         }

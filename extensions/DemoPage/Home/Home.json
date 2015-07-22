@@ -1,8 +1,0 @@
-{
-  "destination": "#message",
-  "client": "extensions/DemoPage/Home/",
-  "require": {
-    "WebComp": ["BgAnim"]
-  }
-}
-

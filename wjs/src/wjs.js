@@ -41,7 +41,7 @@
       // Create owned objects.
       self.extendObject(self, {
         /** @type {string} Override default headless version */
-        version: (options.settings ? options.settings.version : '[$version]-headless'),
+        version: options.settings ? options.settings.version : '[$version]-headless',
         /** @type {boolean} */
         readyComplete: false,
         /** @type {Object} */
@@ -84,7 +84,6 @@
       // Create prototypes instances.
       self.classExtend('WjsLoader', WjsProto.lib.Loader);
       self.classExtend('WjsProcess', WjsProto.lib.Process);
-      self.classExtend('Stack', WjsProto.lib.Stack);
       // Create core loaders.
       self.loaderAdd('JsLink', WjsProto.retrieve('WjsLoader', 'JsLink'), true);
       self.loaderAdd('WjsLoader', WjsProto.retrieve('WjsLoader', 'WjsLoader'), true);
@@ -95,6 +94,8 @@
       // Execute a function asynchronously.
       // Or create a simple timeout.
       self.async = self.window.setTimeout.bind(self.window);
+      // Bind function to wjs.
+      self.trigger = WjsProto.trigger;
       // Load all other scripts then run ready functions.
       // Create a loading process to parse package content.
       self.use(null, {
@@ -217,7 +218,7 @@
           use.push(type);
         }
       }
-      return (use.length) ?
+      return use.length ?
         // Create a new process.
         this.use({WjsLoader: use}, {
           stack: false,
@@ -259,7 +260,7 @@
       // Return value if defined.
       // Use hasOwnProperty allow to save "undefined"
       // for not found extensions.
-      return (extList && extList.hasOwnProperty(name)) ? extList[name] : false;
+      return extList && extList.hasOwnProperty(name) ? extList[name] : false;
     },
 
     /**
@@ -282,7 +283,7 @@
       // Convert callback to options object.
       options = self.extendObject({
         destroy: true,
-        dependencies: (arguments[1] === true || arguments[2] === true)
+        dependencies: arguments[1] === true || arguments[2] === true
       }, self.extendOptions(options));
       // Async false by default.
       options.async = options.async === true;
@@ -306,15 +307,15 @@
     },
 
     extIsCore: function (type, name) {
-      return (type === 'WjsLoader' &&
-        (name !== 'WjsLoader' || name !== 'JsLink' || this.loadersBasic.indexOf(name) !== -1));
+      return type === 'WjsLoader' &&
+        (name !== 'WjsLoader' || name !== 'JsLink' || this.loadersBasic.indexOf(name) !== -1);
     },
 
     requirementsDeletable: function (extensionType, extensionName) {
       var deletable = {}, requirements = this.extRequire[extensionType][extensionName];
       if (requirements) {
         this.regEach(requirements, function (requireType, requireName) {
-          if (// Do not delete core loaders
+          if ( // Do not delete core loaders
             !this.extIsCore(requireType, requireName) &&
               // or shared components.
               !this.requireShared(extensionType, extensionName, requireType, requireName, deletable)) {
@@ -423,7 +424,7 @@
       // Create xhr.
       xhr.open(method,
         // On GET mode append data as query strings.
-        (method === 'GET' && data) ? url + '?' + data : url,
+        method === 'GET' && data ? url + '?' + data : url,
         // Async by default.
         options.async !== undefined ? options.async : true);
       // Define callback.
@@ -563,11 +564,16 @@
      */
     classExtend: function (name, methods) {
       var classMethods = this.classMethods;
+      // Base methods are already defined.
       if (classMethods[name]) {
+        // We add new methods to it.
         this.extendProto(classMethods[name], methods);
       }
       else {
+        // This is the base methods.
         classMethods[name] = methods;
+        // Save a reference to proto name.
+        classMethods[name].protoClassName = name;
       }
       // Ask to rebuild prototype on next instance.
       delete this.classProtos[name];
@@ -717,15 +723,15 @@
    * internally to listen for extension loads,
    * and javascript registering.
    */
-  WjsProto.trigger = function (name, details) {
+  WjsProto.trigger = function (name, options, dom) {
     // Shortcut.
     var win = context.window,
     // Create.
       event = win.document.createEvent('CustomEvent');
     // Init, IE does not support undefined details.
-    event.initCustomEvent(name, true, true, details || null);
-    // Dispatch.
-    win.dispatchEvent(event);
+    event.initCustomEvent(name, true, true, options || null);
+    // Dispatch on window if no dom defined.
+    (dom || win).dispatchEvent(event);
   };
 
   /**
@@ -749,7 +755,7 @@
     var reg = this.reg;
     reg[type] = reg[type] || {};
     reg[type][name] = data;
-    WjsProto.trigger('wjsRegister::' + type + '::' + name);
+    WjsProto.trigger(['wjsRegister', type, name].join('::'));
   };
 
   /**

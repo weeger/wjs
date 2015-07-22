@@ -7,8 +7,8 @@
 
     defaults: undefined,
     // Functions.
-    define: null,
-    destroy: null,
+    define: WjsProto._e,
+    destroy: WjsProto._e,
 
     __construct: function () {
       this.comList = {};
@@ -32,10 +32,9 @@
       this.comList[com.id] = true;
       // Consider empty values like "" or null as real values.
       value = (value !== undefined) ? value : this.defaults;
+      var valueDefined = this.define(com, value, options);
       // Execute define callback.
-      if (this.define) {
-        value = this.define(com, value, options);
-      }
+      value = valueDefined !== undefined ? valueDefined : value;
       // Set value as object's variable.
       if (value !== undefined) {
         // Only define variable if it has not already been
@@ -47,16 +46,13 @@
         }
         // Define already initialised value.
         else {
-          log(this.name);
           com.variableSet(this.name, value);
         }
       }
     },
 
     optionDestroy: function (com) {
-      if (this.destroy) {
-        this.destroy(com);
-      }
+      this.destroy(com);
       delete this.comList[com.id];
       return true;
     }

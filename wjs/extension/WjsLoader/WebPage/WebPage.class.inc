@@ -38,25 +38,21 @@ class Page {
     $this->extensionType = $type;
     $this->extensionName = $name;
     // Load own wjs instance.
-    $this->wjs     = $wjs;
-    $this->loader  = $loader;
-    $this->website = $website;
-    // Init wjs as normal library.
-    $this->libraryLoad('Wjs', array('wjs' => $this->wjs));
+    $this->wjs        = $wjs;
+    $this->loader     = $loader;
+    $this->website    = $website;
     $this->serverPath = $options['server'];
     $this->clientPath = $options['client'];
-    // Load required libraries.
-    $libraries = $this->librariesRequired;
-    // Create list.
-    foreach ($libraries as $name => $libraryOptions) {
-      if (!is_array($libraryOptions)) {
-        $name           = $libraryOptions;
-        $libraryOptions = array();
-      }
-      if (!$this->libraryGet($name)) {
-        $this->libraryLoadOnce($name, $libraryOptions);
-      }
+    $this->title      = $name;
+    // Search for page alias.
+    $aliases = array_flip($this->website->pageAliases);
+    if (isset($aliases[$name])) {
+      $this->urlAlias = $aliases[$name];
     }
+    // Init wjs as normal library.
+    $this->libraryLoad('Wjs', array('wjs' => $this->wjs));
+    // Load required libraries.
+    $this->libraryLoadMultiple($this->librariesRequired);
     // Load other requirements
     foreach ($this->requirements as $extensionType => $extensions) {
       foreach ($extensions as $extensionName) {
@@ -96,6 +92,19 @@ class Page {
     $options['page'] = $this;
     $this->wjs->extensionPush('WjsLibrary', $name, $options);
     return end($this->libraries);
+  }
+
+  function libraryLoadMultiple($libraries) {
+    // Create list.
+    foreach ($libraries as $name => $libraryOptions) {
+      if (is_numeric($name)) {
+        $name           = $libraryOptions;
+        $libraryOptions = array();
+      }
+      if (!$this->libraryGet($name)) {
+        $this->libraryLoadOnce($name, $libraryOptions);
+      }
+    }
   }
 
   function libraryLoadOnce($name, $options = array()) {
@@ -167,12 +176,14 @@ class Page {
     if ($this->urlAlias) {
       $options['urlAlias'] = $this->urlAlias;
     }
+    $options['title'] = $this->title;
     // Rendering is made during push.
     $this->wjs->extensionPush($this->extensionType, $this->extensionName, $options);
   }
 
   function websiteRenderHead() {
     return $this->renderHeadTitle() .
+    $this->website->htmlFileGetContent('theme/head.html') .
     implode($this->librariesHook('renderHeadMeta')) .
     implode($this->librariesHook('renderHeadCss')) .
     implode($this->librariesHook('renderHeadJs'));
@@ -189,7 +200,7 @@ class Page {
   }
 
   function renderHeadTitle() {
-    return '<title>' . $this->title . '</title>';
+    return '<title>' . $this->website->optionGet('pageTitle') . $this->title . '</title>';
   }
 
   function renderJsInclude($path, $inline = '') {
@@ -214,7 +225,8 @@ class Page {
     else {
       $output .= $html;
     }
-    return $this->loader->htmlParse($this->extensionName, $output);
+    $output .= implode($this->librariesHook('renderBodyFooter'));
+    return $output;
   }
 
   function renderTemplate($path, $param = array()) {
