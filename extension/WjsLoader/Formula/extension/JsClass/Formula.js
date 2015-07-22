@@ -1,7 +1,6 @@
 (function (WjsProto) {
   'use strict';
   WjsProto.register('JsClass', 'Formula', {
-    isFormula: true, // TODO
     eventTrigger: false,
 
     __construct: function () {
@@ -11,7 +10,16 @@
         // Event name.
         this.eventNameUpdate = this.name + 'Update';
       }
+      this.initFormula();
     },
+
+    __destruct: function () {
+      this.exitFormula();
+    },
+
+    initFormula: WjsProto._e,
+
+    exitFormula: WjsProto._e,
 
     updateEvent: function () {
       // Update a global event on change,

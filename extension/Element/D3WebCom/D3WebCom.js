@@ -1,6 +1,7 @@
 /**
  * @require Element > Clip
  * @require JsClass > ThreeObject3d
+ * @require JsClass > D3World
  */
 (function (WjsProto) {
   'use strict';
@@ -16,13 +17,61 @@
       translateZ: 0
     },
 
-    __construct: function () {
-      this.init3D();
-      this.__super('__construct', arguments);
+    options: {
+      zSort: {
+        defaults: true,
+        define: function (com, value, options) {
+          com.optionApply('D3World', options);
+          // World manage z sorting.
+          if (value) {
+            com.D3World.child3dSort.push(com);
+          }
+        }
+      },
+      D3World: {
+        define: function (com, value) {
+          if (!value) {
+            if (!this.wjs.D3WorldGlobal) {
+              this.wjs.D3WorldGlobal = new (this.wjs.classProto('D3World'))();
+            }
+            value = this.wjs.D3WorldGlobal;
+          }
+          return value;
+        },
+        /**
+         * @require JsMethod > arrayDeleteItem
+         */
+        destroy: function (com, value) {
+          if (value) {
+            // Remove
+            this.wjs.arrayDeleteItem(value.child3dSort, com);
+          }
+        }
+      }
     },
 
-    init3D: function () {
+    __construct: function () {
+      // Create object for 3D calculations.
       this.object3d = new (this.wjs.classProto('ThreeObject3d'))(0, 1, 0);
+      // Normal com construct.
+      this.__super('__construct', arguments);
+      // Custom init.
+      this.init3D();
+    },
+
+    init3D: WjsProto._e,
+
+    /**
+     * Create a binder, set this as parent.
+     */
+    childAdd: function (options) {
+      if (!this.isA('D3World')) {
+        options.D3World = this.D3World;
+      }
+      else {
+        options.D3World = this;
+      }
+      return this.__super('childAdd', [options]);
     },
 
     renderReset: function () {
@@ -41,9 +90,9 @@
       object3d.translateY(-this.translateY);
       object3d.translateZ(-this.translateZ);
       // Apply rotation.
-      object3d.rotateX(this.wjs.Math.degToRad(this.result(this.rotateH)));
-      object3d.rotateY(this.wjs.Math.degToRad(this.result(this.rotateP)));
-      object3d.rotateZ(this.wjs.Math.degToRad(this.result(this.rotateB)));
+      object3d.rotateX(this.wjs.Math.degToRad(this.variableGet('rotateH')));
+      object3d.rotateY(this.wjs.Math.degToRad(this.variableGet('rotateP')));
+      object3d.rotateZ(this.wjs.Math.degToRad(this.variableGet('rotateB')));
 
       return renderData;
     },

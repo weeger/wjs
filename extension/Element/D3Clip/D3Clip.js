@@ -11,8 +11,11 @@
       this.__super('renderDom', arguments);
       // getWorldPosition() will execute updateMatrixWorld();
       this.distanceToCamera = this.object3d.getWorldPosition().distanceTo(this.D3World.cameraWorldPosition);
-      // Convert to CSS.
-      this.dom.style.transform = this.matrixToCss(this.object3d.matrixWorld);
+      // Dom may be disabled.
+      if (this.dom) {
+        // Convert to CSS.
+        this.dom.style[this.wjs.cssVendorPrefix('transform')] = this.matrixToCss(this.object3d.matrixWorld);
+      }
     },
 
     matrixToCss: function (matrix) {

@@ -2,12 +2,13 @@
   'use strict';
   /**
    * @require JsClass > FormulaPreset
+   * @require Formula > Math
    * @require Formula > MousePosition
-   * @require Formula > SpriteStageSize
+   * @require Formula > ScreenSize
    */
-  WjsProto.register('Formula', 'ClipMousePosition', {
+  WjsProto.register('Formula', 'MousePositionFromCenter', {
     classExtends: 'FormulaPreset',
-
+    eventTrigger: true,
     preset: {
       // Subtract.
       formula: 'Math',
@@ -24,7 +25,7 @@
           method: 'divide',
           values: [
             {
-              formula: 'SpriteStageSize',
+              formula: 'ScreenSize',
               direction: undefined
             },
             // Divided by 2

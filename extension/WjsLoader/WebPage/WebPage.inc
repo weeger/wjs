@@ -13,7 +13,7 @@ use \Wjs\Loader;
  */
 class WebPage extends WebCom {
   var $lastAdded;
-  var $requireCssLinks = FALSE;
+  var $requireCssLinks = TRUE;
 
   function extensionAdd($name, $data) {
     parent::extensionAdd($name, $data);
@@ -48,8 +48,15 @@ class WebPage extends WebCom {
         'client' => $value['client'],
       ));
     }
+    // HTML is required.
+    if (!isset($value['html'])) {
+      $value['html'] = '';
+    }
     // Treat value as a classic WebCom
     $output = parent::extensionPush($name, $options, $value);
+    if (!isset($output['#data']['title'])) {
+      $output['#data']['title'] = $options['title'];
+    }
     if (isset($options['urlHistory'])) {
       $output['#data']['urlHistory'] = $options['urlHistory'];
     }

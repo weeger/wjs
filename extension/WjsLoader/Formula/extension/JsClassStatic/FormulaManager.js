@@ -17,7 +17,7 @@
     },
 
     className: function (name) {
-      return 'Formula' + name;
+      return 'Formula\\' + name;
     },
 
     append: function (name, proto) {

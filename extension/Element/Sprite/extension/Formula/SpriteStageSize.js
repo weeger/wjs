@@ -1,11 +1,9 @@
 (function (WjsProto) {
   'use strict';
   WjsProto.register('Formula', 'SpriteStageSize', {
-    // TODO onresize ?
-
     result: function (formula, element) {
-      // TODO : Calc once by render
-      return element.stage.dom.getBoundingClientRect()[formula.direction];
+      // Client rect is updated on render.
+      return element.stage.domBoundingClientRect[formula.direction];
     }
   });
 }(WjsProto));

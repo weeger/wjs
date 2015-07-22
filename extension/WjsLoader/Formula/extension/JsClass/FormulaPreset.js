@@ -5,7 +5,7 @@
    */
   WjsProto.register('JsClass', 'FormulaPreset', {
     classExtends: 'Formula',
-    preset: {formula: 'undefined'},
+    preset: {formula: 'undefinedBaseFormula'},
 
     result: function (formula, options) {
       // Create a new object with preset.
@@ -19,7 +19,6 @@
       // Execute base preset formula.
       return this.wjs.formula.result(merged, options);
     },
-
     // To override...
     presetAlter: WjsProto._e
   });

@@ -18,6 +18,6 @@
       this.objectFind(key, params, undefined, value);
     }
     // Save params.
-    this.window.history.replaceState(null, null, '?' + this.urlQueryBuild(params));
+    //this.window.history.replaceState(null, null, '?' + this.urlQueryBuild(params));
   });
 }(WjsProto));

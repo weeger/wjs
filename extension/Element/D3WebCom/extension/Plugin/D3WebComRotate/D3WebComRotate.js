@@ -1,6 +1,6 @@
 (function (WjsProto) {
   'use strict';
-  WjsProto.register('Plugin', 'D3ClipRotate', {
+  WjsProto.register('Plugin', 'D3WebComRotate', {
     options: {
       speedH: {
         defaults: 1

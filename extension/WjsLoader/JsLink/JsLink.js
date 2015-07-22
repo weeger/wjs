@@ -33,14 +33,23 @@
       return true;
     },
 
+    /**
+     * @require JsMethod > isDomNode
+     */
     enable: function (name, value) {
-      this.wjs.document.head.appendChild(value);
+      if (value.nodeType && !value.parentNode) {
+        this.wjs.document.head.appendChild(value);
+      }
     },
 
+    /**
+     * @require JsMethod > isDomNode
+     */
     disable: function (name, value) {
+      // Dom node can be preloaded
       // Parent node can be missing in case of
       // deletion of an unknown dom item.
-      if (value.parentNode) {
+      if (value.nodeType && value.parentNode) {
         // Remove child from dom.
         value.parentNode.removeChild(value);
       }

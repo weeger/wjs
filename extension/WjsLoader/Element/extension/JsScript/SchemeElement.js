@@ -1,5 +1,6 @@
 /**
  * Base class for WebComp elements.
+ * @require JsClass > BezierEasing
  */
 (function (WjsProto) {
   'use strict';
@@ -18,16 +19,12 @@
       pluginSharedQueue: null,
       pluginSharedMethodCallback: null,
       frameNextEnabled: false,
-      global: false,
-      globalParents: {},
       playFrameStamp: 0,
-      formulaVarListenersCounter: {}
+      animations: [],
+      domBoundingClientRect: false
     },
 
     options: {
-      global: {
-        defaults: false
-      },
       fps: {
         defaults: 24,
         apply: true,
@@ -41,8 +38,10 @@
             // Use itself as player if true.
             if (value === true) {
               value = com;
+              // TODO Create a playPlayerSet method.
+              com.playPlayerOptions = {details: [com]};
             }
-            else if (value === null && com.parent !== null && com.parent.playPlayer !== null) {
+            else if (value === null && com.parent && com.parent.playPlayer !== null) {
               value = com.parent.playPlayer;
             }
             com.stateSet('playing', value.playStarte);
@@ -59,7 +58,46 @@
         },
         dump: true
       },
+      parentShortcut: {
+        defaults: false,
+        define: function (com, value) {
+          // Define a shortcut for parent to
+          // access to his child.
+          if (value && com.parent) {
+            com.parent[value] = com;
+          }
+        }
+      },
+      plugins: {
+        defaults: {},
+        define: function (com, value) {
+          this.plugins = {};
+          com.pluginAddMultiple(value);
+          return com.plugins;
+        },
+        // Special method is used to dump plugins.
+        dump: []
+      },
+      parent: {
+        defaults: undefined,
+        define: function (com, value) {
+          // Only Element can have parent / children.
+          if (value && value.isA('Element')) {
+            value.elementAppend(com);
+          }
+        },
+        destroy: function (com) {
+          // Remove from parent.
+          if (com.parent) {
+            com.parent.elementRemove(com);
+          }
+        }
+      },
       children: {
+        // Children are created manually
+        // at the full end of object creation
+        // it is not really a part of construction.
+        autoInit: false,
         define: function (com, value) {
           var output = [];
           if (typeof value === 'object') {
@@ -74,40 +112,6 @@
           }
           return output;
         }
-      },
-      parentShortcut: {
-        defaults: false,
-        define: function (com, value) {
-          // Define a shortcut for parent to
-          // access to his child.
-          if (value && com.parent) {
-            com.parent[value] = com;
-          }
-        }
-      },
-      plugins: {
-        defaults: [],
-        define: function (com, value) {
-          com.pluginAddMultiple(value);
-          return undefined;
-        },
-        // Special method is used to dump plugins.
-        dump: []
-      },
-      parent: {
-        defaults: null,
-        define: function (com, value) {
-          // Only Element can have children.
-          if (value && value.isA('Element')) {
-            value.elementAppend(com);
-          }
-        },
-        destroy: function (com) {
-          // Remove from parent.
-          if (com.parent !== null) {
-            com.parent.elementRemove(com);
-          }
-        }
       }
     },
 
@@ -119,84 +123,30 @@
     __construct: function (options) {
       // Build callback for frame playing.
       this.playFrameExecuteProxy = this.playFrameExecute.bind(this);
-      // Callback for listeners.
-      this.playFrameNextEnableProxy = this.frameNextEnable.bind(this);
+      // Define frame enable as callback
+      // when a formula variable change.
+      this.formulaChangeCallback = this.frameNextEnable.bind(this);
       // Base.
       this.__super('__construct', arguments);
+      // Custom init.
+      this.initElement(options);
+      // Children should be created on construct complete.
+      this.optionApply('children', options);
       // Render element.
       this.render();
     },
 
-    /**
-     * Advanced variable setter, detect formulas.
-     */
-    variableSet: function (name, value) {
-      // Remove listener for old value.
-      if (this[name] && this[name].formula) {
-        // Enable
-        // TODO Forget
-//        this.wjs.window.removeEventListener(value.eventNameUpdate, this.playFrameNextEnableProxy);
+    initElement: WjsProto._e,
 
-      }
-      // Set new listener if formula.
-      if (value && value.formula) {
-//        this.formulaListen(value);
-
-        if (this.wjs.formula.formulas[value.formula].preset) {
-          this.formulaListen(this.wjs.formula.formulas[value.formula].preset);
-        }
-      }
-      // Use protected inheritance.
-      this.__super('variableSet', arguments);
-    },
-
-    formulaListen: function (formula) {
-      var self = this;
-      this.formulaInspectEvent(formula, function (formula) {
-        var formulaName = formula.formula, counter = self.formulaVarListenersCounter;
-        // Listen only once for each formula type.
-        if (!counter[formulaName]) {
-          self.wjs.window.addEventListener(formula.eventNameUpdate, self.playFrameNextEnableProxy);
-        }
-        // Count.
-        counter[formulaName] = counter[formulaName] || 0;
-        counter[formulaName]++;
-      });
-    },
-
-    formulaInspectEvent: function (formula, callback) {
-      var self = this;
-      this.objectInspect(formula, function (item) {
-        // Item is a formula / sub formula.
-        if (item && item.formula) {
-          var formulaName = item.formula,
-            formula = self.wjs.formula.formulas[formulaName];
-          // Formula exists and is an event trigger.
-          if (formula && formula.eventTrigger) {
-            callback(formula);
-          }
-        }
-      });
-    },
-// TODO this.wjs FOR THIS METHOD
-    objectInspect: function (object, callback, level) {
-      level = level || 0;
-      for (var keys = Object.keys(object), i = 0, item, result; item = keys[i++];) {
-        result = callback(object[item], item, level);
-        // Recursive, if no "false" returned.
-        if (result !== false &&
-          // On non null objects.
-          typeof object[item] === 'object' && object[item]) {
-          this.objectInspect(object[item], callback, level + 1);
-        }
-        // Continue if no "null" returned.
-        if (result === null) {
-          return;
-        }
-      }
-    },
+    exitElement: WjsProto._e,
 
     exit: function (callback) {
+      if (this.exitElement() !== false) {
+        this.exitElementComplete(callback);
+      }
+    },
+
+    exitElementComplete: function (callback) {
       var self = this,
         args = arguments;
       self.stop();
@@ -207,6 +157,12 @@
         // Execute inherited exit.
         self.__super('exit', args);
       });
+    },
+
+    createInstance: function (type, name, options) {
+      options = options || {};
+      options.parent = this;
+      return this.__super('createInstance', [type, name, options]);
     },
 
     /**
@@ -239,19 +195,8 @@
       }
       // Add to children.
       this.children.push(element);
-      // Copy global parents list.
-      this.wjs.extendObject(element.globalParents, this.globalParents);
-      // Add itself if global
-      if (this.global) {
-        element.globalParents[this.id] = this;
-      }
       // Save parent reference.
       element.parent = this;
-      // Invoke globals
-      var keys = Object.keys(element.globalParents), key, i = 0;
-      while (key = keys[i++]) {
-        element.globalParents[key].globalChildAppend(element);
-      }
     },
 
     elementAppendTo: function (parent) {
@@ -262,22 +207,17 @@
      * @require JsMethod > arrayDeleteItem
      */
     elementRemove: function (element) {
-      // Invoke globals
-      var keys = Object.keys(element.globalParents), key, i = 0;
-      while (key = keys[i++]) {
-        element.globalParents[key].globalChildRemove(element);
-      }
       this.wjs.arrayDeleteItem(this.children, element);
       element.parent = null;
-      // Remove all global parents references.
-      element.globalParents = {};
     },
 
-    // To override...
-    globalChildAppend: WjsProto._e,
-
-    // To override...
-    globalChildRemove: WjsProto._e,
+    domParseInclude: function (options) {
+      options = options || {};
+      // Define current active element
+      // as parent of all found child elements.
+      options.parent = this;
+      return this.__super('domParseInclude', [options]);
+    },
 
     treeMap: function (callback, args) {
       // Search for function.
@@ -326,8 +266,6 @@
       // Push plugin.
       plugins[name].push(plugin);
       pluginsList.push(plugin);
-      // Update rendering.
-      this.render();
       if (callback) {
         callback(plugin);
       }
@@ -434,25 +372,58 @@
         // Block plays if player is not one attached
         // to this sprite, and this one does not allow propagation
         // from an external player. Render with no player defined
-        // is still authorized.
+        // is still authorized. TODO check if still needed (ex: multiple async players)
         (!player || player === this.playPlayer || this.playerPropagate === true)) {
+        // Compute once by render process.
+        this.domBoundingClientRect = this.dom ? this.dom.getBoundingClientRect() : false;
+        // Animation can update data
+        this.renderAnimations();
         // Create render data object shared
         // with other render instances.
         var renderData = this.renderReset();
-        // Ask direct parent rendering.
-        if (this.parent) {
-          this.parent.renderChild(this, renderData);
-        }
+        // Render via plugins.
         this.pluginsInvoke('renderDom', renderData);
         // Apply to element.
         this.renderDom(renderData);
         // Propagate to children.
         this.renderChildren();
+        // Player trigger an event on dom tree.
+        if (this.playPlayer === this && this.dom) {
+          this.wjs.trigger('playPlayerRender', this.playPlayerOptions, this.dom);
+        }
       }
     },
 
     renderReset: function () {
       return {};
+    },
+
+    renderAnimations: function () {
+      for (var i = 0, animation; animation = this.animations[i];) {
+        i = this.renderAnimation(i, animation);
+      }
+      if (this.animations.length) {
+        this.frameNextEnable();
+      }
+    },
+
+    renderAnimation: function (animationIndex, animation) {
+      var timeRemain = animation.options.timeEnd - (new Date()).getTime(),
+        percent = 1 - (timeRemain / animation.options.duration), i = 0, key, percentEase;
+
+      while (key = animation.keys[i++]) {
+        percentEase = animation.options.easing ? animation.options.easing.value(percent) : percent;
+        this[key] = (animation.original[key] + (animation.add[key] * percentEase));
+      }
+
+      if (timeRemain < this.playPlayer.playFrameNext) {
+        if (animation.options.complete) {
+          animation.options.complete();
+        }
+        this.wjs.arrayDeleteByIndex(this.animations, animationIndex);
+        return animationIndex;
+      }
+      return ++animationIndex;
     },
 
     // To override...
@@ -461,14 +432,14 @@
 
     renderChildren: function (player) {
       for (var i = 0, child; child = this.children[i++];) {
-        // Init children.
-        child.render(player);
+        // Use an override method.
+        this.renderChild(child, player);
       }
     },
 
-    // To override... (child, renderData)
-    // No automated application for styles.
-    renderChild: WjsProto._e,
+    renderChild: function (element, player) {
+      element.render(player);
+    },
 
     empty: function (callback) {
       this.emptyNext(callback);
@@ -507,7 +478,7 @@
     stop: function () {
       this.treeMap('playStateQuit', [this]);
       this.playStarted = false;
-      this.trigger('play_stopped', [this]);
+      this.trigger('playStopped', [this]);
     },
 
     playStateStart: function (playPlayer) {
@@ -537,17 +508,55 @@
       this.frameNextEnabled = false;
       this.playFrameStamp = new Date().getTime();
       this.playFrameCurrent = this.playFrameNumber();
+      // Get the expected stamp of the next frame
+      this.playFrameNext = (((this.playFrameCurrent + 1) * (1000 / this.fps)) + this.playStampStart) - this.playFrameStamp;
       this.render();
     },
 
     playFrameNextLaunch: function () {
       if (this.frameNextEnabled) {
         // Launch next frame.
-        this.wjs.window.setTimeout(this.playFrameExecuteProxy,
-          // Get the expected stamp of the next frame
-          (((this.playFrameCurrent + 1) * (1000 / this.fps)) + this.playStampStart) - this.playFrameStamp
+        this.wjs.window.setTimeout(this.playFrameExecuteProxy, this.playFrameNext);
+      }
+    },
+
+    animate: function (properties, options) {
+      // Convert numeric to object.
+      options = typeof options === 'object' ? options : {duration: options};
+      // Convert other format to object with complete callback.
+      options = this.wjs.extendOptions(options);
+      // Save start stamp.
+      options.timeStart = (new Date()).getTime();
+      // Save stop stamp.
+      options.timeEnd = options.timeStart + options.duration;
+      // Build base animation object.
+      var animation = {
+        keys: Object.keys(properties),
+        properties: properties,
+        original: {},
+        add: {},
+        options: options
+      }, i = 0, key;
+      // Add properties.
+      while (key = animation.keys[i++]) {
+        // Create a local copy of original states.
+        animation.original[key] = this[key];
+        // Save value to add.
+        animation.add[key] = properties[key] - this[key];
+      }
+      // Create easing.
+      if (options.easing) {
+        options.easing = new (this.wjs.classProto('BezierEasing'))(
+          options.easing[0],
+          options.easing[1],
+          options.easing[2],
+          options.easing[3]
         );
       }
+      // Append to animation list.
+      this.animations.push(animation);
+      // Start animation.
+      this.play();
     },
 
     /**
@@ -571,10 +580,6 @@
     frame: function () {
       this.play();
       this.stop();
-    },
-
-    result: function (formula) {
-      return this.wjs.formula.result(formula, this);
     }
   });
 }(WjsProto));

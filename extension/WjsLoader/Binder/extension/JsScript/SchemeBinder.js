@@ -1,7 +1,6 @@
 /**
  * Base class for WebComp elements.
  * @require JsScript > SchemeWebCom
- * @require JsMethod > inheritMethod
  * @require JsMethod > inheritLinage
  */
 (function (WjsProto) {
@@ -11,11 +10,11 @@
     type: 'Binder',
 
     variables: {
-      cssClasses: null,
       listeners: {},
       statesVars: {},
       stateConnected: {},
-      stateListener: {}
+      stateListener: {},
+      formulaVarListenersCounter: {}
     },
 
     states: {},
@@ -26,39 +25,46 @@
           value = value || [];
           if (com.loader.classLists[com.typeGlobal]) {
             // Return list of used classes.
-            com.cssClasses = value.concat(com.loader.classLists[com.typeGlobal]);
+            return value.concat(com.loader.classLists[com.typeGlobal]);
           }
+        }
+      },
+      cssFadeIn: {
+        define: function (com, value, options) {
+          var i = 0, cssClassNameShortcut, loader = com.loader,
+            protoName = loader.protoName(com.type),
+            domStyle = loader.domStyle[protoName];
+          // There is extra parsed CSS data into an internal tag.
+          if (domStyle) {
+            // Iterates over.
+            while (cssClassNameShortcut = loader.classLists[com.typeGlobal][i++]) {
+              // Search for css class names.
+              if (com.cssRulesClassSearch(domStyle.sheet, cssClassNameShortcut)) {
+                // Ona have been found, we will need global type class.
+                com.classLoads.typeGlobal = true;
+              }
+            }
+          }
+          // Call base function which search into regular CSS links.
+          return this.__super('define', [com, value, options]);
         }
       }
     },
 
     __construct: function (options) {
-      // Base method.
-      this.__super('__construct', arguments);
-      // Inherit callbacks methods.
-      this.wjs.inheritLinage(this, 'callbacks');
-      this.wjs.inheritLinage(this, 'states');
       // Bind callbacks for dom.
-      var key;
-      for (key in this) {
-        if (key.indexOf('__callbacks__domListen__') === 0) {
+      var scheme = this.loader.webCompSchemes[this.protoClassName];
+      if (scheme.callbacks && scheme.callbacks.domListen) {
+        for (var i = 0, key, keys = Object.keys(scheme.callbacks.domListen); key = keys[i++];) {
+          key = this.methodName('callbacks.domListen.' + key);
+          // Bind.
           this[key] = this[key].bind(this);
         }
       }
-    },
-
-    cssRulesClassInit: function () {
-      var hasCssKeyRule = this.wjs.inheritMethod(this, 'cssRulesClassInit', arguments),
-        i = 0, item, protoName = this.loader.protoName(this.type),
-        domStyle = this.loader.domStyle[protoName];
-      if (domStyle) {
-        while (item = this.loader.classLists[this.typeGlobal][i++]) {
-          if (this.cssRulesClassSearch(domStyle.sheet, item)) {
-            hasCssKeyRule = true;
-          }
-        }
-      }
-      return hasCssKeyRule;
+      // Base method.
+      this.__super('__construct', arguments);
+      // Inherit callbacks methods.
+      this.wjs.inheritLinage(this, 'states');
     },
 
     callbackFind: function (callback, group) {
@@ -75,7 +81,7 @@
 
     domChildFill: function (name, content) {
       // Use parent method.
-      this.wjs.inheritMethod(this, 'domChildFill', arguments);
+      this.__super('domChildFill', arguments);
       // Trigger event.
       this.trigger('domChildFill', [name, content]);
     },
@@ -91,6 +97,86 @@
 
     domRect: function () {
       return this.dom.getBoundingClientRect();
+    },
+
+    /**
+     * Advanced variable setter, detect formulas.
+     */
+    variableSet: function (name, value) {
+      // Remove listener for old value.
+      if (value && value.formula) {
+        // Disable
+        this.formulaListenAll(value, false);
+      }
+      // Set new listener if formula.
+      if (value && value.formula) {
+        this.formulaListenAll(value);
+      }
+      // Use protected inheritance.
+      this.__super('variableSet', arguments);
+    },
+
+    variableGet: function (name) {
+      var value = this.__super('variableGet', arguments);
+      if (value !== undefined && value.formula) {
+        return this.wjs.formula.result(value, this);
+      }
+      // Use protected inheritance.
+      return value;
+    },
+
+    formulaListenAll: function (formula, toggle) {
+      this.objectInspect(formula, this.formulaListen.bind(this), toggle);
+    },
+
+    formulaListen: function (item, toggle) {
+      // Item is a formula / sub formula.
+      if (item && item.formula) {
+        var formulaName = item.formula,
+          formula = this.wjs.formula.formulas[formulaName];
+        // Formula exists and is an event trigger.
+        if (formula && formula.eventTrigger && this.formulaChangeCallback) {
+          var counter = this.formulaVarListenersCounter;
+          // Remove
+          if (toggle === false && counter[formulaName] > 0) {
+            // Decrease.
+            counter[formulaName]--;
+            // All formulas removed.
+            if (counter[formulaName] === 0) {
+              this.wjs.window.removeEventListener(formula.eventNameUpdate, this.formulaChangeCallback);
+              delete counter[formulaName];
+            }
+          }
+          // Add
+          else {
+            // Listen only once for each formula type.
+            if (!counter[formulaName]) {
+              this.wjs.window.addEventListener(formula.eventNameUpdate, this.formulaChangeCallback);
+            }
+            // Count.
+            counter[formulaName] = counter[formulaName] || 0;
+            counter[formulaName]++;
+          }
+        }
+      }
+    },
+
+// TODO this.wjs FOR THIS METHOD
+    objectInspect: function (object, callback, args, level) {
+      level = level || 0;
+      if (typeof object === 'object') {
+        var result = callback(object, args, level);
+        // Recursive if not null.
+        if (result !== null) {
+          for (var keys = Object.keys(object), i = 0, key; key = keys[i++];) {
+            // Continue if no false;
+            if (this.objectInspect(object[key], callback, args, level + 1) === false) {
+              return;
+            }
+          }
+        }
+        return result;
+      }
     },
 
     stateSet: function (name, value, vars) {
@@ -259,6 +345,8 @@
 
     /**
      * Apply an internal function on a node list.
+     * Used to be able to execute the same function on
+     * one isolated dom node or on a complete node list.
      * Consider first argument of "args" as a NodeList.
      */
     domNodeListMap: function (name, args) {

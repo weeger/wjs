@@ -14,17 +14,36 @@
       this.destroyTimeouts = {};
       this.pageRequireStatic = [];
       this.pageInstances = [];
+      this.pageReadyCallbacks = [];
+      this.pageShowLast = undefined;
+      // Load URL params.
+      var params = this.wjs.urlQueryParse();
+      // Search for requirement of default page.
+      if (params[this.type]) {
+        // Page should be already preloaded.
+        delete params[this.type];
+        // We don't need to let webcom to auto load it.
+        this.wjs.urlQueryReplace(params);
+      }
+      // Basic construct.
       this.wjs.loaders.WebCom.__construct.call(this);
+      // Use custom queue to manage page loads.
       this.queueName = this.type + 'PageLoads';
+      // Listen for back button.
       this.wjs.window.addEventListener('popstate', this.onPopState.bind(this));
     },
 
     /**
      * @require JsMethod > urlQueryParse
      */
-    onPopState: function () {
+    onPopState: function (e) {
       var query = this.wjs.urlQueryParse();
-      if (query[this.type]) {
+      // Search into saved alias.
+      if (e.state.type === this.type && e.state.name) {
+        this.pageHide(e.state.name);
+      }
+      // Search into query string.
+      else if (query[this.type]) {
         this.pageHide(query[this.type]);
       }
     },
@@ -34,13 +53,20 @@
      * @param name
      */
     link: function (name) {
+      // Allow only one call for each page name.
+      if (name === this.pageShowLast) {
+        return;
+      }
+      // Save name.
+      this.pageShowLast = name;
       this.pageShow(name);
     },
 
     enable: function (name, value, process) {
       // Create an instance once downloaded.
       if (!process || !process.options.webPagePreload) {
-        this.pageCurrent = this.instance(name, value);
+        // Creating instance will set pageCurrent.
+        this.instance(name, value);
       }
     },
 
@@ -61,26 +87,34 @@
      */
     pageShow: function (name, complete) {
       var self = this, wjs = self.wjs, type = self.type;
+      // Pages loads / hides are queued.
       wjs.queueAdd(self.queueName, function () {
+        // There is a current page to close.
         if (self.pageCurrent) {
-          self.pageHide(name, complete);
-          // Remove itself
+          // Do not display the same page.
+          if (self.pageCurrent.name !== name) {
+            // Hide will close current and relaunch show.
+            self.pageHide(name, complete);
+          }
+          // Remove itself.
           wjs.queueNext(self.queueName);
           return;
         }
         // Remove destroy time out if exists.
         self.destroyTimeoutClear(name);
-        //
+        // Page to show is not loaded.
         if (!wjs.get(type, name)) {
-          wjs.use(type, name, {
-            complete: function () {
-              self.pageShow(name, complete);
-              wjs.queueNext(self.queueName);
-            }
+          // Standard load.
+          wjs.use(type, name, function () {
+            self.pageShowLast = undefined;
+            // Launch again (new queue item).
+            self.pageShow(name, complete);
+            // Clear this queued item.
+            wjs.queueNext(self.queueName);
           });
         }
         else {
-          // In case of use JsLinks some CSSStyleSheets
+          // In case of using JsLinks, some CSSStyleSheets
           // loads can be delayed from the tag append,
           // so we have to ensure that the "sheet" property
           // is available before to continue.
@@ -128,10 +162,11 @@
      */
     pageHide: function (replacement, complete) {
       var self = this;
+      // Pages loads / hides are queued.
       self.wjs.queueAdd(self.queueName, function () {
         var pageCurrent = self.pageCurrent,
-          loaded = replacement ? false : true,
-          exited = pageCurrent ? false : true,
+          loaded = !replacement,
+          exited = !pageCurrent,
         // Wait for current page to be exited
         // and also for new page preload complete.
           callback = function () {
@@ -144,8 +179,7 @@
                 // case of user returns on this page.
                 pageCurrent.loader.destroyTimeout(pageCurrent.type);
               }
-              // Reset variables.
-              self.pageCurrent = false;
+
               self.pageHideStarted = false;
               // Display new page.
               if (replacement) {
@@ -185,6 +219,10 @@
       });
     },
 
+    pageReady: function (callback) {
+      this.pageReadyCallbacks.push(callback);
+    },
+
     /**
      * @require JsMethod > wjsRegDiffName
      */
@@ -192,15 +230,8 @@
       var self = this, callback = function () {
         // Destroy timeout
         delete self.destroyTimeouts[name];
-        // No current page, destroy requirements.
-        if (!self.pageCurrent) {
-          self.wjs.destroy(self.type, name, {
-            // Shared dependencies are managed into WebPage.
-            dependencies: true
-          });
-        }
-        // Page is not the same one.
-        else if (self.pageCurrent.name !== name) {
+        // No current page, do not destroy anything.
+        if (self.pageCurrent) {
           // Page should be from the
           // same type to work properly.
           var destroyable = self.wjs.wjsRegDiffName(self.type, name, self.type, self.pageCurrent.type);

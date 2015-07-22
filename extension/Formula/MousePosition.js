@@ -6,9 +6,12 @@
   WjsProto.register('Formula', 'MousePosition', {
     eventTrigger: true,
 
-    __construct: function () {
-      this.wjs.loaders.JsClass.items.Formula.__construct.apply(this, arguments);
+    initFormula: function () {
       this.wjs.window.addEventListener('MousePositionListenerChange', this.updateEventProxy);
+    },
+
+    exitFormula: function () {
+      this.wjs.window.removeEventListener('MousePositionListenerChange', this.updateEventProxy);
     },
 
     result: function (formula) {

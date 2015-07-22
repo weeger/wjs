@@ -129,13 +129,17 @@ class Wjs extends Router {
 
     // Find path of website inside domain,
     // Ex for domain.com/path/to/root/internal/folder/page.php :
-    // - /path/to/root/
+    // - path/to/root/
     if ($this->optionGet('clientPathWebsite') === NULL) {
-      // Find base path by intersecting requested URI and script path.
-      $this->optionSet('clientPathWebsite', $this->pathAddSlash(implode('/', array_intersect(
+      $folder = implode('/', array_intersect(
         explode('/', $this->optionGet('clientPathFull')),
-        explode('/', dirname($_SERVER['SCRIPT_NAME']) . '/')
-      ))));
+        explode('/', dirname($_SERVER['SCRIPT_NAME']))
+      ));
+      if ($folder) {
+        $folder = $this->pathAddSlash($folder);
+      }
+      // Find base path by intersecting requested URI and script path.
+      $this->optionSet('clientPathWebsite', $folder);
     }
 
     // Find part of URI who represent internal site request
@@ -455,8 +459,13 @@ class Wjs extends Router {
     // Iterate over types.
     foreach ($requestArray as $type => $items) {
       // Iterate over items.
-      foreach ($items as $name) {
-        $this->extensionPush($type, $name);
+      foreach ($items as $name => $options) {
+        if (!is_array($options)) {
+          $this->extensionPush($type, $options);
+        }
+        else {
+          $this->extensionPush($type, $name, $options);
+        }
       }
     }
   }
@@ -526,7 +535,7 @@ class Wjs extends Router {
       'pathResponse'         => $this->optionGet('clientPathResponse'),
       'pathFull'             => $this->optionGet('clientPathFull'),
       'pathWebsite'          => $this->optionGet('clientPathWebsite'),
-      'pathRequest'          => $this->optionGet('clientPathRequest'),
+      'pathRequest'          => $this->optionGet('clientRequest'),
       'pathRequestDirectory' => $this->optionGet('clientRequestDirectory'),
       'cacheToken'           => $this->optionGet('cacheToken'),
     ));
@@ -596,9 +605,15 @@ class Wjs extends Router {
   }
 
   function filePathMinExists($path, $extension) {
-    $min = $this->filePathMin($path, $extension);
-    if (file_exists($min)) {
-      return $min;
+    // No minified file allowed when source
+    // subversion is used.
+    if ($this->subversion !== 'source') {
+      // Get minified file name.
+      $min = $this->filePathMin($path, $extension);
+      // It must exist.
+      if (file_exists($min)) {
+        return $min;
+      }
     }
     return $path;
   }
@@ -651,9 +666,9 @@ class Wjs extends Router {
     // Get "JsLinks" name from "js" type.
     $requireType  = ucfirst($type) . 'Link';
     $linkFilePath = $this->findLinksClassFile($classPath, $type);
+    $linkFilePath = $this->filePathMinExists($linkFilePath, $type);
     if ($linkFilePath) {
       $clientPath = $this->pathClient($linkFilePath);
-
       // Add && Push.
       $this->extensionAdd($requireType, $clientPath, array(
         'server' => $linkFilePath,
@@ -699,7 +714,7 @@ class Wjs extends Router {
         file_put_contents($aggregationFileName, $cacheContent . $this->renderJsUnpacker());
       }
       // Add link from client.
-      $output .= $indent . $this->renderJsInclude($this->pathClient($aggregationFileName));
+      $output .= $indent . $this->renderJsInclude($this->pathClient(realpath($aggregationFileName)));
     }
     else {
       $output .= $this->renderHeaderLinks('js', $this->jsFiles('client', TRUE), $indent);
@@ -781,7 +796,7 @@ class Wjs extends Router {
   }
 
   /**
-   * Append a trailing slash if needed.
+   * Append a trailing slash if missing.
    */
   function pathAddSlash($path) {
     return $path . (substr($path, -1) !== '/' ? '/' : '');
@@ -812,13 +827,16 @@ class Wjs extends Router {
     return ($root === '/' ? '' : $this->pathRelative($this->optionGet('clientRequestDirectory'), '')) . $path;
   }
 
-  function htmlParseIncludeRequire($html, $extensionType, $extensionName, $options = array()) {
+  function htmlParseIncludeRequire($html, $extensionType, $extensionName, $options = array(), $push = FALSE) {
     $result = array();
     // Search for <div data-wjsInclude="...">
     // Get text content if present.
-    preg_match_all('`<div[^<]*data\\-wjsInclude="([^"]*)\:([^"]*)"([^>|\/>])*(?:\/>|(?!\/)>([\s\S]*?)<\/div>)`i', $html, $result);
+    preg_match_all('`<div[^<]*data\-wjsInclude="([^"]*)\:([^"]*)"([^>|\/>])*(?:\/>|(?!\/)>([\s\S]*?)<\/div>)`i', $html, $result);
     foreach ($result[1] as $key => $requireType) {
       $this->extensionAddRequire($extensionType, $extensionName, $requireType, $result[2][$key], $options);
+      if ($push) {
+        $this->extensionPush($requireType, $result[2][$key]);
+      }
     }
     if (!empty($result[1])) {
       // Automatically push include tag detection.
@@ -853,7 +871,8 @@ class Wjs extends Router {
     foreach ($images as $image) {
       $src = $image->getAttribute('src');
       // Relocate images from extensions location.
-      if ($src && substr($src, 0, 4) !== 'http') {
+      // Ignore full paths and template {{markups}}.
+      if ($src && substr($src, 0, 4) !== 'http' && substr($src, 0, 2) !== '{{') {
         $image->setAttribute('src', $basePath . $image->getAttribute('src'));
       }
     }

@@ -19,6 +19,7 @@
     },
 
     destroy: function (name, data, process) {
+      err(this.type + ' >>> ' + name);
       // Destruct class.
       if (this.items[name].__destruct) {
         this.items[name].__destruct();

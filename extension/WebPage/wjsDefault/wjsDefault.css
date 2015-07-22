@@ -1,0 +1,28 @@
+* {
+  font-family:HelveticaNeue, arial, helvetica, clean, sans-serif;
+  letter-spacing:3px;
+}
+
+body {
+  margin:20px;
+}
+
+section {
+  border:2px dashed #DDD;
+  padding:20px;
+  border-radius:10px;
+  margin:20px 0;
+  color:#AAA;
+}
+
+h1 {
+  color:#333;
+  text-shadow:0 1px 1px rgba(0, 0, 0, .5);
+  margin:0;
+  padding:0;
+}
+
+p {
+  margin:20px 0 10px 0;
+  padding:0;
+}

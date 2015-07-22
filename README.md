@@ -4,7 +4,7 @@ Introduction
 ============
 
 ![Alt text](logo.png?raw=true "The discreet library")
-Wjs is a front end development toolkit designed to bring a new user experience to web clients, by increasing interactions between browser and server, supporting a full dynamic navigation with no pages loads, and providing an advanced object oriented programming interface supporting plugins, keyframe rendering, and so on... Wjs is still in development, all features are not fully working actually.
+Wjs is a front end development toolkit designed to bring a new user experience to web clients, by increasing interactions between browser and server, supporting a full dynamic navigation with no pages reloads, and providing an advanced object oriented programming interface supporting plugins, keyframe rendering, and so on... Wjs is still in development, all features are not fully working actually.
 
 Check out the <a target="_blank" href="http://wjs.wexample.com">demo website</a>
 
@@ -22,16 +22,19 @@ Features :
   - Native useful methods
     - AudioTrackPlayer
     - AudioTrackPlayerTrack
+    - BezierEasing
     - MathEuler
     - MathMatrix4
     - MathQuaternion
     - MathVector3
     - ThreeCamera
     - ThreeObject3d
+    - AccelerometerListener
     - DisableCtrlS
     - Math
     - MousePositionListener
     - QueueManager
+    - ScrollManager
     - webPageKeyboardChange
 - Web components management
   - Separated folders for each component
@@ -408,6 +411,11 @@ wjs.use({
 ```
 
 
+Php methods
+-----------
+
+You can load PHP classical methods.
+
 Loaders
 -------
 
@@ -439,6 +447,11 @@ Web pages
 ---------
 
 The WebPage type is a subclass of WebComp, designed manage advanced pages integration and URL management. This class is used by the Website class as the default objects for page rendering.
+
+Web forms
+---------
+
+The web form offers a server side validation system for your web components.
 
 Web pages
 ---------

@@ -2,10 +2,9 @@
   'use strict';
   /**
    * Updates the window history with the given query parameter.
-   * @require JsMethod > urlQueryBuild
+   * @require JsMethod > urlHistory
    */
   WjsProto.register('JsMethod', 'urlQueryReplace', function (params, action) {
-    // Save params.
-    this.window.history[(action || 'replace') + 'State'](null, null, '/' + this.settings.pathFull + '?' + this.urlQueryBuild(params));
+    return this.urlHistory(action || 'replace', undefined, params);
   });
 }(WjsProto));
