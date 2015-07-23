@@ -6,9 +6,11 @@ Introduction
 ![Alt text](logo.png?raw=true "The discreet library")
 Wjs is a front end development toolkit designed to bring a new user experience to web clients, by increasing interactions between browser and server, supporting a full dynamic navigation with no pages reloads, and providing an advanced object oriented programming interface supporting plugins, keyframe rendering, and so on... Wjs is still in development, all features are not fully working actually.
 
-Check out the <a target="_blank" href="http://wjs.wexample.com">demo website</a>
+Wjs is now accessible from <a target="_blank" href="http://microjs.com">microjs.com</a>, the Fantastic Micro-Frameworks and Micro-Libraries for Fun and Profit.
 
-It is actually written in Javascript for the client part, and PHP for the server part. It is also ready to be translated into every other server side languages, depending of needs. 
+Check out the <a target="_blank" href="http://wjs.wexample.com">demo website</a>,and fork it on his <a target="_blank" href="https://github.com/weeger/weeger">Github repository</a>.
+
+You can support us on <a href="http://funding.openinitiative.com/funding/2150/">OpenInitiative</a>, <a target="_blank" href="http://wjs.wexample.com">Kickstarter</a>.It is actually written in Javascript for the client part, and PHP for the server part. It is also ready to be translated into every other server side languages, depending of needs. 
 
 Features :
 - AJAX Loading with server side package management
