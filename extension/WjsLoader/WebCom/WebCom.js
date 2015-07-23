@@ -84,7 +84,7 @@
     parse: function (name, value, process) {
       // If a js file is attached, it have been already
       // loaded, and registered items are waiting to be parsed.
-      this.protoAdd(name, WjsProto.retrieve(this.type, name));
+      this.protoAdd(name, WjsProto.retrieve(this.type, name) || {});
       // Enable.
       WjsProto.lib.Loader.parse.apply(this, arguments);
       return value;
