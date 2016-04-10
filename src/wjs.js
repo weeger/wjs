@@ -18,7 +18,7 @@
     }
     // Defer execution after page load.
     else {
-      this.window.addEventListener('load', this.init.bind(this));
+      this.window.addEventListener('DOMContentLoaded', this.init.bind(this));
     }
   };
 
