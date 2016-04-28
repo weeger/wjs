@@ -3,6 +3,8 @@
 Introduction
 ============
 
+[![Join the chat at https://gitter.im/weeger/wjs](https://badges.gitter.im/weeger/wjs.svg)](https://gitter.im/weeger/wjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ![Alt text](logo.png?raw=true "The discreet library")
 Wjs is a front end development toolkit designed to bring a new user experience to web clients, by increasing interactions between browser and server, supporting a full dynamic navigation with no pages reloads, and providing an advanced object oriented programming interface supporting plugins, keyframe rendering, and so on... Wjs is still in development, all features are not fully working actually.
 
