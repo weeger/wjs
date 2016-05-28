@@ -1,6 +1,6 @@
 /**
  * To install dependencies run :
- * npm i -D gulp gulp-babel babel-preset-es2015 gulp-sourcemaps gulp-uglify gulp-concat
+ * npm i -D gulp gulp-babel babel-preset-es2015 gulp-sourcemaps gulp-uglify gulp-concat git-guppy
  */
 const gulp = require('gulp');
 const babel = require('gulp-babel');
@@ -25,3 +25,4 @@ gulp.task('watch', () => {
 });
 
 gulp.task('default', ['watch']);
+gulp.task('pre-commit', ['buildCoreJs']);
