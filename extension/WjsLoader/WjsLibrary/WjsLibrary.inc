@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 require_once 'WjsLibrary.class.inc';
 
@@ -55,7 +55,7 @@ class WjsLibrary extends WebCom {
       $output = parent::extensionPush($name, $options, $value);
       // Libraries can be only a collection of requirements.
       if ($library->hiddenPush) {
-        return WJS_PUSH_HIDDEN_EXTENSION;
+        return WJS5_PUSH_HIDDEN_EXTENSION;
       }
       return $output;
     }

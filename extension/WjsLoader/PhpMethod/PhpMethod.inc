@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 use \Wjs5\Loader;
 
@@ -16,7 +16,7 @@ class PhpMethod extends Loader {
       require_once $this->valuePush($name, $value);
     }
     // Do not push anything to client.
-    return WJS_PUSH_HIDDEN_EXTENSION;
+    return WJS5_PUSH_HIDDEN_EXTENSION;
   }
 
   function scanFolderItem($directory, $item, $globalData) {

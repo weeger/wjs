@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 use \Wjs5\Loader;
 
@@ -15,7 +15,7 @@ class JsScript extends Loader {
    */
   function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
-    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
+    if ($value !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
       if (is_file($value)) {
         $value = file_get_contents($value);
         $this->wjs->jsParseRequire($this->type, $name, $value);

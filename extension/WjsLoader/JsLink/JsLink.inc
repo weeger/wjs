@@ -1,10 +1,10 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 use \Wjs5\Loader;
 
-define('WJS_PUSH_JSLINK_INCLUDED', 'WJS_PUSH_JSLINK_INCLUDED');
+define('WJS5_PUSH_JSLINK_INCLUDED', 'WJS5_PUSH_JSLINK_INCLUDED');
 
 /**
  * @package Wjs\Loader
@@ -43,7 +43,7 @@ class JsLink extends Loader {
 
   function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
-    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME && is_array($value) && isset($value['client'])) {
+    if ($value !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME && is_array($value) && isset($value['client'])) {
       $value = $value['client'];
     }
     return parent::extensionPush($name, $options, $value);
@@ -60,7 +60,7 @@ class JsLink extends Loader {
         // Remove internally.
         $this->extensionsPushed[$name]['#data'] =
           // Remove into wjs registry.
-        $this->wjs->outputPackage[$this->type][$name]['#data'] = WJS_PUSH_JSLINK_INCLUDED;
+        $this->wjs->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_JSLINK_INCLUDED;
       }
       // Avoid duplicates, it can occur when
       // loader have parent or dependencies.

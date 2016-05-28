@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 use \Wjs5\Loader\JsMethod;
 

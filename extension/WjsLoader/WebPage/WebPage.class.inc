@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader\WebPage;
+namespace Wjs5\Loader\WebPage;
 
 use \Wjs5\Loader\WjsLibrary\Library;
 use \Wjs5\Website;

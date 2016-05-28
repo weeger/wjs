@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 use \Wjs5\Loader;
 
@@ -19,7 +19,7 @@ class JsArray extends Loader {
       $array = array_values($value);
     }
     else {
-      $array = WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME;
+      $array = WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME;
     }
     return parent::extensionPush($name, $options, $array);
   }

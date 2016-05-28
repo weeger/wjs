@@ -1,11 +1,13 @@
 <?php
 
-define('WJS_VERSION', '[$version]');
-define('WJS_PUSH_HIDDEN_EXTENSION', 'WJS_PUSH_HIDDEN_EXTENSION');
-define('WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME', 'WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME');
-define('WJS_ERR_PUSH_UNDEFINED_EXTENSION_TYPE', 'WJS_ERR_PUSH_UNDEFINED_EXTENSION_TYPE');
+namespace Wjs5;
 
-if (!defined('WJS_ROOT')) {
+define('WJS5_VERSION', '[$version]');
+define('WJS5_PUSH_HIDDEN_EXTENSION', 'WJS5_PUSH_HIDDEN_EXTENSION');
+define('WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME', 'WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME');
+define('WJS5_ERR_PUSH_UNDEFINED_EXTENSION_TYPE', 'WJS5_ERR_PUSH_UNDEFINED_EXTENSION_TYPE');
+
+if (!defined('WJS5_ROOT')) {
   // Wjs root contains path to this file like and
   // can be defined externally in order to keep
   // unresolved symlinks to wjs, when used.
@@ -13,13 +15,13 @@ if (!defined('WJS_ROOT')) {
   // paths detection. This behavior is due to PHP
   // limitation who always resolve symlinks and
   // do not let a method to find unresolved paths.
-  define('WJS_ROOT', dirname(dirname(__FILE__)) . '/');
+  define('WJS5_ROOT', dirname(dirname(__FILE__)) . '/');
 }
 
-require_once WJS_ROOT . 'php/router.inc';
-require_once WJS_ROOT . 'php/loader.inc';
-require_once WJS_ROOT . 'extension/WjsLoader/JsLink/JsLink.inc';
-require_once WJS_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.inc';
+require_once WJS5_ROOT . 'php/router.inc';
+require_once WJS5_ROOT . 'php/loader.inc';
+require_once WJS5_ROOT . 'extension/WjsLoader/JsLink/JsLink.inc';
+require_once WJS5_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.inc';
 
 use \Wjs5\Router;
 
@@ -174,13 +176,13 @@ class Wjs extends Router {
     // Use cwd as base path.
       $this->optionGet('serverWorkingDirectory'),
       // Subtract link.
-      WJS_ROOT));
+      WJS5_ROOT));
 
     // Fill wjs client path if still missing.
     // Defining it manually can be useful
     // when URL rewriting is used.
     if (!$this->optionGet('clientPathWjs')) {
-      $this->optionSet('clientPathWjs', $this->pathClient(WJS_ROOT));
+      $this->optionSet('clientPathWjs', $this->pathClient(WJS5_ROOT));
     }
 
     // Define core version.
@@ -198,7 +200,7 @@ class Wjs extends Router {
       ->extensions['WjsLoader'] = $wjsLoaderData;
 
     // Scan core extensions.
-    $this->scanFolderExtensions(WJS_ROOT . 'extension/', array(), array(
+    $this->scanFolderExtensions(WJS5_ROOT . 'extension/', array(), array(
       'WjsLoader' => array(
         // Specify some loading priorities.
         'WjsLoader',
@@ -416,7 +418,7 @@ class Wjs extends Router {
         // Build output package.
         $extensionData = $loader->extensionPush($extensionName, $options);
         // Avoid missing extensions errors.
-        if ($extensionData !== WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
+        if ($extensionData !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
           // Recreate cache file.
           if ($this->optionGet('staticFilesFlush') === TRUE || !is_file($pathCacheServer)) {
             // Create directory.
@@ -437,12 +439,12 @@ class Wjs extends Router {
       }
     }
     else {
-      $extensionData = WJS_ERR_PUSH_UNDEFINED_EXTENSION_TYPE;
+      $extensionData = WJS5_ERR_PUSH_UNDEFINED_EXTENSION_TYPE;
     }
     // Save into loader.
     $loader->extensionsPushed[$extensionName] = $extensionData;
     // Allow to not really push data to client side.
-    if ($extensionData !== WJS_PUSH_HIDDEN_EXTENSION) {
+    if ($extensionData !== WJS5_PUSH_HIDDEN_EXTENSION) {
       // Save into output package.
       $this->outputPackage[$extensionType][$extensionName] = $extensionData;
     }
@@ -526,7 +528,7 @@ class Wjs extends Router {
   function initPackage() {
     // Use path option.
     $settings   = array_merge($this->settings, array(
-      'version'              => WJS_VERSION,
+      'version'              => WJS5_VERSION,
       'clientName'           => $this->optionGet('clientName'),
       'paramExtra'           => $this->optionGet('paramExtra'),
       'paramInc'             => $this->optionGet('paramInc'),

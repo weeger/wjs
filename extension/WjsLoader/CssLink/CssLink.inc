@@ -1,10 +1,10 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 use \Wjs5\Loader;
 
-define('WJS_PUSH_CSSLINK_INCLUDED', 'WJS_PUSH_CSSLINK_INCLUDED');
+define('WJS5_PUSH_CSSLINK_INCLUDED', 'WJS5_PUSH_CSSLINK_INCLUDED');
 
 /**
  * @package Wjs\Loader
@@ -14,7 +14,7 @@ class CssLink extends Loader {
 
   function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
-    if ($value !== WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME && is_array($value) && isset($value['client'])) {
+    if ($value !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME && is_array($value) && isset($value['client'])) {
       $value = $value['client'];
     }
     return parent::extensionPush($name, $options, $value);
@@ -31,7 +31,7 @@ class CssLink extends Loader {
         // Remove internally.
         $this->extensionsPushed[$name]['#data'] =
           // Remove into wjs registry.
-        $this->wjs->outputPackage[$this->type][$name]['#data'] = WJS_PUSH_CSSLINK_INCLUDED;
+        $this->wjs->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_CSSLINK_INCLUDED;
       }
       // Return always server path.
       return $this->extensions[$name][$side];

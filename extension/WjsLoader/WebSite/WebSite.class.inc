@@ -3,7 +3,7 @@
 namespace Wjs5;
 
 // Find Wjs if not loaded.
-require_once (defined('WJS_ROOT') ? WJS_ROOT : dirname(__FILE__) . '../../../../php/') . 'wjs.inc';
+require_once (defined('WJS5_ROOT') ? WJS5_ROOT : dirname(__FILE__) . '../../../../php/') . 'wjs.inc';
 
 use \Wjs5\Loader\WebPage\Page;
 
@@ -23,7 +23,7 @@ class Website extends Router {
    * Define the environment key name used into htaccess.
    * ex : SetEnv YOUR_SITE_ENV dev
    */
-  var $envKey = 'WJS_ENV';
+  var $envKey = 'WJS5_ENV';
   /**
    * Define the environment name.
    */
@@ -183,7 +183,7 @@ class Website extends Router {
     $this->pagePreloadInit();
     $options = array_merge(array(
       // Define html body as preloaded.
-      'html' => WJS_PUSH_WEBPAGE_PRELOADED
+      'html' => WJS5_PUSH_WEBPAGE_PRELOADED
     ), $options);
     // Push into own wjs.
     $this->page->push($options);

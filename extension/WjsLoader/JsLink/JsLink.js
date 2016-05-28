@@ -6,7 +6,7 @@
 
     parse: function (name, value, process) {
       // Link have been included into page head.
-      if (value === 'WJS_PUSH_JSLINK_INCLUDED') {
+      if (value === 'WJS5_PUSH_JSLINK_INCLUDED') {
         // Choose dom element with query selector.
         // It can also be missing in case of js aggregation.
         // Then continue parsing.

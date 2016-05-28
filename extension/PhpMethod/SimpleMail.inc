@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\PhpMethod;
+namespace Wjs5\PhpMethod;
 
 function simpleMail($from, $to, $subject, $message) {
   mail($to, $subject, $message, 'From: ' . $from . "\r\n" .

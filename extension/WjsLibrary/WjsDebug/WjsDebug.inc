@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader\WjsLibrary;
+namespace Wjs5\Loader\WjsLibrary;
 
 require_once 'd.inc';
 

@@ -138,7 +138,7 @@
       if (cacheToken) {
         // Append ?
         return (url.indexOf('?') === -1 ? url + '?' : url) +
-          // Add token.
+            // Add token.
           '&' + cacheToken;
       }
       return url;
@@ -316,9 +316,9 @@
       if (requirements) {
         this.regEach(requirements, function (requireType, requireName) {
           if ( // Do not delete core loaders
-            !this.extIsCore(requireType, requireName) &&
-              // or shared components.
-              !this.requireShared(extensionType, extensionName, requireType, requireName, deletable)) {
+          !this.extIsCore(requireType, requireName) &&
+            // or shared components.
+          !this.requireShared(extensionType, extensionName, requireType, requireName, deletable)) {
             deletable[requireType] = deletable[requireType] || [];
             deletable[requireType].push(requireName);
           }
@@ -342,9 +342,9 @@
         var require = self.extRequire[type][name];
         // Type is another one of sent arguments
         if (type !== baseType && name !== baseName &&
-          // It contains the same dependency.
+            // It contains the same dependency.
           require[requireType] && require[requireType].indexOf(requireName) !== -1 &&
-          // It is not placed into exceptions.
+            // It is not placed into exceptions.
           (!except || !except[type] || except[type].indexOf(name) === -1)) {
           // Save as shared.
           shared = true;
@@ -802,6 +802,7 @@
   };
 
   // Save global prototype.
-  context.WjsProto = WjsProto;
+  context.WjsProto =
+    context.W = WjsProto;
   // [-->
 }(this));

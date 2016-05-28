@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader\WebForm;
+namespace Wjs5\Loader\WebForm;
 
 class Form {
   var $type;

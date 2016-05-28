@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 use \Wjs5\Loader;
 
@@ -41,7 +41,7 @@ class WjsLoader extends JsLink {
     /* @var \Wjs5\Loader $loader */
     $this->wjs->loaders[$name] = $loader = new $className($value, $this->wjs);
     // Add requirement according to parent class.
-    if ($this->wjs->loaders[$name]->parentClass) {
+    if ($this->wjs->loaders[$name]->parentClass && $this->wjs->loaders[$name]->parentClass !== 'Loader') {
       $this->wjs->extensionAddRequire('WjsLoader', $name, 'WjsLoader', $this->wjs->loaders[$name]->parentClass);
     }
     // Exported data is file URL.

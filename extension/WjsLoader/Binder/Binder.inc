@@ -1,8 +1,8 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
-require_once WJS_ROOT . 'extension/WjsLoader/WebCom/WebCom.inc';
+require_once WJS5_ROOT . 'extension/WjsLoader/WebCom/WebCom.inc';
 
 class Binder extends WebCom {
   // Do not use WebCom css links detection.

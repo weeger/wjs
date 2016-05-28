@@ -1,10 +1,10 @@
 <?php
 
-namespace Wjs\Loader;
+namespace Wjs5\Loader;
 
 require_once 'WebPage.class.inc';
 
-define('WJS_PUSH_WEBPAGE_PRELOADED', 'WJS_PUSH_WEBPAGE_PRELOADED');
+define('WJS5_PUSH_WEBPAGE_PRELOADED', 'WJS5_PUSH_WEBPAGE_PRELOADED');
 
 use \Wjs5\Loader;
 

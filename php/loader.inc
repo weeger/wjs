@@ -13,7 +13,7 @@ abstract class Loader extends Router {
    */
   var $type;
   /**
-   * @var \Wjs $w
+   * @var \Wjs5\Wjs $w
    */
   var $wjs;
   /**
@@ -41,7 +41,7 @@ abstract class Loader extends Router {
    */
   var $parentClass = FALSE;
 
-  function __construct($options, \Wjs $wjs) {
+  function __construct($options, \Wjs5\Wjs $wjs) {
     parent::__construct($options);
     $reflector       = new \ReflectionClass($this);
     $this->type      = $reflector->getShortName();
@@ -235,7 +235,7 @@ abstract class Loader extends Router {
   function valuePush($name, $value = NULL) {
     if ($value === NULL) {
       if (!isset($this->extensions[$name])) {
-        return WJS_ERR_PUSH_UNDEFINED_EXTENSION_NAME;
+        return WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME;
       }
       return $this->extensions[$name];
     }
@@ -243,7 +243,7 @@ abstract class Loader extends Router {
   }
 
   function valueIsError($value) {
-    return is_string($value) && strpos($value, 'WJS_ERR_PUSH') === 0;
+    return is_string($value) && strpos($value, 'WJS5_ERR_PUSH') === 0;
   }
 
   /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader\WjsLibrary;
+namespace Wjs5\Loader\WjsLibrary;
 
 class GoogleAnalytics extends Library {
   var $id = 'UA-XXXXXXXX-X'; // UA-XXXXXXXX-X

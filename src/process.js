@@ -398,7 +398,7 @@
       // before the end on this script.
         loader = wjs.loaders[extensionType];
       // Handle errors.
-      if (typeof extensionData === 'string' && extensionData.indexOf('WJS_ERR_') === 0) {
+      if (typeof extensionData === 'string' && extensionData.indexOf('WJS5_ERR_') === 0) {
         // Throw custom error.
         wjs.err('Parse error for ' + extensionType + '::' + extensionName + ' : ' + extensionData);
         // Convert data to error object.

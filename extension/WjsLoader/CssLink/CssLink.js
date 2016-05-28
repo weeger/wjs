@@ -9,7 +9,7 @@
      */
     parse: function (name, value, process) {
       // Link have been included into page head.
-      if (value === 'WJS_PUSH_CSSLINK_INCLUDED') {
+      if (value === 'WJS5_PUSH_CSSLINK_INCLUDED') {
         // Choose dom element with query selector.
         // Then continue parsing.
         return this.wjs.document.head.querySelector('link[href="' + name + '"]') || true;

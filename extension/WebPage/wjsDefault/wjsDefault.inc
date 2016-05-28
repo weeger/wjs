@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs\Loader\WebPage;
+namespace Wjs5\Loader\WebPage;
 
 class wjsDefault extends Page {
   function renderBody($params = array()) {
