@@ -1,8 +1,8 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Plugin', 'ClipPlugin', {
+  W.register('Plugin', 'ClipPlugin', {
     optionsDefault: {
       elementType: 'Clip'
     }
   });
-}(WjsProto));
+}(W));

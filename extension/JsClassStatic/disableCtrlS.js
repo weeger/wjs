@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Disable ctrl+s on hole page.
    */
-  WjsProto.register('JsClassStatic', 'DisableCtrlS', {
+  W.register('JsClassStatic', 'DisableCtrlS', {
     __construct: function () {
       this.wjs.document.onkeydown = function (event) {
         // The property to obtain a keycode depends on browsers you are using.
@@ -19,4 +19,4 @@
       };
     }
   });
-}(WjsProto));
+}(W));

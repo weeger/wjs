@@ -2,9 +2,9 @@
  * Base class for WebCom elements.
  * @require JsScript > SchemeWebCom
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WebComScheme', 'SchemeWebForm', {
+  W.register('WebComScheme', 'SchemeWebForm', {
     classExtends: 'WebCom',
 
     options: {
@@ -58,10 +58,10 @@
     },
 
     // To override...
-    initWebForm: WjsProto._e,
+    initWebForm: W._e,
 
     // To override...
-    exitWebForm: WjsProto._e,
+    exitWebForm: W._e,
 
     formSubmit: function (e) {
       // Stop submission.
@@ -89,12 +89,12 @@
     },
 
     // To override...
-    submit: WjsProto._e,
+    submit: W._e,
 
     // To override...
-    sent: WjsProto._e,
+    sent: W._e,
 
     // To override...
-    success: WjsProto._e
+    success: W._e
   });
-}(WjsProto));
+}(W));

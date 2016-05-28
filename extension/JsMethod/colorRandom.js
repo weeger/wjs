@@ -2,7 +2,7 @@
  * Random color from
  * https://github.com/davidmerfield/randomColor
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
 
   // Shared color dictionary
@@ -395,7 +395,7 @@
   // Populate the color dictionary
   loadColorBounds();
 
-  WjsProto.register('JsMethod', 'colorRandom', function (options) {
+  W.register('JsMethod', 'colorRandom', function (options) {
     options = options || {};
     var H, S, B;
     // Check if we need to generate multiple colors
@@ -418,6 +418,6 @@
     // Then we return the HSB color in the desired format
     return setFormat.call(this, [H, S, B], options);
   });
-}(WjsProto));
+}(W));
 
 

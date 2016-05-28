@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Formula', 'ElementAnimationFrame', {
+  W.register('Formula', 'ElementAnimationFrame', {
     result: function (formula, element) {
       element.frameNextEnable();
       return element.playPlayer.playFrameCurrent;
     }
   });
-}(WjsProto));
+}(W));

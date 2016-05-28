@@ -1,13 +1,13 @@
 /**
  * @require JsMethod > cssVendorPrefix
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Apply a animation delay for each items selected.
    * @require JsMethod > cssAnimateCallback
    */
-  WjsProto.register('JsMethod', 'cssAnimationDelayOffset', function (domContainer, querySelector, timeOffset, timeGlobalDelay, timeOffsetMultiplier, animateOnce, reverse) {
+  W.register('JsMethod', 'cssAnimationDelayOffset', function (domContainer, querySelector, timeOffset, timeGlobalDelay, timeOffsetMultiplier, animateOnce, reverse) {
     // Support array as first argument.
     var items = (Array.isArray(domContainer) ? domContainer : domContainer.querySelectorAll(querySelector)),
       i = (reverse ? items.length - 1 : 0), j, k = 0, localTimeOffset = [], item, prefixed;
@@ -39,4 +39,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

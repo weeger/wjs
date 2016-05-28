@@ -1,11 +1,11 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Imported from ThreeJS
    * https://github.com/mrdoob/three.js/
    * @require JsClass > MathVector3
    */
-  WjsProto.register('JsClass', 'MathMatrix4', {
+  W.register('JsClass', 'MathMatrix4', {
     __construct: function () {
       this.elements = new Float32Array([
         1, 0, 0, 0,
@@ -260,4 +260,4 @@
       return this;
     }
   });
-}(WjsProto));
+}(W));

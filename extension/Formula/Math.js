@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsMethod > upperCaseFirstLetter
    */
-  WjsProto.register('Formula', 'Math', {
+  W.register('Formula', 'Math', {
     // add / minus / divide / multiply
     method: undefined,
     // Mixed list of values / formulas;
@@ -34,4 +34,4 @@
       return previous * current;
     }
   });
-}(WjsProto));
+}(W));

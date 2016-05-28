@@ -3,9 +3,9 @@
  * @require JsClass > ThreeObject3d
  * @require JsClass > D3World
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Element', 'D3WebCom', {
+  W.register('Element', 'D3WebCom', {
     classExtends: 'Element\\Clip',
 
     variables: {
@@ -59,7 +59,7 @@
       this.init3D();
     },
 
-    init3D: WjsProto._e,
+    init3D: W._e,
 
     /**
      * Create a binder, set this as parent.
@@ -111,4 +111,4 @@
       return  'matrix3d(' + Array.prototype.slice.call(matrix.elements).join(',') + ')';
     }
   });
-}(WjsProto));
+}(W));

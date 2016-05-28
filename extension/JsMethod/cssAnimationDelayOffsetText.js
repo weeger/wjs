@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   var letterAnimationCallback = function (domElement, wjs) {
     var domLetter = domElement.getElementsByClassName('letter')[0];
@@ -14,7 +14,7 @@
    * @require JsMethod > domTextWrapLetter
    * @require JsMethod > cssAnimationDelayOffset
    */
-  WjsProto.register('JsMethod', 'cssAnimationDelayOffsetText', function (dom, timeOffset, timeGlobalDelay, timeOffsetMultiplier, reverse, destroyDom) {
+  W.register('JsMethod', 'cssAnimationDelayOffsetText', function (dom, timeOffset, timeGlobalDelay, timeOffsetMultiplier, reverse, destroyDom) {
     var
     // Add a span around each text letter.
       letters = this.domTextWrapLetter(dom);
@@ -27,4 +27,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

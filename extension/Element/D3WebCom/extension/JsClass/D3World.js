@@ -1,9 +1,9 @@
 /**
  * @require JsClass > ThreeCamera
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsClass', 'D3World', {
+  W.register('JsClass', 'D3World', {
 
     __construct: function (domContainer, cameraZ, perspective) {
       // Perspective angle.
@@ -49,4 +49,4 @@
       return 0;
     }
   });
-}(WjsProto));
+}(W));

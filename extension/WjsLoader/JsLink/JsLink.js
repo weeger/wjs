@@ -1,7 +1,7 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   // <--]
-  WjsProto.register('WjsLoader', 'JsLink', {
+  W.register('WjsLoader', 'JsLink', {
     processType: 'parse',
 
     parse: function (name, value, process) {
@@ -61,4 +61,4 @@
     }
   });
   // [-->
-}(WjsProto));
+}(W));

@@ -1,10 +1,10 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Imported from ThreeJS
    * https://github.com/mrdoob/three.js/
    */
-  WjsProto.register('JsClass', 'MathVector3', {
+  W.register('JsClass', 'MathVector3', {
 
     __construct: function (x, y, z) {
       this.x = x || 0;
@@ -146,4 +146,4 @@
     }
 
   });
-}(WjsProto));
+}(W));

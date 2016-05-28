@@ -3,9 +3,9 @@
  * @require JsScript > SchemeWebCom
  * @require JsMethod > inheritLinage
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WebComScheme', 'SchemeBinder', {
+  W.register('WebComScheme', 'SchemeBinder', {
     classExtends: 'WebCom',
     type: 'Binder',
 
@@ -394,4 +394,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

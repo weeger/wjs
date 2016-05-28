@@ -2,9 +2,9 @@
  * @require JsScript > SchemeWebPage
  * @require JsClassStatic > QueueManager
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'WebPage', {
+  W.register('WjsLoader', 'WebPage', {
     loaderExtends: 'WebCom',
     protoBaseClass: 'WebPage',
     pageCurrent: null,
@@ -254,4 +254,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

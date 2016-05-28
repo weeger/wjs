@@ -1,9 +1,9 @@
 /**
  * Clips have a specific centered positioning system.
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Binder', 'Clone', {
+  W.register('Binder', 'Clone', {
     options: {
       target: {
         required: true,
@@ -34,4 +34,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

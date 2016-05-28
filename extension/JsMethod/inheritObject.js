@@ -1,7 +1,7 @@
 /**
  * @require JsMethod > inheritProperty
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Merge variable from base to this instance type.
@@ -10,7 +10,7 @@
    * @param variable
    * @returns {{}}
    */
-  WjsProto.register('JsMethod', 'inheritObject', function (object, variable) {
+  W.register('JsMethod', 'inheritObject', function (object, variable) {
     var i = 0, key, output = {},
     // Get list of variable in different states levels.
       variables = this.inheritProperty(object, variable),
@@ -21,4 +21,4 @@
     }
     return output;
   });
-}(WjsProto));
+}(W));

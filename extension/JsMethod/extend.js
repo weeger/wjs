@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * This is a quasi clone of jQuery's extend() function.
@@ -6,7 +6,7 @@
    * @require JsMethod > isPlainObject
    * @returns {*|{}}
    */
-  WjsProto.register('JsMethod', 'extend', function (e) {
+  W.register('JsMethod', 'extend', function (e) {
     // Make a copy of arguments to avoid JS inspector hints.
     var toAdd, name, copyIsArray, clone,
     // The target object who receive parameters
@@ -66,4 +66,4 @@
     }
     return target;
   });
-}(WjsProto));
+}(W));

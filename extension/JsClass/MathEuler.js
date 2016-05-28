@@ -1,11 +1,11 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Imported from ThreeJS
    * https://github.com/mrdoob/three.js/
    * @require JsClassStatic > Math
    */
-  WjsProto.register('JsClass', 'MathEuler', {
+  W.register('JsClass', 'MathEuler', {
     __construct: function (x, y, z) {
       this._x = x || 0;
       this._y = y || 0;
@@ -51,4 +51,4 @@
     }
 
   });
-}(WjsProto));
+}(W));

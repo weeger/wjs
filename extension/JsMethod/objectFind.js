@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Find data into an object using string path
@@ -9,7 +9,7 @@
    * @param {?} value Optional value to set.
    * @returns {*}
    */
-  WjsProto.register('JsMethod', 'objectFind', function (path, object, result, value) {
+  W.register('JsMethod', 'objectFind', function (path, object, result, value) {
     var base = object, item,
     // We use "arguments" variable to allow to defined false values.
       valueExists = (arguments.length === 4);
@@ -41,4 +41,4 @@
     // No value defined, and no value found.
     return false;
   });
-}(WjsProto));
+}(W));

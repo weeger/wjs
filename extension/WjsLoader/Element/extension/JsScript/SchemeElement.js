@@ -2,9 +2,9 @@
  * Base class for WebComp elements.
  * @require JsClass > BezierEasing
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WebComScheme', 'SchemeElement', {
+  W.register('WebComScheme', 'SchemeElement', {
     classExtends: 'Binder',
     type: 'Element',
 
@@ -136,9 +136,9 @@
       this.render();
     },
 
-    initElement: WjsProto._e,
+    initElement: W._e,
 
-    exitElement: WjsProto._e,
+    exitElement: W._e,
 
     exit: function (callback) {
       if (this.exitElement() !== false) {
@@ -428,7 +428,7 @@
 
     // To override...
     // No automated application for styles.
-    renderDom: WjsProto._e,
+    renderDom: W._e,
 
     renderChildren: function (player) {
       for (var i = 0, child; child = this.children[i++];) {
@@ -582,4 +582,4 @@
       this.stop();
     }
   });
-}(WjsProto));
+}(W));

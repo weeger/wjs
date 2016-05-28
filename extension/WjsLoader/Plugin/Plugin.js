@@ -2,10 +2,10 @@
  * @require WjsLoader > Binder
  * @require JsScript > SchemePlugin
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'Plugin', {
+  W.register('WjsLoader', 'Plugin', {
     loaderExtends: 'Binder',
     protoBaseClass: 'Plugin'
   });
-}(WjsProto));
+}(W));

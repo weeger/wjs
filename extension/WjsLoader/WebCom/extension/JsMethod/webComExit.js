@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Destroy a list of webcom.
    */
-  WjsProto.register('JsMethod', 'webComExit', function (destroyQueue, callback, queued) {
+  W.register('JsMethod', 'webComExit', function (destroyQueue, callback, queued) {
     var localCallbackCount = 0, localCallback = function () {
         if (!destroyQueue.length || ++localCallbackCount === destroyQueue.length) {
           complete();
@@ -48,4 +48,4 @@
       localCallback();
     }
   }
-}(WjsProto));
+}(W));

@@ -1,7 +1,7 @@
 /**
  * @require JsMethod > arrayDeleteByIndex
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
   var inheritMethodCallback = function (object, method, passes, objectCurrentMethod) {
     return function () {
@@ -27,7 +27,7 @@
    * @param {object} args The calls arguments, basically use the "arguments" special variable.
    * @returns {*} The data returned from the super method.
    */
-  WjsProto.register('JsMethod', 'inheritMethod', function (object, method, args) {
+  W.register('JsMethod', 'inheritMethod', function (object, method, args) {
     // We create an object to keep reference to "base" object,
     // it will be replaced during lineage exploration to always keep
     // direct parent object. We use a object to save multiple references
@@ -116,4 +116,4 @@
       return output;
     }
   });
-}(WjsProto));
+}(W));

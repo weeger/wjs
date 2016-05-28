@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Imported from ThreeJS
@@ -8,7 +8,7 @@
    * @require JsClass > MathVector3
    * @require JsClass > MathMatrix4
    */
-  WjsProto.register('JsClass', 'ThreeObject3d', {
+  W.register('JsClass', 'ThreeObject3d', {
     __construct: function () {
 
       this.parent = undefined;
@@ -133,4 +133,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

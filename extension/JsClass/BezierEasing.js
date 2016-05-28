@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Forked from:
@@ -11,7 +11,7 @@
    * spline(x) => returns the easing value | x must be in [0, 1] range
    *
    */
-  WjsProto.register('JsClass', 'BezierEasing', {
+  W.register('JsClass', 'BezierEasing', {
     // These values are established by empiricism with tests (tradeoff: performance VS precision)
     NEWTON_ITERATIONS: 4,
     NEWTON_MIN_SLOPE: 0.001,
@@ -21,7 +21,7 @@
     kSplineTableSize: 11,
     kSampleStepSize: 1.0 / (11 - 1.0),
 
-    float32ArraySupported: 'Float32Array' in WjsProto.context,
+    float32ArraySupported: 'Float32Array' in W.context,
 
     _precomputed: false,
 
@@ -167,5 +167,5 @@
       return "cubic-bezier(" + this.args + ")";
     }
   });
-}(WjsProto));
+}(W));
 

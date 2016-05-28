@@ -1,11 +1,11 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Create a new instance for each <div data-wjsInclude="..."> tag found
    * into the given dom object.
    * @require JsMethod > wjsIncludeScan
    */
-  WjsProto.register('JsMethod', 'wjsIncludeInit', function (dom, options, complete) {
+  W.register('JsMethod', 'wjsIncludeInit', function (dom, options, complete) {
     var i = 0, includes = this.wjsIncludeScan(dom),
       item, split, request = {}, destinations = [];
     while (item = includes[i++]) {
@@ -40,4 +40,4 @@
     }
     return includes;
   });
-}(WjsProto));
+}(W));

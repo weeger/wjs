@@ -1,7 +1,7 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   // <--]
-  WjsProto.register('WjsLoader', 'WjsLoader', {
+  W.register('WjsLoader', 'WjsLoader', {
     // Extends full named loader class.
     loaderExtends: 'JsLink',
     processType: 'server',
@@ -44,7 +44,7 @@
     },
 
     register: function (type, name, process) {
-      var proto = WjsProto.retrieve(this.type, name);
+      var proto = W.retrieve(this.type, name);
       // Append loader for this wjs instance.
       this.wjs.loaderAdd(name, proto);
       // Continue parsing.
@@ -52,4 +52,4 @@
     }
   });
   // [-->
-}(WjsProto));
+}(W));

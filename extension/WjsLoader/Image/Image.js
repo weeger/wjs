@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'Image', {
+  W.register('WjsLoader', 'Image', {
     processType: 'parse',
     /**
      * Use Image loading to complete process.
@@ -22,4 +22,4 @@
       return false;
     }
   });
-}(WjsProto));
+}(W));

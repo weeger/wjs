@@ -1,8 +1,8 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    */
-  WjsProto.register('JsMethod', 'domTextWrapLetter', function (dom, tagName) {
+  W.register('JsMethod', 'domTextWrapLetter', function (dom, tagName) {
     tagName = tagName || 'span';
     var text = dom.innerHTML, output = [], i = 0, letter, domWrapper, domLetter;
 
@@ -32,4 +32,4 @@
 
     return output;
   });
-}(WjsProto));
+}(W));

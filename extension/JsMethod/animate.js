@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Animate a property of an object.
    */
-  WjsProto.register('JsMethod', 'animate', function (object, properties, options) {
+  W.register('JsMethod', 'animate', function (object, properties, options) {
     var timeStart = (new Date()).getTime(),
       duration = typeof options === 'object' ? options.duration : options,
       timeEnd = timeStart + duration, step, callback,
@@ -44,4 +44,4 @@
     };
     return outputController;
   });
-}(WjsProto));
+}(W));

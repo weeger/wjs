@@ -1,10 +1,10 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Forked from http://davidwalsh.name/vendor-prefix
    * @type {CssStyle|CSSStyleDeclaration}
    */
-  var styles = WjsProto.context.window.getComputedStyle(WjsProto.context.window.document.documentElement, ''),
+  var styles = W.context.window.getComputedStyle(W.context.window.document.documentElement, ''),
     prefix = (Array.prototype.slice
       .call(styles)
       .join('')
@@ -26,10 +26,10 @@
    * Return prefixed name of the given CSS property.
    * Only supports methods used internally by wjs.
    */
-  WjsProto.register('JsMethod', 'cssVendorPrefix', function (name) {
+  W.register('JsMethod', 'cssVendorPrefix', function (name) {
     if (!buffer[name]) {
       buffer[name] = prefixBuild(name);
     }
     return buffer[name];
   });
-}(WjsProto));
+}(W));

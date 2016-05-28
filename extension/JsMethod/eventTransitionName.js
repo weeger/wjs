@@ -1,10 +1,10 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Returns name of css transition event,
    * used to detect when a CSS animation ends.
    */
-  WjsProto.register('JsMethod', 'eventTransitionName', function () {
+  W.register('JsMethod', 'eventTransitionName', function () {
     var t,
       fakeElement = this.window.document.createElement('fakeElement'),
       transitions = {
@@ -20,4 +20,4 @@
     }
     return false;
   });
-}(WjsProto));
+}(W));

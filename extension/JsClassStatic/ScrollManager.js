@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Simulate scroll for interactive management.
    */
-  WjsProto.register('JsClassStatic', 'ScrollManager', {
+  W.register('JsClassStatic', 'ScrollManager', {
     scrollX: null,
     scrollY: null,
     scrollSpeedX: false,
@@ -79,7 +79,7 @@
       this.scrollXPercent = this.scrollX / this.wjs.window.innerWidth;
       this.scrollY = this.scrollGet('Top');
       this.scrollYPercent = this.scrollY / this.wjs.window.innerHeight;
-      WjsProto.trigger('ScrollManagerChange', [this]);
+      W.trigger('ScrollManagerChange', [this]);
     }
   });
-}(WjsProto));
+}(W));

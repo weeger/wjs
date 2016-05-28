@@ -7,7 +7,7 @@
   context.wjsContext = context;
 
   /** @constructor */
-  var WjsProto = function (options) {
+  var W = function (options) {
     // If only a function sent, convert it to options.
     this.options = options = this.extendOptions(options);
     // Save wjs instance as global object.
@@ -22,7 +22,7 @@
     }
   };
 
-  WjsProto.prototype = {
+  W.prototype = {
 
     // Can use various context type.
     context: context,
@@ -82,11 +82,11 @@
       // Apply options.
       self.extendObject(self, options);
       // Create prototypes instances.
-      self.classExtend('WjsLoader', WjsProto.lib.Loader);
-      self.classExtend('WjsProcess', WjsProto.lib.Process);
+      self.classExtend('WjsLoader', W.lib.Loader);
+      self.classExtend('WjsProcess', W.lib.Process);
       // Create core loaders.
-      self.loaderAdd('JsLink', WjsProto.retrieve('WjsLoader', 'JsLink'), true);
-      self.loaderAdd('WjsLoader', WjsProto.retrieve('WjsLoader', 'WjsLoader'), true);
+      self.loaderAdd('JsLink', W.retrieve('WjsLoader', 'JsLink'), true);
+      self.loaderAdd('WjsLoader', W.retrieve('WjsLoader', 'WjsLoader'), true);
       // Create basic loaders who are required by package.
       for (var i = 0, type; type = self.loadersBasic[i++];) {
         self.loaderAdd(type, undefined, true);
@@ -95,13 +95,13 @@
       // Or create a simple timeout.
       self.async = self.window.setTimeout.bind(self.window);
       // Bind function to wjs.
-      self.trigger = WjsProto.trigger;
+      self.trigger = W.trigger;
       // Load all other scripts then run ready functions.
       // Create a loading process to parse package content.
       self.use(null, {
         response: self.packageDefault,
         complete: function () {
-          var callbacks = WjsProto.readyCallbacks[self.settings.clientName];
+          var callbacks = W.readyCallbacks[self.settings.clientName];
           // Mark as readyComplete, further ready functions
           // will be executed directly.
           self.readyComplete = true;
@@ -689,17 +689,17 @@
     }
   };
   // Handle core prototypes.
-  WjsProto.lib = {};
-  WjsProto.reg = {};
-  WjsProto.readyCallbacks = {};
-  WjsProto.context = context;
+  W.lib = {};
+  W.reg = {};
+  W.readyCallbacks = {};
+  W.context = context;
 
   /**
    * Allow to store callback after page loads.
    * @param {string|function} clientName
    * @param {function=} callback Function executed on loading complete.
    */
-  WjsProto.ready = function (clientName, callback) {
+  W.ready = function (clientName, callback) {
     var readyCallbacks = this.readyCallbacks;
     // Allow to store only callback.
     if (typeof clientName === 'function') {
@@ -723,7 +723,7 @@
    * internally to listen for extension loads,
    * and javascript registering.
    */
-  WjsProto.trigger = function (name, options, dom) {
+  W.trigger = function (name, options, dom) {
     // Shortcut.
     var win = context.window,
     // Create.
@@ -737,7 +737,7 @@
   /**
    * Listen event only once.
    */
-  WjsProto.listenOnce = function (eventName, callback) {
+  W.listenOnce = function (eventName, callback) {
     var localCallback = function () {
       context.window.removeEventListener(eventName, localCallback);
       callback();
@@ -751,17 +751,17 @@
    * an extension type to store various types / names
    * couples of data.
    */
-  WjsProto.register = function (type, name, data) {
+  W.register = function (type, name, data) {
     var reg = this.reg;
     reg[type] = reg[type] || {};
     reg[type][name] = data;
-    WjsProto.trigger(['wjsRegister', type, name].join('::'));
+    W.trigger(['wjsRegister', type, name].join('::'));
   };
 
   /**
    * Retrieve saved data.
    */
-  WjsProto.retrieve = function (type, name) {
+  W.retrieve = function (type, name) {
     var reg = this.reg;
     if (reg[type] && reg[type][name]) {
       return reg[type][name];
@@ -775,13 +775,13 @@
    * @param name
    * @param callback
    */
-  WjsProto.registerListen = function (type, name, callback) {
-    var self = this, data = WjsProto.retrieve(type, name);
+  W.registerListen = function (type, name, callback) {
+    var self = this, data = W.retrieve(type, name);
     if (data) {
       callback(data);
     }
     else {
-      WjsProto.listenOnce('wjsRegister::' + type + '::' + name, function () {
+      W.listenOnce('wjsRegister::' + type + '::' + name, function () {
         callback(self.reg[type][name]);
       });
     }
@@ -790,19 +790,18 @@
   /**
    * Store cached data.
    */
-  WjsProto.cache = function (extType, extName, data) {
-    WjsProto.register('cache', extType + '/' + extName, data);
+  W.cache = function (extType, extName, data) {
+    W.register('cache', extType + '/' + extName, data);
   };
 
   /**
    * Empty function to hold methods to override.
    */
-  WjsProto._e = function () {
+  W._e = function () {
     // Nothing.
   };
 
   // Save global prototype.
-  context.WjsProto =
-    context.W = WjsProto;
+  context.W = W;
   // [-->
 }(this));

@@ -1,10 +1,10 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Imported from ThreeJS
    * https://github.com/mrdoob/three.js/
    */
-  WjsProto.register('JsClass', 'MathQuaternion', {
+  W.register('JsClass', 'MathQuaternion', {
 
     __construct: function (x, y, z, w) {
       this._x = x || 0;
@@ -145,4 +145,4 @@
     }
 
   });
-}(WjsProto));
+}(W));

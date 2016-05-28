@@ -1,9 +1,9 @@
 /**
  * - Every sprite must be attached to a stage.
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Element', 'Stage', {
+  W.register('Element', 'Stage', {
     options: {
       playPlayer: true,
       autoPlay: true,
@@ -41,7 +41,7 @@
       // Use dom.
       dom: true,
       // Use body as default destination.
-      domDestination: WjsProto.context.window.document.body,
+      domDestination: W.context.window.document.body,
       // Use as animation player.
       playPlayer: true,
       // Launch play once created.
@@ -66,4 +66,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

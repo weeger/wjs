@@ -1,10 +1,10 @@
 /**
  * @require JsScript > SchemeWebForm
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'WebForm', {
+  W.register('WjsLoader', 'WebForm', {
     loaderExtends: 'WebCom',
     protoBaseClass: 'WebForm'
   });
-}(WjsProto));
+}(W));

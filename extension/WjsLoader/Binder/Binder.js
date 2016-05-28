@@ -2,10 +2,10 @@
  * @require WjsLoader > WebCom
  * @require JsScript > SchemeBinder
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
   var regReplaceSlashes = new RegExp('\\.', 'g');
-  WjsProto.register('WjsLoader', 'Binder', {
+  W.register('WjsLoader', 'Binder', {
     // Extends full named loader class.
     loaderExtends: 'WebCom',
     protoBaseClass: 'Binder',
@@ -194,4 +194,4 @@
       this.cssSheetLoadQueueAppend(domStyle);
     }
   });
-}(WjsProto));
+}(W));

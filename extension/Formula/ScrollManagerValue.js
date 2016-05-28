@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsClassStatic > ScrollManager
    */
-  WjsProto.register('Formula', 'ScrollManagerValue', {
+  W.register('Formula', 'ScrollManagerValue', {
     eventTrigger: true,
 
     initFormula: function () {
@@ -18,4 +18,4 @@
       return this.wjs.ScrollManager['scroll' + formula.direction] || 0;
     }
   });
-}(WjsProto));
+}(W));

@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   // Create regex once.
   var regex = new RegExp('^[a-zA-Z0-9]*\\[([a-zA-Z0-9]*)\\]$'),
@@ -6,7 +6,7 @@
   /**
    * Convert a query string to a key / value object.
    */
-  WjsProto.register('JsMethod', 'urlQueryParse', function (search) {
+  W.register('JsMethod', 'urlQueryParse', function (search) {
     var output = {}, i, split, key, value, match;
     // If not specified, take the current search
     // value without leading "?".
@@ -43,4 +43,4 @@
     }
     return output;
   });
-}(WjsProto));
+}(W));

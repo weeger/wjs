@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require Element > D3Container
    */
-  WjsProto.register('Element', 'D3ContainerRing', {
+  W.register('Element', 'D3ContainerRing', {
     classExtends: 'Element\\D3Container',
 
     optionsDefault: {
@@ -28,4 +28,4 @@
       this.__super('renderChild', arguments);
     }
   });
-}(WjsProto));
+}(W));

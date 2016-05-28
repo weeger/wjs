@@ -1,11 +1,11 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Check if CSS Rules are correctly loaded before to execute
    * complete function. Use an interval to force process completion.
    * @require JsMethod > cssSheetRules
    */
-  WjsProto.register('JsMethod', 'cssSheetLoad', function (domLink, complete, timeMax) {
+  W.register('JsMethod', 'cssSheetLoad', function (domLink, complete, timeMax) {
     // One second max by default.
     timeMax = timeMax || 1000;
     var self = this, doc = self.document,
@@ -43,4 +43,4 @@
     // First check.
     check();
   });
-}(WjsProto));
+}(W));

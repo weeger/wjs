@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   // Search for {{markups}} or encoded %7B%7Bmarkups%7D%7D
   var regHtmlVariable = new RegExp('(?:{|%7B){2}((?:.(?!{|%7B))*)(?:}|%7D){2}', 'g');
 
-  WjsProto.register('WebComScheme', 'SchemeWebCom', {
+  W.register('WebComScheme', 'SchemeWebCom', {
     classExtends: null,
     type: 'WebCom',
     id: '',
@@ -780,4 +780,4 @@
       throw new Error(message + ' in ' + this.typeGlobal + ' #' + this.id);
     }
   });
-}(WjsProto));
+}(W));

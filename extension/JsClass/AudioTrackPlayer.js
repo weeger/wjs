@@ -1,9 +1,9 @@
 /**
  * Base class for WebComp elements.
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsClass', 'AudioTrackPlayer', {
+  W.register('JsClass', 'AudioTrackPlayer', {
     classExtends: 'BasicWebComp',
 
     variables: {
@@ -126,4 +126,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

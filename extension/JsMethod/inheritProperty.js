@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Get lineage of a specified property from an inherited object.
@@ -6,7 +6,7 @@
    * @param property
    * @returns {Array}
    */
-  WjsProto.register('JsMethod', 'inheritProperty', function (object, property) {
+  W.register('JsMethod', 'inheritProperty', function (object, property) {
     var base = object,
       output = [];
     // Use hasOwnProperty to define if we are out of
@@ -20,4 +20,4 @@
     }
     return output.reverse();
   });
-}(WjsProto));
+}(W));

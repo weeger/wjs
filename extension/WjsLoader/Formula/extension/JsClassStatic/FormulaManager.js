@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsClass > Formula
    */
-  WjsProto.register('JsClassStatic', 'FormulaManager', {
+  W.register('JsClassStatic', 'FormulaManager', {
     __construct: function () {
       this.formulas = {};
       this.wjs.formula = this;
@@ -45,4 +45,4 @@
       return this.formulas[formula.formula].result(formula, options);
     }
   });
-}(WjsProto));
+}(W));

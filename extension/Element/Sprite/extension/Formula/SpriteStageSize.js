@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Formula', 'SpriteStageSize', {
+  W.register('Formula', 'SpriteStageSize', {
     result: function (formula, element) {
       // Client rect is updated on render.
       return element.stage.domBoundingClientRect[formula.direction];
     }
   });
-}(WjsProto));
+}(W));

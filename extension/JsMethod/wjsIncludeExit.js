@@ -1,11 +1,11 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsMethod > isDomNode
    * @require JsMethod > wjsIncludeScan
    * @require JsMethod > webComExit
    */
-  WjsProto.register('JsMethod', 'wjsIncludeExit', function (dom, callback, queued, keep) {
+  W.register('JsMethod', 'wjsIncludeExit', function (dom, callback, queued, keep) {
     var i = 0, includes = this.isDomNode(dom) ? this.wjsIncludeScan(dom) : dom, destroyQueue = [], type,
       item, split;
     while (item = includes[i++]) {
@@ -21,4 +21,4 @@
     }
     this.webComExit(destroyQueue, callback, queued);
   });
-}(WjsProto));
+}(W));

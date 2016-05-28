@@ -2,9 +2,9 @@
  * @require WjsLoader > Binder
  * @require JsScript > SchemeElement
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'Element', {
+  W.register('WjsLoader', 'Element', {
     loaderExtends: 'Binder',
     protoBaseClass: 'Element',
     stageDefault: null,
@@ -20,4 +20,4 @@
       return this.stageDefault;
     }
   });
-}(WjsProto));
+}(W));

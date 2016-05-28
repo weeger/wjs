@@ -1,9 +1,9 @@
 /**
  * @require WjsLoader > JsScript
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'JsMethod', {
+  W.register('WjsLoader', 'JsMethod', {
     loaderExtends: 'JsScript',
     addLastComp: null,
     addLastCompCallback: null,
@@ -20,7 +20,7 @@
      * manage handling with add.
      * @param {string} name
      * @param {string} value
-     * @param {WjsProto.lib.Process} process
+     * @param {W.lib.Process} process
      * @return {?}
      */
     parse: function (name, value, process) {
@@ -34,7 +34,7 @@
 
     register: function (type, name, process, value) {
       // Get method
-      value = value || WjsProto.retrieve(this.type, name);
+      value = value || W.retrieve(this.type, name);
       // Localize functions to wjs.
       if (typeof value === 'function') {
         value = value.bind(this.wjs);
@@ -70,4 +70,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

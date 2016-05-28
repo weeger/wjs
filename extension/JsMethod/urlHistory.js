@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsMethod > urlQueryBuild
    */
-  WjsProto.register('JsMethod', 'urlHistory', function (method, path, queryString, stateObj) {
+  W.register('JsMethod', 'urlHistory', function (method, path, queryString, stateObj) {
     // Update current path if defined.
     this.settings.pathRequest = typeof path === 'string' ? path : this.settings.pathRequest;
     // Update full path.
@@ -19,4 +19,4 @@
         // Query strings.
         queryString);
   });
-}(WjsProto));
+}(W));

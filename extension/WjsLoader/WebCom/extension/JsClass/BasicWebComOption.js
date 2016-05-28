@@ -1,14 +1,14 @@
 /**
  * Base class for WebCom option.
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsClass', 'BasicWebComOption', {
+  W.register('JsClass', 'BasicWebComOption', {
 
     defaults: undefined,
     // Functions.
-    define: WjsProto._e,
-    destroy: WjsProto._e,
+    define: W._e,
+    destroy: W._e,
 
     __construct: function () {
       this.comList = {};
@@ -57,4 +57,4 @@
       return true;
     }
   });
-}(WjsProto));
+}(W));

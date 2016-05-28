@@ -1,10 +1,10 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Returns list of attributes
    * of given dom object.
    */
-  WjsProto.register('JsMethod', 'domAttributes', function (domNode) {
+  W.register('JsMethod', 'domAttributes', function (domNode) {
     var i = 0, output = {},
       domAttributes = Array.prototype.slice.call(domNode.attributes);
     for (; i < domAttributes.length; i++) {
@@ -12,4 +12,4 @@
     }
     return output;
   });
-}(WjsProto));
+}(W));

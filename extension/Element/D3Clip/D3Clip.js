@@ -2,9 +2,9 @@
  * @require Element > D3WebCom
  * @require JsClass > ThreeObject3d
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Element', 'D3Clip', {
+  W.register('Element', 'D3Clip', {
     classExtends: 'Element\\D3WebCom',
 
     renderDom: function (renderData) {
@@ -23,4 +23,4 @@
       return  'matrix3d(' + Array.prototype.slice.call(matrix.elements).join(',') + ')';
     }
   });
-}(WjsProto));
+}(W));

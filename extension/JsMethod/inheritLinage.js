@@ -3,7 +3,7 @@
  * @require JsMethod > inheritMethodLinage
  * @require JsMethod > isPlainObject
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Inspect package tree to merge content.
@@ -47,7 +47,7 @@
    * @param {object} object
    * @param {string} name
    */
-  WjsProto.register('JsMethod', 'inheritLinage', function (object, name) {
+  W.register('JsMethod', 'inheritLinage', function (object, name) {
     var variables = this.inheritProperty(object, name),
       item, i = 0;
     // Reset package.
@@ -58,4 +58,4 @@
       _inheritLinage.call(this, object, object[name], item);
     }
   });
-}(WjsProto));
+}(W));

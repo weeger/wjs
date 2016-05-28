@@ -1,10 +1,10 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Return inner size of window,
    * with not scrollbar.
    */
-  WjsProto.register('JsMethod', 'windowInnerSize', function () {
+  W.register('JsMethod', 'windowInnerSize', function () {
     var container = this.window,
       prefix = 'inner';
     if (!container.hasOwnProperty('innerWidth')) {
@@ -16,4 +16,4 @@
       height: container[prefix + 'Height']
     };
   });
-}(WjsProto));
+}(W));

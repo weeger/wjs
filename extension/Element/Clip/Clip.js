@@ -2,9 +2,9 @@
  * Clips have a specific centered positioning system.
  * @require Element > Sprite
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Element', 'Clip', {
+  W.register('Element', 'Clip', {
     classExtends: 'Element\\Sprite',
 
     options: {
@@ -93,4 +93,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsClass', 'Formula', {
+  W.register('JsClass', 'Formula', {
     eventTrigger: false,
 
     __construct: function () {
@@ -17,16 +17,16 @@
       this.exitFormula();
     },
 
-    initFormula: WjsProto._e,
+    initFormula: W._e,
 
-    exitFormula: WjsProto._e,
+    exitFormula: W._e,
 
     updateEvent: function () {
       // Update a global event on change,
       // used by listener to update, ie. frame rendering.
-      WjsProto.trigger(this.eventNameUpdate);
+      W.trigger(this.eventNameUpdate);
     },
 
-    result: WjsProto._e
+    result: W._e
   });
-}(WjsProto));
+}(W));

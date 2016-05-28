@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Updates the window history with the given query parameter.
@@ -6,7 +6,7 @@
    * @require JsMethod > urlQueryParse
    * @require JsMethod > objectFind
    */
-  WjsProto.register('JsMethod', 'urlQueryUpdate', function (key, value) {
+  W.register('JsMethod', 'urlQueryUpdate', function (key, value) {
     // Get params.
     var params = this.urlQueryParse();
     // Merge objects.
@@ -20,4 +20,4 @@
     // Save params.
     //this.window.history.replaceState(null, null, '?' + this.urlQueryBuild(params));
   });
-}(WjsProto));
+}(W));

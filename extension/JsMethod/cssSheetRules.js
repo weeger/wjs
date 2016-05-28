@@ -1,7 +1,7 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsMethod', 'cssSheetRules', function (domLink) {
+  W.register('JsMethod', 'cssSheetRules', function (domLink) {
     // On Firefox rules are stored into cssRules var
     return domLink.cssRules || domLink.rules;
   });
-}(WjsProto));
+}(W));

@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'CacheLink', {
+  W.register('WjsLoader', 'CacheLink', {
     loaderExtends: 'JsLink'
   });
-}(WjsProto));
+}(W));

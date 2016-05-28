@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Add a css class then a callback when finished.
@@ -6,7 +6,7 @@
    * Class should exists in order get complete event.
    * @require JsMethod > eventTransitionName
    */
-  WjsProto.register('JsMethod', 'cssAnimateCallback', function (dom, callback, timeLimit) {
+  W.register('JsMethod', 'cssAnimateCallback', function (dom, callback, timeLimit) {
     var transitionEvent = this.eventTransitionName(), self = this,
       callbackLocal = function (e) {
         // Animation should be on the main item only.
@@ -29,4 +29,4 @@
       }, timeLimit);
     }
   });
-}(WjsProto));
+}(W));

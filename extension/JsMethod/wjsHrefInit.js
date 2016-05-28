@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
 
   /**
@@ -20,7 +20,7 @@
    * Detects links containing href with wjs://extensionType:extensionName
    * @param {Object} domElement
    */
-  WjsProto.register('JsMethod', 'wjsHrefInit', function (dom) {
+  W.register('JsMethod', 'wjsHrefInit', function (dom) {
     // Search for html containing href="wjs://..."
     var wjsLinks = dom.querySelectorAll('a[href^="wjs://"]'),
       i = 0, href, disable = function () {
@@ -35,4 +35,4 @@
       wjsLinks[i].addEventListener('click', linksClick.bind(this));
     }
   });
-}(WjsProto));
+}(W));

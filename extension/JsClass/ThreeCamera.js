@@ -1,10 +1,10 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Imported from ThreeJS
    * https://github.com/mrdoob/three.js/
    */
-  WjsProto.register('JsClass', 'ThreeCamera', {
+  W.register('JsClass', 'ThreeCamera', {
     classExtends:'ThreeObject3d'
   });
-}(WjsProto));
+}(W));

@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Plugin', 'D3ClipTarget', {
+  W.register('Plugin', 'D3ClipTarget', {
 
     options: {
       targetX: 0,
@@ -33,4 +33,4 @@
       element.object3d.lookAt(element.object3d.worldToLocal(target));
     }
   });
-}(WjsProto));
+}(W));

@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WebComScheme', 'SchemePlugin', {
+  W.register('WebComScheme', 'SchemePlugin', {
     classExtends: 'Binder',
     type: 'Plugin',
 
@@ -93,16 +93,16 @@
     },
 
     // To override.
-    elementInit: WjsProto._e,
+    elementInit: W._e,
 
     // To override.
-    elementExit: WjsProto._e,
+    elementExit: W._e,
 
     // To override.
-    initPlugin: WjsProto._e,
+    initPlugin: W._e,
 
     // To override.
-    exitPlugin: WjsProto._e,
+    exitPlugin: W._e,
 
     elementsCall: function (method, args) {
       this.elementsEach(args ? function (element) {
@@ -121,4 +121,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

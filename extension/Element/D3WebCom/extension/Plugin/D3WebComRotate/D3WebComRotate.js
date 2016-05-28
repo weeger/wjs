@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Plugin', 'D3WebComRotate', {
+  W.register('Plugin', 'D3WebComRotate', {
     options: {
       speedH: {
         defaults: 1
@@ -25,4 +25,4 @@
       element.frameNextEnable();
     }
   });
-}(WjsProto));
+}(W));

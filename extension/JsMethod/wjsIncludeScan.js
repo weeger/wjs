@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Search for <div data-wjsInclude="..."> dom element recursively.
@@ -6,7 +6,7 @@
    * Do not inspect inside each element found, a new
    * request should be launched separately.
    */
-  WjsProto.register('JsMethod', 'wjsIncludeScan', function (dom) {
+  W.register('JsMethod', 'wjsIncludeScan', function (dom) {
     var child, i = 0, output = [];
     while (child = dom.children[i++]) {
       if (child.getAttribute('data-wjsInclude')) {
@@ -20,4 +20,4 @@
     }
     return output;
   });
-}(WjsProto));
+}(W));

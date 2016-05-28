@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsClassStatic', 'Math', {
+  W.register('JsClassStatic', 'Math', {
     __construct: function () {
       this.degreeToRadiansFactor = Math.PI / 180;
       this.radianToDegreesFactor = Math.PI / 180;
@@ -18,4 +18,4 @@
       return radians * this.radianToDegreesFactor;
     }
   });
-}(WjsProto));
+}(W));

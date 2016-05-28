@@ -1,11 +1,11 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Listen mouse position on hole page.
    * Allow to get mouse position at any time
    * without to create a dedicated event.
    */
-  WjsProto.register('JsClassStatic', 'MousePositionListener', {
+  W.register('JsClassStatic', 'MousePositionListener', {
     clientX: undefined,
     clientY: undefined,
 
@@ -22,7 +22,7 @@
       this.clientX = e.clientX;
       this.clientY = e.clientY;
       // Trigger custom event.
-      WjsProto.trigger('MousePositionListenerChange', [this]);
+      W.trigger('MousePositionListenerChange', [this]);
     }
   });
-}(WjsProto));
+}(W));

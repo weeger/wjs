@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsMethod', 'cssSheetLoadMultiple', function (domLink, complete, timeMax) {
+  W.register('JsMethod', 'cssSheetLoadMultiple', function (domLink, complete, timeMax) {
     timeMax = timeMax || 1000;
     var self = this, doc = self.document,
       checkInterval = 100, loaded = false, timeStart = (new Date()).getTime(),
@@ -29,4 +29,4 @@
     // First check.
     check();
   });
-}(WjsProto));
+}(W));

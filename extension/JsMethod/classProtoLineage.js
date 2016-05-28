@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsMethod', 'classProtoLineage', function (tempNameProto) {
+  W.register('JsMethod', 'classProtoLineage', function (tempNameProto) {
     var lineage = [];
     if (this.classMethods[tempNameProto]) {
       while (tempNameProto) {
@@ -14,4 +14,4 @@
     }
     return lineage;
   });
-}(WjsProto));
+}(W));

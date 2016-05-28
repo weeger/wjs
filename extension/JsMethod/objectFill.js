@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsMethod > isPlainObject
@@ -21,7 +21,7 @@
    * Fill recursively an object with data from another one,
    * override only missing properties.
    */
-  WjsProto.register('JsMethod', 'objectFill', function (objectToFill, objectWith) {
+  W.register('JsMethod', 'objectFill', function (objectToFill, objectWith) {
     objectFill.call(this, objectToFill, objectWith);
   });
-}(WjsProto));
+}(W));

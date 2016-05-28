@@ -5,12 +5,12 @@
  * and can execute a "complete" callback when finished.
  * This is useful when loading is asynchronous and allows
  * to launch several processes separately.
- * @param {WjsProto} WjsProto
+ * @param {W} W
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
   // <--]
-  WjsProto.lib.Process = {
+  W.lib.Process = {
     // Add static and non objects parameters.
     phase: 0,
     /** @type {Array} Boot phases. */
@@ -377,7 +377,7 @@
         // cache links to manage deletions and dependencies.
         wjs.cacheReg[extensionType + '::' + extensionName] = extensionData['#data'].split('://')[1];
         // Launch an event listener for cache retrieving.
-        WjsProto.registerListen('cache', extensionType + '/' + extensionName, function (data) {
+        W.registerListen('cache', extensionType + '/' + extensionName, function (data) {
           // Replace cache:// link by real data into process object
           // it create a safe place where to find raw data.
           extensionData['#data'] = data;
@@ -546,4 +546,4 @@
     }
   };
   // [-->
-}(WjsProto));
+}(W));

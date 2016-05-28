@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Formula', 'ScreenSize', {
+  W.register('Formula', 'ScreenSize', {
     eventTrigger: true,
     directions: {
       width: 'innerWidth',
@@ -19,4 +19,4 @@
       return window[this.directions[formula.direction]];
     }
   });
-}(WjsProto));
+}(W));

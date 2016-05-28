@@ -4,7 +4,7 @@
 
   // Detect tablets.
   if (navigator.userAgent.match(/iPad/i) !== null) {
-    context.WjsProto.ready(function () {
+    context.W.ready(function () {
       debugViewer = window.document.createElement('div');
       debugViewer.style.fontSize = '10px';
       debugViewer.style.fontFamily = 'Verdana';

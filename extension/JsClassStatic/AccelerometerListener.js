@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('JsClassStatic', 'AccelerometerListener', {
+  W.register('JsClassStatic', 'AccelerometerListener', {
     alpha: undefined,
     beta: undefined,
     gamma: undefined,
@@ -19,7 +19,7 @@
       this.beta = e.beta;
       this.gamma = e.gamma;
       // Trigger custom event.
-      WjsProto.trigger('DeviceOrientationChange', [this]);
+      W.trigger('DeviceOrientationChange', [this]);
     }
   });
-}(WjsProto));
+}(W));

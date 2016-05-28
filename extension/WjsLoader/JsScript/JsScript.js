@@ -1,11 +1,11 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'JsScript', {
+  W.register('WjsLoader', 'JsScript', {
     /**
      * Execute retrieved javascript.
      * @param {string} name
      * @param {string|Function} value
-     * @param {WjsProto.lib.Process} process
+     * @param {W.lib.Process} process
      * @return {?}
      */
     parse: function (name, value, process) {
@@ -26,4 +26,4 @@
       return value;
     }
   });
-}(WjsProto));
+}(W));

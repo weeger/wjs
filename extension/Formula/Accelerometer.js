@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsClassStatic > AccelerometerListener
    */
-  WjsProto.register('Formula', 'Accelerometer', {
+  W.register('Formula', 'Accelerometer', {
     eventTrigger: true,
 
     initFormula: function () {
@@ -18,4 +18,4 @@
       return this.wjs.AccelerometerListener[formula.direction] || 0;
     }
   });
-}(WjsProto));
+}(W));

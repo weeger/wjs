@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Check to see if an object is a plain object
@@ -7,7 +7,7 @@
    * @param obj
    * @returns {boolean}
    */
-  WjsProto.register('JsMethod', 'isPlainObject', function (obj) {
+  W.register('JsMethod', 'isPlainObject', function (obj) {
     // Not plain objects:
     // - Any object or value whose internal [[Class]] property is not "[object Object]"
     // - DOM nodes
@@ -30,4 +30,4 @@
     // |obj| is a plain object, created by {} or constructed with new Object
     return true;
   });
-}(WjsProto));
+}(W));

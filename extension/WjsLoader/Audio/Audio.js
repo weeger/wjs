@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'Audio', {
+  W.register('WjsLoader', 'Audio', {
     processType: 'parse',
     /**
      * Use Audio loading to complete process.
@@ -20,4 +20,4 @@
       return false;
     }
   });
-}(WjsProto));
+}(W));

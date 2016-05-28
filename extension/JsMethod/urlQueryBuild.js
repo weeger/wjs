@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Convert a key / value object to a query string.
    */
-  WjsProto.register('JsMethod', 'urlQueryBuild', function (object) {
+  W.register('JsMethod', 'urlQueryBuild', function (object) {
     var output = [], i = 0, j, key, keys = Object.keys(object), keysParam;
     while (key = keys[i++]) {
       if (typeof object[key] === 'object') {
@@ -18,4 +18,4 @@
     }
     return output.join('&');
   });
-}(WjsProto));
+}(W));

@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    *
    */
-  WjsProto.register('JsClassStatic', 'webPageKeyboardChange', {
+  W.register('JsClassStatic', 'webPageKeyboardChange', {
     __construct: function () {
       // Key press handler.
       this.wjs.window.addEventListener('keydown', this.eventKeydown.bind(this));
@@ -27,4 +27,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

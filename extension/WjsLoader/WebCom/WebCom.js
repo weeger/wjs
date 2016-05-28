@@ -6,9 +6,9 @@
  * @require JsScript > SchemeWebCom
  * @require JsClass > BasicWebComOption
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'WebCom', {
+  W.register('WjsLoader', 'WebCom', {
     protoBaseClass: 'WebCom',
 
     /**
@@ -27,7 +27,7 @@
       // Proxy methods.
       this.protoAddPartProxy = this.protoAddPart.bind(this);
       // Create base prototype.
-      this.protoAdd(this.protoBaseClass, WjsProto.retrieve('WebComScheme', 'Scheme' + this.protoBaseClass));
+      this.protoAdd(this.protoBaseClass, W.retrieve('WebComScheme', 'Scheme' + this.protoBaseClass));
       if (!this.wjs.domStyleAnim) {
         // Create global CSS void animation,
         // used to manage fades without visible changes.
@@ -40,7 +40,7 @@
         this.wjs.document.head.appendChild(this.wjs.domStyleAnim);
       }
       // Use base construction.
-      WjsProto.lib.Loader.__construct.call(this);
+      W.lib.Loader.__construct.call(this);
       // Load instances asked from URL
       var params = this.wjs.urlQueryParse();
       // Some query are into URL
@@ -78,15 +78,15 @@
       // Remove global keyframe animation.
       this.wjs.document.head.removeChild(this.domStyleAnim);
       // Use base destruction.
-      WjsProto.lib.Loader.__destruct.call(this);
+      W.lib.Loader.__destruct.call(this);
     },
 
     parse: function (name, value, process) {
       // If a js file is attached, it have been already
       // loaded, and registered items are waiting to be parsed.
-      this.protoAdd(name, WjsProto.retrieve(this.type, name) || {});
+      this.protoAdd(name, W.retrieve(this.type, name) || {});
       // Enable.
-      WjsProto.lib.Loader.parse.apply(this, arguments);
+      W.lib.Loader.parse.apply(this, arguments);
       return value;
     },
 
@@ -390,4 +390,4 @@
       this.instance(name, options);
     }
   });
-}(WjsProto));
+}(W));

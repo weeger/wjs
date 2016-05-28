@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Simple callbacks queue management.
    */
-  WjsProto.register('JsClassStatic', 'QueueManager', {
+  W.register('JsClassStatic', 'QueueManager', {
     __construct: function () {
       this.queues = {};
       this.queuesStarted = {};
@@ -42,4 +42,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

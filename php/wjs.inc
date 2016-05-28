@@ -425,7 +425,7 @@ class Wjs extends Atom {
             }
             // Create file.
             file_put_contents($pathCacheServer,
-              'WjsProto.cache("' . $extensionType . '","' . $extensionName . '",' . $loader->cacheJsEncode($extensionData['#data']) . ');');
+              'W.cache("' . $extensionType . '","' . $extensionName . '",' . $loader->cacheJsEncode($extensionData['#data']) . ');');
           }
           // Replace data by logical cache path.
           $extensionData['#data'] = 'cache://' . $pathCache;
@@ -753,7 +753,7 @@ class Wjs extends Atom {
    * @return string
    */
   function renderJsUnpacker() {
-    return 'new ' . ($this->subversion === 'jQuery' ? 'jQuery' : 'window') . '.WjsProto(' . $this->initPackage() . ');';
+    return 'new ' . ($this->subversion === 'jQuery' ? 'jQuery' : 'window') . '.W(' . $this->initPackage() . ');';
   }
 
   /**

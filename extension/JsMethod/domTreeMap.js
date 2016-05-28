@@ -1,8 +1,8 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    */
-  WjsProto.register('JsMethod', 'domTreeMap', function (dom, callback) {
+  W.register('JsMethod', 'domTreeMap', function (dom, callback) {
     callback(dom);
     if (dom.childNodes) {
       for (var domChild, i = 0; domChild = dom.childNodes[i++];) {
@@ -10,4 +10,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

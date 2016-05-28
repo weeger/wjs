@@ -3,9 +3,9 @@
  * - Contain play / stop controllers.
  * @require Element > Stage
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Element', 'Sprite', {
+  W.register('Element', 'Sprite', {
 
     variables: {
       name: '',
@@ -70,4 +70,4 @@
       }
     }
   });
-}(WjsProto));
+}(W));

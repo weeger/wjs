@@ -10,7 +10,7 @@ Wjs is now accessible from <a target="_blank" href="http://microjs.com">microjs.
 
 Check out the <a target="_blank" href="http://wjs.wexample.com">demo website</a>,and fork it on his <a target="_blank" href="https://github.com/weeger/weeger">Github repository</a>.
 
-You can support us on <a href="http://funding.openinitiative.com/funding/2150/">OpenInitiative</a>, <a target="_blank" href="http://wjs.wexample.com">Kickstarter</a>.It is actually written in Javascript for the client part, and PHP for the server part. It is also ready to be translated into every other server side languages, depending of needs. 
+You can support us on <a href="http://funding.openinitiative.com/funding/2150/">OpenInitiative</a>, <a target="_blank" href="http://wjs.wexample.com">Kickstarter</a>.It is actually written in Javascript for the client part, and PHP for the server part. It is also ready to be translated into every other server side languages, depending of needs.
 
 Features :
 - AJAX Loading with server side package management
@@ -65,12 +65,12 @@ Features :
   - Libraries loading
 - Source version or minified- Headless support (no server side)
 
-Wjs is made for you if : 
+Wjs is made for you if :
 - You are a very special person
 - You are seeking a lazy loader (to load almost any type of data)
 - You want to try a new way to create rich web interfaces
 - You want to bring to your user a fresh navigation system
-- You need advanced javascript objects supporting listening, dependencies management, animation keyframes, etc... 
+- You need advanced javascript objects supporting listening, dependencies management, animation keyframes, etc...
 
 Wjs is NOT for you if you are seeking a handy Javascript only library (like jQuery, Backbone, etc...). We are seeking for contributors for this project to report comments, bugs, improvements or compatibility support. All kind of reaction are appreciated.
 
@@ -91,7 +91,7 @@ There is three important steps required to work properly with wjs, and different
 - Configure your html head
 - Handle ajax requests on server side
 
-After these steps you will be able to use the basic javascript method :  
+After these steps you will be able to use the basic javascript method :
 ```javascript
 wjs.use("Type", "Name");
 ```
@@ -102,14 +102,14 @@ Create a Wjs instance
 
 The quickest method to start is to instantiate wjs with no arguments.
 
-On server side : 
+On server side :
 ```php
 $wjs = new Wjs();
 ```
 
 Otherwise you can define more configuration settings.
 
-On server side : 
+On server side :
 ```php
 // Add only option that you explicitly need,
 // any option are required.
@@ -158,7 +158,7 @@ Registering extensions is not pushing them to the frontend, it just define which
 
 Registered data is also depending of each loader behavior, more information on loaders specific section.
 
-On server side : 
+On server side :
 ```php
 $this->wjs->extensionAdd('JsArray', 'myJsArrayCustomName', array(
   0 => 'MyItem',
@@ -183,9 +183,9 @@ $files = $wjs->jsFiles();
 This method will return js files used by core, depending of the core version used, the loaders defined, and required.
 
 You can now include these links into your html page. The next point is to init wjs. This action will unpack pushed content from PHP, and execute startup function (see "ready" method).
-On client side : 
+On client side :
 ```javascript
-new WjsProto(<?php print $wjs->initPackage(); ?>);
+new W(<?php print $wjs->initPackage(); ?>);
 ```
 
 
@@ -223,7 +223,7 @@ Wjs uses loaders to retrieve data from server, and parse it. Several loaders are
 Simple Javascript Object
 ------------------------
 
-On server side : 
+On server side :
 ```php
 // Add array as a JsObject.
 $this->wjs->extensionAdd('JsObject', 'testObject', array(
@@ -233,7 +233,7 @@ $this->wjs->extensionAdd('JsObject', 'testObject', array(
   'thisIsAnArray' => array('foo' => 'bar')
 ));
 ```
-On client side : 
+On client side :
 ```javascript
 wjs.use('JsObject', 'testObject', function () {
   continueCallback();
@@ -244,9 +244,9 @@ wjs.use('JsObject', 'testObject', function () {
 Simple Javascript Array
 -----------------------
 
-Like objects, you can also append data as javascript arrays. Note that array keys will be turned to indexes only if not numeric, as JavaScript arrays do not support string indexes (otherwise use JsObjects). 
+Like objects, you can also append data as javascript arrays. Note that array keys will be turned to indexes only if not numeric, as JavaScript arrays do not support string indexes (otherwise use JsObjects).
 
-On server side : 
+On server side :
 ```php
 $this->wjs->extensionAdd('JsArray', 'myJsArrayName', array(
   0           => 'ATest',
@@ -255,7 +255,7 @@ $this->wjs->extensionAdd('JsArray', 'myJsArrayName', array(
   'disappear' => array(0 => 'bar')
 ));
 ```
-On client side : 
+On client side :
 ```javascript
 // Will return : ["ATest", "AnOtherTest", 123, Array[1]]
 wjs.use('JsArray', 'myJsArrayName', function (arrayContent) {
@@ -267,9 +267,9 @@ wjs.use('JsArray', 'myJsArrayName', function (arrayContent) {
 Javascript code
 ---------------
 
-You can easily add simple javascript code for your own usage. 
+You can easily add simple javascript code for your own usage.
 
-On server side : 
+On server side :
 ```php
 // Add a remote file.
 $this->wjs->extensionAdd('JsScript', 'testScriptFile', $filePath);
@@ -279,7 +279,7 @@ $this->wjs->extensionAdd('JsScript', 'testScriptInline', 'window.jsScriptInlineL
 // it will increment global var at each pull, with the reload:true option.
 $this->wjs->extensionAdd('JsScript', 'jsScriptReloadable', 'window.jsScriptReloadCount===undefined ? window.jsScriptReloadCount = 0 : window.jsScriptReloadCount++;');
 ```
-On client side : 
+On client side :
 ```javascript
 // If loader do not exists, it will be loaded first.
 wjs.use('JsScript', 'testScriptFile', function () {
@@ -298,7 +298,7 @@ Javascript methods
 
 You can load simple javascript methods with wjs, asynchronously or not, and execute it in your code. Some methods are included into wjs core, as example.
 
-On server side : 
+On server side :
 ```php
 // Add javascript method from a file.
 $this->wjs->extensionAdd('JsMethod', 'testMethod', $path);
@@ -309,7 +309,7 @@ Your Js file must also be wrapped, it allows wjs to catch it :
 [FILE:projects/wjs/tests/objects/JsMethod/testMethod.js]
 ```
 
-On client side : 
+On client side :
 ```javascript
 // The retrieved method will return the length of an object.
 var length = wjs.use('JsMethod', 'testMethod', function (reg) {
@@ -334,9 +334,9 @@ var length = wjs.use('JsMethod', 'testMethod', function (reg) {
 Image loading
 -------------
 
-You can also use wjs to retrieve images, and use it only when load complete. Images do not need to be packed on server side. 
+You can also use wjs to retrieve images, and use it only when load complete. Images do not need to be packed on server side.
 
-On client side : 
+On client side :
 ```javascript
 // We load the HTML5 Image Logo
 wjs.use('Image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
@@ -348,9 +348,9 @@ wjs.use('Image', 'http://www.w3.org/html/logo/downloads/HTML5_Logo_512.png', {
 Audio loading
 -------------
 
-You can also use wjs to retrieve audio, and use it only when load complete. Images do not need to be packed on server side. 
+You can also use wjs to retrieve audio, and use it only when load complete. Images do not need to be packed on server side.
 
-On client side : 
+On client side :
 ```javascript
 // We load an mp3 or ogg file.
 wjs.use('Audio', audioUrl, {
@@ -364,7 +364,7 @@ Javascript links
 
 wjs is also able to append script links into your pages.
 
-On client side : 
+On client side :
 ```javascript
 // We load an external js.
 wjs.use('JsLink', pathToYourJsFile, {
@@ -374,7 +374,7 @@ wjs.use('JsLink', pathToYourJsFile, {
 
 
 But also several links, if you need to add them in a specific order
-On client side : 
+On client side :
 ```javascript
 // If several links are declared from an array,
 // All links are loaded, in order. Each link wait for
@@ -392,7 +392,7 @@ CSS links
 
 Like .js, you can also retireve css links, as link tags. They will be appended to your document head.
 
-On client side : 
+On client side :
 ```javascript
 // We load an external js.
 wjs.use('CssLink', pathToYourCssFile, {
@@ -401,7 +401,7 @@ wjs.use('CssLink', pathToYourCssFile, {
 ```
 
 
-And for multiple css. On client side : 
+And for multiple css. On client side :
 ```javascript
 // If several links are declared from an array,
 // All links are loaded, in order. Each link wait for
@@ -423,11 +423,11 @@ Loaders
 
 Now enter in the craziness of wjs.. You can also load loaders as extensions. It allow to load your page only with wjs and the core wjsLoader, then load every loader you need later.
 
-On server side : 
+On server side :
 ```php
 [PULL_WJSLOADER_PHP]
 ```
-On client side : 
+On client side :
 ```javascript
 // First we load loader,
 // this action is also for example,
@@ -458,7 +458,7 @@ The web form offers a server side validation system for your web components.
 Web pages
 ---------
 
-Libraries are linked to WebPages and contains extra required features for current loaded page. 
+Libraries are linked to WebPages and contains extra required features for current loaded page.
 
 Groups
 ------
@@ -512,7 +512,7 @@ Define requirement
 
 A simple function allows you to connect an extension to another one.
 
-On server side : 
+On server side :
 ```php
 // Extension of type JsObject > testObject,
 // will be loaded with  JsObject > testObject2 when asked.
@@ -525,7 +525,7 @@ Exclude dependencies
 
 A dangerous point with dependencies is to retrieve multiple times the same extensions. If "A" and "B" need "C" extensions, you'll probably load it two times. You can define options on your request to ask to not retrieve dependencies. It is useful to control when you know that required extensions are already loaded.
 
-On client side : 
+On client side :
 ```javascript
 // We don't want any dependency.
 object = wjs.use('JsObject', 'nameOfExtensionWithDependencies', {
@@ -534,7 +534,7 @@ object = wjs.use('JsObject', 'nameOfExtensionWithDependencies', {
 });
 ```
 
-Or more precisely. On client side : 
+Or more precisely. On client side :
 ```javascript
 // We don't want multiple dependencies, but we allow others.
 object = wjs.use('JsObject', 'nameOfExtensionWithDependencies', {
@@ -560,10 +560,10 @@ You can manage full websites with the website class. It will configure wjs for y
 Document ready
 --------------
 
-In order to wait wjs to be loaded before using it, you should wrap your scripts into the wjs.ready(callback); function. It ensure the callback to be executed after your page loading and also after wjs initialization. On client side : 
+In order to wait wjs to be loaded before using it, you should wrap your scripts into the wjs.ready(callback); function. It ensure the callback to be executed after your page loading and also after wjs initialization. On client side :
 ```javascript
-WjsProto.ready(function(){ 
-  console.log("Ready to pull !"); 
+W.ready(function(){
+  console.log("Ready to pull !");
   // Place here your wjs.use() requests.
 })
 ```
@@ -572,9 +572,9 @@ WjsProto.ready(function(){
 Prototyping
 -----------
 
-wJs allow you to instantiate easily classes prototype. The method is used internally by wJs and can be reused. This method respects javascript getters and setters declaration. 
+wJs allow you to instantiate easily classes prototype. The method is used internally by wJs and can be reused. This method respects javascript getters and setters declaration.
 
-On client side : 
+On client side :
 ```javascript
 // Registers a new class prototype.
 wjs.classExtend("className",{ ... });

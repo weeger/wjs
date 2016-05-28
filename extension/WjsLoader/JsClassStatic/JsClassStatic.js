@@ -1,12 +1,12 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'JsClassStatic', {
+  W.register('WjsLoader', 'JsClassStatic', {
     loaderExtends: 'JsClass',
     wjsShortcuts: true,
 
     register: function (type, name, process, value) {
       // Get method
-      value = value || WjsProto.retrieve(this.type, name);
+      value = value || W.retrieve(this.type, name);
       // Extend prototype.
       this.wjs.classExtend(name, value);
       // Create proto
@@ -30,4 +30,4 @@
       return this.wjs.loaders.JsClass.destroy.call(this, name, data, process);
     }
   });
-}(WjsProto));
+}(W));

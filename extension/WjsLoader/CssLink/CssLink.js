@@ -1,6 +1,6 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'CssLink', {
+  W.register('WjsLoader', 'CssLink', {
     processType: 'parse',
 
     /**
@@ -59,4 +59,4 @@
       process.itemParseComplete(this.type, name, domLink);
     }
   });
-}(WjsProto));
+}(W));

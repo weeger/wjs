@@ -5,11 +5,11 @@
  * in mind that processes can load and parse multiple scripts
  * in the same time.
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
   // <--]
   // Save declaration statically into wjs proto.
-  WjsProto.lib.Loader = {
+  W.lib.Loader = {
     type: '',
     preventReload: true,
     processType: 'server',
@@ -23,11 +23,11 @@
       // loader may add extra entry if needed, so
       // entry name is not deeply linked to loader name.
       // Entry can also be declared previously than loader.
-      WjsProto.reg.WjsLoader[this.type] = WjsProto.reg.WjsLoader[this.type] || {};
+      W.reg.WjsLoader[this.type] = W.reg.WjsLoader[this.type] || {};
     },
 
     // To override...
-    __destruct: WjsProto._e,
+    __destruct: W._e,
 
     /**
      * Called after ajax call, ask loader
@@ -44,7 +44,7 @@
      * during parse. Should be initialised with listenRegister.
      * To override... (type, name, process)
      */
-    register: WjsProto._e,
+    register: W._e,
 
     /**
      * Called when a user click on a link
@@ -66,16 +66,16 @@
     },
 
     // To override... (name, value, process)
-    enable: WjsProto._e,
+    enable: W._e,
 
     // To override... (name, value)
-    disable: WjsProto._e,
+    disable: W._e,
 
     /**
      * Launched on extension use request,
      * create data for process.
      * @param {string} name
-     * @param {WjsProto.lib.Process} process
+     * @param {W.lib.Process} process
      */
     requestUse: function (name, process) {
       return {
@@ -89,7 +89,7 @@
      * Launched on extension use request,
      * create data for process.
      * @param {string} name
-     * @param {WjsProto.lib.Process} process
+     * @param {W.lib.Process} process
      */
     requestDestroy: function (name, process) {
       return {
@@ -101,10 +101,10 @@
 
     registerListen: function (type, name, process) {
       var self = this;
-      WjsProto.registerListen(type, name, function () {
+      W.registerListen(type, name, function () {
         self.register.call(self, type, name, process);
       });
     }
   };
   // [-->
-}(WjsProto));
+}(W));

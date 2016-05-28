@@ -3,9 +3,9 @@
  * @require WjsLoader > JsClassStatic
  * @require JsClassStatic > FormulaManager
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('WjsLoader', 'Formula', {
+  W.register('WjsLoader', 'Formula', {
     loaderExtends: 'JsClass',
     wjsShortcuts: false,
 
@@ -17,7 +17,7 @@
 
     register: function (type, name, process, value) {
       // Add to manager.
-      this.wjs.formula.append(name, value || WjsProto.retrieve(this.type, name));
+      this.wjs.formula.append(name, value || W.retrieve(this.type, name));
       // Skip JsClass inheritance level.
       this.wjs.loaders.JsMethod.register.apply(this, [type, name, process, value]);
     },
@@ -29,4 +29,4 @@
       return this.wjs.loaders.JsClass.destroy.apply(this, arguments);
     }
   });
-}(WjsProto));
+}(W));

@@ -1,9 +1,9 @@
 /**
  * @require Element > D3WebCom
  */
-(function (WjsProto) {
+(function (W) {
   'use strict';
-  WjsProto.register('Element', 'D3Container', {
+  W.register('Element', 'D3Container', {
     classExtends: 'Element\\D3WebCom',
     optionsDefault: {
       dom: true,
@@ -24,4 +24,4 @@
       this.__super('renderDom', arguments);
     }
   });
-}(WjsProto));
+}(W));

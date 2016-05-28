@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsClass > FormulaPreset
@@ -6,7 +6,7 @@
    * @require Formula > MousePosition
    * @require Formula > ScreenSize
    */
-  WjsProto.register('Formula', 'MousePositionFromCenter', {
+  W.register('Formula', 'MousePositionFromCenter', {
     classExtends: 'FormulaPreset',
     eventTrigger: true,
     preset: {
@@ -47,4 +47,4 @@
       merged.values[1].values[0].direction = this.scales[formula.direction];
     }
   });
-}(WjsProto));
+}(W));

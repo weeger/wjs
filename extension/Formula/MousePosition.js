@@ -1,9 +1,9 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * @require JsClassStatic > MousePositionListener
    */
-  WjsProto.register('Formula', 'MousePosition', {
+  W.register('Formula', 'MousePosition', {
     eventTrigger: true,
 
     initFormula: function () {
@@ -18,4 +18,4 @@
       return this.wjs.MousePositionListener['client' + formula.direction] || 0;
     }
   });
-}(WjsProto));
+}(W));

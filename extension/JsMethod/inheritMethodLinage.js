@@ -1,4 +1,4 @@
-(function (WjsProto) {
+(function (W) {
   'use strict';
   /**
    * Create a super method for first function, pointing to
@@ -7,7 +7,7 @@
    * @param add
    * @returns {}
    */
-  WjsProto.register('JsMethod', 'inheritMethodLinage', function (object, baseMethod, addMethod, extraArgs) {
+  W.register('JsMethod', 'inheritMethodLinage', function (object, baseMethod, addMethod, extraArgs) {
     // Base method is called with __base() function.
     return function () {
       var baseSaved = object.__base, result, args = arguments;
@@ -22,4 +22,4 @@
       return result;
     };
   });
-}(WjsProto));
+}(W));
