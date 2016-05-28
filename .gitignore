@@ -1,3 +1,5 @@
+.idea
+
 # NodeJS modules
 node_modules
 
@@ -29,7 +31,8 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
