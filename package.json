@@ -71,6 +71,7 @@
     "gulp-git": "^1.7.2",
     "gulp-minify": "0.0.11",
     "gulp-sourcemaps": "^1.6.0",
+    "gulp-sync": "^0.1.4",
     "gulp-uglify": "^1.5.3",
     "guppy-pre-commit": "^0.3.0",
     "vinyl-buffer": "^1.0.0",
