@@ -7,7 +7,7 @@ namespace Wjs5;
  * and parse extensions from server side to client site
  * depending from extension type.
  */
-abstract class Loader extends Router {
+abstract class Loader extends Atom {
   /**
    * @var string $type
    */

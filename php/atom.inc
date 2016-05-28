@@ -3,30 +3,32 @@
 namespace Wjs5;
 
 /**
- * Router class is used to manage objects with grouped parameters.
+ * Atom class is used to manage objects with grouped parameters.
  * They are used as base object to have contextualised options and location paths.
  * @package Wjs
  */
-class Router {
+class Atom {
   /**
-   * Required options expected to be defined at object creation.
+   * @var string[] Required options expected to be defined at object creation.
    */
   var $optionsRequired = array();
   /**
-   * Default values.
+   * @var string[] Default values.
    */
   var $optionsDefault = array();
+  /**
+   * @var string[] Save options internally.
+   */
+  var $options = array();
   /**
    * Debug level.
    */
   var $errorLevel = E_USER_WARNING;
-  /**
-   * Save options internally.
-   */
-  var $options = array();
 
   /**
    * Construct object with predefined options.
+   *
+   * @param array|null $options
    */
   function __construct($options = NULL) {
     // Allow to set paths to null, but creates options array instead.
@@ -46,6 +48,9 @@ class Router {
 
   /**
    * Set value of a option.
+   *
+   * @param string $name
+   * @param string $value
    */
   function optionSet($name, $value) {
     $this->options[$name] = $value;
@@ -54,6 +59,10 @@ class Router {
   /**
    * Return value of a option.
    * It avoid to use isset each time an option is required.
+   *
+   * @param string $name
+   *
+   * @return null|string
    */
   function optionGet($name) {
     // Return requested option if exists.
@@ -62,15 +71,22 @@ class Router {
 
   /**
    * Trigger wjs error.
+   *
+   * @param string $message
    */
   function error($message) {
     trigger_error('wjs error : ' . $message, $this->errorLevel);
+    exit;
   }
 
   /**
    * Convert windows backslashes into paths to linux slashes.
    * Backslashes may pose problems when different slashes types
    * are mixed into a path in client side.
+   *
+   * @param string $path
+   *
+   * @return string
    */
   function pathCleanupSlashes($path) {
     return str_replace('\\', '/', $path);
@@ -81,6 +97,12 @@ class Router {
    * Return a client path, relatively to the current working directory.
    * All path used by this function to be located on client side
    * should be placed into this working directory by as symlink or not.
+   *
+   * @param string      $pathServerAbsolute
+   * @param string      $serverWorkingDirectory
+   * @param string|null $clientRequestDirectory
+   *
+   * @return string
    */
   function pathClient($pathServerAbsolute, $serverWorkingDirectory, $clientRequestDirectory = NULL) {
     // Relative position from site base path used
@@ -92,6 +114,10 @@ class Router {
 
   /**
    * Get dir name without resolving symlinks.
+   *
+   * @param string $path
+   *
+   * @return string
    */
   function pathDirName($path) {
     $parts = explode('/', $this->pathNormalize($path));
@@ -102,8 +128,8 @@ class Router {
   /**
    * Return relative path from a file to another.
    *
-   * @param $from
-   * @param $to
+   * @param string $from
+   * @param string $to
    *
    * @return string
    */
@@ -139,7 +165,7 @@ class Router {
    * Into :
    *   ../a/b/d
    *
-   * @param $path
+   * @param string $path
    *
    * @return string
    */

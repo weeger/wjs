@@ -18,14 +18,12 @@ if (!defined('WJS5_ROOT')) {
   define('WJS5_ROOT', dirname(dirname(__FILE__)) . '/');
 }
 
-require_once WJS5_ROOT . 'php/router.inc';
+require_once WJS5_ROOT . 'php/atom.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.class.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/JsLink/JsLink.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.inc';
 
-use \Wjs5\Router;
-
-class Wjs extends Router {
+class Wjs extends Atom {
   /**
    * Options can be defined by user.
    * @var array

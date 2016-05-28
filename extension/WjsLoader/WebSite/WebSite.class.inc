@@ -13,7 +13,7 @@ use \Wjs5\Loader\WebPage\Page;
  * It works with WebPage extensions and expect a specific
  * management, se the demo source code for a live example.
  */
-class Website extends Router {
+class Website extends Atom {
   /**
    * Name is used into page cache files names.
    * @var string
