@@ -2,9 +2,17 @@
   'use strict';
   // <--]
 
-  // Add a global wjsContext, use
-  // by scripts links to access to wjs.
+  // Add a global wjsContext, used
+  // by scripts links to access to w.
   context.wjsContext = context;
+
+  /**
+   * Shortcut function for w.
+   * Wait for an "load" event on given object.
+   */
+  var onload = (callback, item, event = 'load') => {
+    (item || context).addEventListener(event, callback);
+  };
 
   /** @constructor */
   var W = function (options) {
@@ -70,7 +78,7 @@
         cacheReg: {},
         /** @type {Object} */
         settings: {
-          clientName: '',
+          clientName: 'wjs',
           paramExtra: '',
           paramInc: '',
           paramExc: '',
@@ -803,5 +811,13 @@
 
   // Save global prototype.
   context.W = W;
-  // [-->
+
+  // Listen for page load.
+  onload(() => {
+    // Check if at least on instance of wjs
+    // have been created, manually or by server init.
+    if (!context.wjs) {
+      new W();
+    }
+  }, context);
 }(this));
