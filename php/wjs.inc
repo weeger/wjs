@@ -74,7 +74,7 @@ class Wjs extends Router {
       // Files order is important.
       // In this case, WjsLoader loader
       // is added via the normal js list way.
-      'src/wjs.js',
+      'src/w.js',
       'src/loader.js',
       'src/process.js',
       'extension/WjsLoader/JsLink/JsLink.js',
