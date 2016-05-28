@@ -25,8 +25,11 @@ gulp.task('watch', () => {
   gulp.watch(['src/*.js'], ['buildCoreJs']);
 });
 
+var guppy = require('git-guppy')(gulp);
+
 gulp.task('gitCommit', () => {
-  return gulp.src(['w.min.js', 'w.min.js.map']).pipe(git.add());
+  return gulp.src('w.min.js')
+    .pipe(git.add());
 });
 
 gulp.task('default', ['watch']);
