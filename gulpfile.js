@@ -26,7 +26,7 @@ gulp.task('watch', () => {
 });
 
 gulp.task('gitCommit', () => {
-  gulp.src(['w.min.js']).pipe(git.add());
+  gulp.src('w.min.js').pipe(git.add());
 });
 
 gulp.task('default', ['watch']);
