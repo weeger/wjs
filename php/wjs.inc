@@ -19,7 +19,7 @@ if (!defined('WJS5_ROOT')) {
 }
 
 require_once WJS5_ROOT . 'php/router.inc';
-require_once WJS5_ROOT . 'php/loader.inc';
+require_once WJS5_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.class.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/JsLink/JsLink.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.inc';
 

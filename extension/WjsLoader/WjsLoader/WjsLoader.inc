@@ -2,6 +2,8 @@
 
 namespace Wjs5\Loader;
 
+require_once 'WjsLoader.class.inc';
+
 use \Wjs5\Loader;
 
 /**
