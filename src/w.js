@@ -87,6 +87,7 @@
           cacheToken: ''
         }
       });
+      log('test');
       // Apply options.
       self.extendObject(self, options);
       // Create prototypes instances.
