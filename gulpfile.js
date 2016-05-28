@@ -7,6 +7,7 @@ const babel = require('gulp-babel');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
+const git = require('gulp-git');
 
 gulp.task('buildCoreJs', () => {
   return gulp.src('src/*.js')
@@ -24,5 +25,9 @@ gulp.task('watch', () => {
   gulp.watch(['src/*.js'], ['buildCoreJs']);
 });
 
+gulp.task('gitCommit', () => {
+  gulp.src(['w.min.js']).pipe(git.add());
+});
+
 gulp.task('default', ['watch']);
-gulp.task('pre-commit', ['buildCoreJs']);
+gulp.task('pre-commit', ['buildCoreJs', 'gitCommit']);
