@@ -2,8 +2,8 @@
 
 namespace Wjs;
 
-require_once 'wjs.inc';
-require_once 'router.inc';
+// Find Wjs if not loaded.
+require_once (defined('WJS_ROOT') ? WJS_ROOT : dirname(__FILE__) . '../../../../php/') . 'wjs.inc';
 
 use \Wjs;
 use \Wjs\Loader\WebPage\Page;
