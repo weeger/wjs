@@ -11,7 +11,6 @@ const git = require('gulp-git');
 const gulpsync = require('gulp-sync')(gulp);
 
 gulp.task('buildCoreJs', () => {
-  console.log('core');
   return gulp.src('src/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel({
@@ -30,8 +29,7 @@ gulp.task('watch', () => {
 var guppy = require('git-guppy')(gulp);
 
 gulp.task('gitCommit', () => {
-  console.log('commit');
-  return gulp.src('w.min.js')
+  return gulp.src(['w.min.js','w.min.js.map'])
     .pipe(git.add());
 });
 
