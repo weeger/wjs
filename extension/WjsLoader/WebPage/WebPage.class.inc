@@ -2,10 +2,9 @@
 
 namespace Wjs\Loader\WebPage;
 
-use \Wjs;
-use \Wjs\Loader\WjsLibrary\Library;
-use \Wjs\Website;
-use \Wjs\Loader;
+use \Wjs5\Loader\WjsLibrary\Library;
+use \Wjs5\Website;
+use \Wjs5\Loader;
 
 class Page {
   /**
@@ -13,11 +12,11 @@ class Page {
    */
   var $website;
   /**
-   * @var Wjs
+   * @var \Wjs5\
    */
   var $wjs;
   /**
-   * @var Loader\WebCom
+   * @var \Wjs5\Loader\WebCom
    */
   var $loader;
   var $title = 'Page';
@@ -120,7 +119,7 @@ class Page {
    *
    * @param $name
    *
-   * @return \Wjs\Loader\WjsLibrary\Library
+   * @return \Wjs5\Loader\WjsLibrary\Library
    */
   function libraryGet($name) {
     foreach ($this->libraries as $library) {

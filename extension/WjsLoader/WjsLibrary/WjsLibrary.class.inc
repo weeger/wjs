@@ -2,12 +2,12 @@
 
 namespace Wjs\Loader\WjsLibrary;
 
-use \Wjs\Loader\WebPage\Page;
+use \Wjs5\Loader\WebPage\Page;
 
 abstract class Library {
   /**
    * Each library is linked to one page instance.
-   * @var \Wjs\Loader\WebPage
+   * @var \Wjs5\Loader\WebPage
    */
   var $page;
   /**

@@ -6,7 +6,7 @@ require_once 'WebPage.class.inc';
 
 define('WJS_PUSH_WEBPAGE_PRELOADED', 'WJS_PUSH_WEBPAGE_PRELOADED');
 
-use \Wjs\Loader;
+use \Wjs5\Loader;
 
 /**
  * @package Wjs\Loader
@@ -84,12 +84,12 @@ class WebPage extends WebCom {
 
   function instance($name, $options = array(), $wjs = NULL, $website = NULL) {
     // Find page class name.
-    $className = '\\Wjs\\Loader\\' . $this->type . '\\' . $name;
+    $className = '\\Wjs5\\Loader\\' . $this->type . '\\' . $name;
     if (!class_exists($className)) {
-      $className = '\\Wjs\\Loader\\' . $this->type . '\\Page';
+      $className = '\\Wjs5\\Loader\\' . $this->type . '\\Page';
     }
     if (!class_exists($className)) {
-      $className = '\\Wjs\\Loader\\WebPage\\Page';
+      $className = '\\Wjs5\\Loader\\WebPage\\Page';
     }
     $value = $this->valuePush($name);
     if (!$this->valueIsError($value)) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs;
+namespace Wjs5;
 
 /**
  * Loaders are separated processes used to pack / encode

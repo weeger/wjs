@@ -2,7 +2,7 @@
 
 namespace Wjs\Loader;
 
-use \Wjs\Loader\JsScript;
+use \Wjs5\Loader\JsScript;
 
 class JsMethod extends JsScript {
   var $allowJsCache = TRUE;

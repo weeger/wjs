@@ -2,7 +2,7 @@
 
 namespace Wjs\Loader;
 
-use \Wjs\Loader;
+use \Wjs5\Loader;
 
 /**
  * Transmit an array to a JS array.

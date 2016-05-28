@@ -1,12 +1,11 @@
 <?php
 
-namespace Wjs;
+namespace Wjs5;
 
 // Find Wjs if not loaded.
 require_once (defined('WJS_ROOT') ? WJS_ROOT : dirname(__FILE__) . '../../../../php/') . 'wjs.inc';
 
-use \Wjs;
-use \Wjs\Loader\WebPage\Page;
+use \Wjs5\Loader\WebPage\Page;
 
 /**
  * The website class can be used optionally used with wjs
@@ -40,7 +39,7 @@ class Website extends Router {
   var $wjs;
   /**
    * Save the latest page instance.
-   * @var \Wjs\Loader\WebPage\Page
+   * @var \Wjs5\Loader\WebPage\Page
    */
   var $page;
   var $pageClassType = 'WebPage';
@@ -123,10 +122,10 @@ class Website extends Router {
    * @return Page
    */
   function pageInstance($webPageName, $options = array()) {
-    /** @var \Wjs\Loader\WebPage $loader */
+    /** @var \Wjs5\Loader\WebPage $loader */
     $loader = $this->wjs->loaderGet($this->pageClassType);
     // Return new page.
-    /** @var \Wjs\Loader\WebPage\Page $page */
+    /** @var \Wjs5\Loader\WebPage\Page $page */
     $page = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
     // Check if exists.
     if (!$page) {

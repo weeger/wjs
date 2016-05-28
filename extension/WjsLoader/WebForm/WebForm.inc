@@ -4,7 +4,7 @@ namespace Wjs\Loader;
 
 require_once 'WebForm.class.inc';
 
-use \Wjs\Loader;
+use \Wjs5\Loader;
 
 /**
  * @package Wjs\Loader
@@ -63,16 +63,16 @@ class WebForm extends WebCom {
    * @param $name
    * @param $data
    *
-   * @return \Wjs\Loader\WebForm\Form
+   * @return \Wjs5\Loader\WebForm\Form
    */
   function instance($name, $data) {
     // Find page class name.
-    $className = '\\Wjs\\Loader\\' . $this->type . '\\' . $name;
+    $className = '\\Wjs5\\Loader\\' . $this->type . '\\' . $name;
     if (!class_exists($className)) {
-      $className = '\\Wjs\\Loader\\' . $this->type . '\\Page';
+      $className = '\\Wjs5\\Loader\\' . $this->type . '\\Page';
     }
     if (!class_exists($className)) {
-      $className = '\\Wjs\\Loader\\WebForm\\Form';
+      $className = '\\Wjs5\\Loader\\WebForm\\Form';
     }
     // Create class.
     return new $className($this->type, $name, $data, $this->wjs);

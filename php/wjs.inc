@@ -21,7 +21,7 @@ require_once WJS_ROOT . 'php/loader.inc';
 require_once WJS_ROOT . 'extension/WjsLoader/JsLink/JsLink.inc';
 require_once WJS_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.inc';
 
-use \Wjs\Router;
+use \Wjs5\Router;
 
 class Wjs extends Router {
   /**
@@ -193,7 +193,7 @@ class Wjs extends Router {
       'serverPathJs'    => $this->optionGet('serverPathWjs') . $filePath . '.min.js',
       'clientPathJs'    => $this->optionGet('clientPathWjs') . $filePath . '.min.js',
     );
-    $this->loaders['WjsLoader'] = new \Wjs\Loader\WjsLoader($wjsLoaderData, $this);
+    $this->loaders['WjsLoader'] = new \Wjs5\Loader\WjsLoader($wjsLoaderData, $this);
     $this->loaders['WjsLoader']
       ->extensions['WjsLoader'] = $wjsLoaderData;
 
@@ -322,7 +322,7 @@ class Wjs extends Router {
    *
    * @param string $name
    *
-   * @return \Wjs\Loader
+   * @return \Wjs5\Loader
    */
   function loaderGet($name) {
     return isset($this->loaders[$name]) ? $this->loaders[$name] : FALSE;
@@ -566,7 +566,7 @@ class Wjs extends Router {
 
   function cssFiles($side = 'client', $render = FALSE) {
     $files = array();
-    /* @var \Wjs\Loader $loader */
+    /* @var \Wjs5\Loader $loader */
     foreach ($this->loaders as $loader) {
       $loader->headerFiles('css', $files, $side, $render);
     }
@@ -585,7 +585,7 @@ class Wjs extends Router {
     foreach ($this->jsCoreFiles[$this->subversion] as $file) {
       $files[] = $basePath . $file;
     }
-    /* @var \Wjs\Loader $loader */
+    /* @var \Wjs5\Loader $loader */
     foreach ($this->loaders as $loader) {
       $loader->headerFiles('js', $files, $side, $render);
     }

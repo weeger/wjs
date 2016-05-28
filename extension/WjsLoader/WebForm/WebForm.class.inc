@@ -2,9 +2,6 @@
 
 namespace Wjs\Loader\WebForm;
 
-use \Wjs;
-
-
 class Form {
   var $type;
   var $name;

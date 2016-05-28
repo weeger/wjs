@@ -1,6 +1,6 @@
 <?php
 
-namespace Wjs;
+namespace Wjs5;
 
 /**
  * Router class is used to manage objects with grouped parameters.

@@ -2,7 +2,7 @@
 
 namespace Wjs\Loader;
 
-use \Wjs\Loader;
+use \Wjs5\Loader;
 
 define('WJS_PUSH_CSSLINK_INCLUDED', 'WJS_PUSH_CSSLINK_INCLUDED');
 

@@ -4,7 +4,7 @@ namespace Wjs\Loader;
 
 require_once 'WjsLibrary.class.inc';
 
-use \Wjs\Loader;
+use \Wjs5\Loader;
 
 /**
  * @package Wjs\Loader
@@ -25,7 +25,7 @@ class WjsLibrary extends WebCom {
     // for each page.
     parent::extensionAdd($name, array(
       'server'    => $data,
-      'className' => '\\Wjs\\Loader\\WjsLibrary\\' . $name,
+      'className' => '\\Wjs5\\Loader\\WjsLibrary\\' . $name,
       'classFile' => $classFile
     ));
   }
@@ -42,9 +42,9 @@ class WjsLibrary extends WebCom {
   function extensionPush($name, $options = array(), $value = NULL) {
     $value = $this->valuePush($name, $value);
     if (!$this->valueIsError($value)) {
-      /* @var \Wjs\Loader\WebPage\Page $page */
+      /* @var \Wjs5\Loader\WebPage\Page $page */
       $page = $options['page'];
-      /* @var \Wjs\Loader\WjsLibrary\Library $library */
+      /* @var \Wjs5\Loader\WjsLibrary\Library $library */
       $library = new $value['className']($page, $options, $value);
       $value   = $library->push($options, array(
         // Let only values use by WebCom parent loader.

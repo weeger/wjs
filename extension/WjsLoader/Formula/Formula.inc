@@ -2,7 +2,7 @@
 
 namespace Wjs\Loader;
 
-use \Wjs\Loader\JsMethod;
+use \Wjs5\Loader\JsMethod;
 
 class Formula extends JsClass {
 

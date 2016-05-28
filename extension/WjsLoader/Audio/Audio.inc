@@ -2,7 +2,7 @@
 
 namespace Wjs\Loader;
 
-use \Wjs\Loader;
+use \Wjs5\Loader;
 
 class Audio extends Loader {
   var $allowRequireJs = TRUE;

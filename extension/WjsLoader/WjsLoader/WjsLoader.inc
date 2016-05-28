@@ -2,7 +2,7 @@
 
 namespace Wjs\Loader;
 
-use \Wjs\Loader;
+use \Wjs5\Loader;
 
 /**
  * Loader to load other WjsLoader loaders !
@@ -37,8 +37,8 @@ class WjsLoader extends JsLink {
     // Load PHP class definition.
     // Data is a path pointing to the main folder.
     require_once $value['classFile'];
-    $className = '\Wjs\Loader\\' . $name;
-    /* @var \Wjs\Loader $loader */
+    $className = '\Wjs5\Loader\\' . $name;
+    /* @var \Wjs5\Loader $loader */
     $this->wjs->loaders[$name] = $loader = new $className($value, $this->wjs);
     // Add requirement according to parent class.
     if ($this->wjs->loaders[$name]->parentClass) {
