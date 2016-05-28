@@ -63,7 +63,7 @@ class Wjs extends Router {
     'master' => array(
       // Minified version contain core js,
       // and also WjsLoader loader.
-      'wjs.min.js',
+      'w.min.js',
     ),
     'jQuery' => array(
       'wjs.jquery.js',
