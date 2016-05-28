@@ -49,6 +49,8 @@ class Website extends Router {
   var $pageAliases = array();
   var $pageLibraries = array();
   var $extensionGlobal = array();
+  var $serverPathWebsiteRoot;
+  var $serverPathWebsiteRootResolved;
 
   function __construct($callerFile = '') {
     // Save the raw path to the website root (allow symlinks).
