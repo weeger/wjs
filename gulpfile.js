@@ -20,20 +20,8 @@ gulp.task('buildCoreJs', () => {
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('buildExtensionsJs', () => {
-  return gulp.src('extension/*.js','!extension/*.min.js')
-    .pipe(sourcemaps.init())
-    .pipe(babel({
-      presets: ['es2015']
-    }))
-    .pipe(uglify())
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('.'));
-});
-
 gulp.task('watch', () => {
   gulp.watch(['src/*.js'], ['buildCoreJs']);
-  gulp.watch(['extension/*.js','!extension/*.min.js'], ['buildExtensionsJs']);
 });
 
 gulp.task('default', ['watch']);
