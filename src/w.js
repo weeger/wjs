@@ -6,6 +6,8 @@
   // by scripts links to access to w.
   context.wjsContext = context;
 
+  console.log('___');
+
   /**
    * Shortcut function for w.
    * Wait for an "load" event on given object.
