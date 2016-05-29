@@ -528,6 +528,9 @@
       return output;
     },
 
+    /**
+     * @require JsMethod > cssVendorPrefix
+     */
     cssRuleNumberValue: function (cssRule, name) {
       var time;
       name = this.w.cssVendorPrefix(name);
