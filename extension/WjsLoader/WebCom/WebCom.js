@@ -28,6 +28,9 @@
       this.protoAddPartProxy = this.protoAddPart.bind(this);
       // Create base prototype.
       this.protoAdd(this.protoBaseClass, W.retrieve('WebComScheme', 'Scheme' + this.protoBaseClass));
+      // Prevent to add it multiple times.
+      this.w.domStyleAnimCounter = this.w.domStyleAnimCounter || 0;
+      this.w.domStyleAnimCounter++;
       if (!this.w.domStyleAnim) {
         // Create global CSS void animation,
         // used to manage fades without visible changes.
@@ -75,8 +78,14 @@
     },
 
     __destruct: function () {
-      // Remove global keyframe animation.
-      this.w.document.head.removeChild(this.domStyleAnim);
+      this.w.domStyleAnimCounter--;
+      // No more loader using this dom node.
+      if (!this.w.domStyleAnimCounter) {
+        // Remove global keyframe animation.
+        this.w.document.head.removeChild(this.w.domStyleAnim);
+        delete this.w.domStyleAnim;
+        delete this.w.domStyleAnimCounter;
+      }
       // Use base destruction.
       W.lib.Loader.__destruct.call(this);
     },
@@ -188,11 +197,11 @@
         // Search into parent prototype options if a value exists.
         optionProto[settingName] = (
           // Options should exist
-          protoParent.options &&
-            // Same entry.
-            protoParent.options[name] &&
-            // Value must not be undefined.
-            protoParent.options[name][settingName] !== undefined) ?
+        protoParent.options &&
+          // Same entry.
+        protoParent.options[name] &&
+          // Value must not be undefined.
+        protoParent.options[name][settingName] !== undefined) ?
           // True byn default.
           protoParent.options[name][settingName] : defaults;
       }
