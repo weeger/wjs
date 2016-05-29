@@ -55,7 +55,7 @@ class WebPage extends WebCom {
     // Treat value as a classic WebCom
     $output = parent::extensionPush($name, $options, $value);
     if (!isset($output['#data']['title'])) {
-      $output['#data']['title'] = $options['title'];
+      $output['#data']['title'] = $options['instance']->title;
     }
     if (isset($options['urlHistory'])) {
       $output['#data']['urlHistory'] = $options['urlHistory'];

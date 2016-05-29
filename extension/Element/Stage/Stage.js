@@ -24,9 +24,7 @@
       dom: {
         define: function (com, value, options) {
           // Ensure to have body as default value.
-          value = value || com.w.document.body;
-          // Call base function.
-          return this.__super('define', [com, value, options]);
+          return this.__super('define', [com, value || com.wjs.document.body, options]);
         },
         destroy: function (com) {
           // Do not destroy body.

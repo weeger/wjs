@@ -33,7 +33,7 @@ class Page {
   var $clientPath = '';
   var $urlAlias = FALSE;
 
-  function __construct($type, $name, $options, Wjs $wjs, Loader $loader, Website $website = NULL) {
+  function __construct($type, $name, $options, \Wjs5\Wjs $wjs, Loader $loader, Website $website = NULL) {
     $this->extensionType = $type;
     $this->extensionName = $name;
     // Load own w instance.
@@ -43,10 +43,13 @@ class Page {
     $this->serverPath = $options['server'];
     $this->clientPath = $options['client'];
     $this->title      = $name;
-    // Search for page alias.
-    $aliases = array_flip($this->website->pageAliases);
-    if (isset($aliases[$name])) {
-      $this->urlAlias = $aliases[$name];
+    // Not sure if website is expected.
+    if ($this->website) {
+      // Search for page alias.
+      $aliases = array_flip($this->website->pageAliases);
+      if (isset($aliases[$name])) {
+        $this->urlAlias = $aliases[$name];
+      }
     }
     // Init w as normal library.
     $this->libraryLoad('Wjs', array('w' => $this->w));

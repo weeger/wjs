@@ -1,6 +1,7 @@
 /**
  * @require Element > D3WebCom
  * @require JsClass > ThreeObject3d
+ * @require JsMethod > cssVendorPrefix
  */
 (function (W) {
   'use strict';
