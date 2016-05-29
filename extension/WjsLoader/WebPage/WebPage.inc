@@ -47,6 +47,7 @@ class WebPage extends WebCom {
         'server' => $value['server'],
         'client' => $value['client'],
       ));
+      $options['html'] = $options['instance']->render();
     }
     // HTML is required.
     if (!isset($value['html'])) {
