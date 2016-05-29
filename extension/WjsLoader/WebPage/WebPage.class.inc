@@ -14,7 +14,7 @@ class Page {
   /**
    * @var \Wjs5\
    */
-  var $wjs;
+  var $w;
   /**
    * @var \Wjs5\Loader\WebCom
    */

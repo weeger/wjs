@@ -8,7 +8,7 @@ class Form {
   /**
    * @var \Wjs
    */
-  var $wjs;
+  var $w;
   var $formId;
   var $formStamp;
 

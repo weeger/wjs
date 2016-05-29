@@ -15,7 +15,7 @@ abstract class Loader extends Atom {
   /**
    * @var \Wjs5\Wjs $w
    */
-  var $wjs;
+  var $w;
   /**
    * Contain list of registered items.
    * @var array

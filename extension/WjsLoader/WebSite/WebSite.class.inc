@@ -36,7 +36,7 @@ class Website extends Atom {
    * with the same extensions available.
    * @var Wjs
    */
-  var $wjs;
+  var $w;
   /**
    * Save the latest page instance.
    * @var \Wjs5\Loader\WebPage\Page
