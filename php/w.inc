@@ -635,6 +635,7 @@ class Wjs extends Atom {
   /**
    * Return the .min.js file path of a given file
    * if exists and current w version is master.
+   * TODO Rename as minified ??
    */
   function jsFileVersioned($jsFile) {
     if ($this->subversion === 'master') {
@@ -683,10 +684,10 @@ class Wjs extends Atom {
     $linkFilePath = $this->filePathMinExists($linkFilePath, $type);
     if ($linkFilePath) {
       $clientPath = $this->pathClient($linkFilePath);
-      // Add && Push.
+      // Add.
       $this->extensionAdd($requireType, $clientPath, array(
         'server' => $linkFilePath,
-        'client' => $clientPath
+        'client' => $clientPath,
       ));
       $this->extensionAddRequire($extensionType, $extensionName, $requireType, $clientPath);
       return $clientPath;
@@ -707,7 +708,7 @@ class Wjs extends Atom {
     // Append css files.
     $output .= $this->renderHeaderLinks('css', $this->cssFiles('client', TRUE), $indent);
     // Append loaders for pushed extensions,
-    // it allow to parse start package completely.
+    // it allow to parse startup package completely.
     // It is not placed progressively during push,
     // to avoid to mix behavior with response package.
     foreach ($this->outputPackage as $type => $items) {
@@ -758,6 +759,9 @@ class Wjs extends Atom {
     return '<script type="text/javascript"' . ($path ? ' src="' . $path . '"' : '') . '>' . $inline . '</script>';
   }
 
+  /**
+   * Render standard css sheet include.
+   */
   function renderCssInclude($file) {
     return '<link rel="stylesheet" media="all" type="text/css" href="' . $file . '" />';
   }
