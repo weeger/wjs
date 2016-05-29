@@ -40,7 +40,7 @@
      */
     __construct: function (options) {
       // Add required plugins TODO IN PROTO.
-      this.required = this.wjs.inheritObject(this, 'required', true);
+      this.required = this.w.inheritObject(this, 'required', true);
       // Base construction.
       this.__super('__construct', arguments);
       // User friendly init.

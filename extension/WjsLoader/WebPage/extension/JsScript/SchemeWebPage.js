@@ -26,7 +26,7 @@
           // String value uses custom treatment.
           if (typeof value === 'string') {
             // Apply to history, it updates website path.
-            this.wjs.urlHistory(
+            this.w.urlHistory(
               // pushState for new page (saved into history,
               // accessible with the back button),
               // replaceState for first loaded page, considered as
@@ -49,10 +49,10 @@
       },
       title: {
         define: function (com, value) {
-          var websitePageTitle = com.wjs.get('JsObject', 'WebsiteInfo').pageTitle;
+          var websitePageTitle = com.w.get('JsObject', 'WebsiteInfo').pageTitle;
           // Prepend website global title
           // defined into settings php file.
-          com.wjs.window.document.title = (websitePageTitle || '') + value;
+          com.w.window.document.title = (websitePageTitle || '') + value;
           return value;
         }
       },
@@ -69,7 +69,7 @@
           // Search into previous page static requirements.
           if (com.loader.pageRequireStatic) {
             // Iterate over requirements.
-            com.wjs.regEach(com.loader.pageRequireStatic, function (type, name) {
+            com.w.regEach(com.loader.pageRequireStatic, function (type, name) {
               // Item is not into the current page.
               if (!value || !value[type] || value[type].indexOf(name) === -1) {
                 previousDelete[type] = previousDelete[type] || [];
@@ -86,7 +86,7 @@
             com.destroyInstances(com.loader.pageInstances);
           }
           if (value) {
-            com.wjs.regEach(value, function (type, name) {
+            com.w.regEach(value, function (type, name) {
               // Item is not already in the (previous) page.
               if (!previousKeep[type] || previousKeep[type].indexOf(name) === -1) {
                 currentNew[type] = currentNew[type] || [];
@@ -118,13 +118,13 @@
             // Force option apply.
             com.optionApply('domImported', options);
             // Find dom into document.
-            value = this.wjs.document.getElementById(com.type + '-preloaded');
+            value = this.w.document.getElementById(com.type + '-preloaded');
             // Preloaded content is hidden by default.
             value.style.display = null;
           }
           output = this.__super('define', [com, value, options]);
           // Search for links.
-          this.wjs.wjsHrefInit(output);
+          this.w.wjsHrefInit(output);
           return output;
         }
       },
@@ -146,8 +146,8 @@
             this.__super('destroy', [com, value]);
           }
           else {
-            this.wjs.extLoaded[com.loader.type][com.type].html = com.options.html.valuePreloaded;
-            this.wjs.destroy(com.loader.type, com.type);
+            this.w.extLoaded[com.loader.type][com.type].html = com.options.html.valuePreloaded;
+            this.w.destroy(com.loader.type, com.type);
           }
         }
       }
@@ -161,7 +161,7 @@
       // Shorthand.
       this.initWebPage();
       // Execute callbacks append before page load.
-      this.wjs.callbacks(this.loader.pageReadyCallbacks);
+      this.w.callbacks(this.loader.pageReadyCallbacks);
       // Reset callback list.
       this.loader.pageReadyCallbacks = [];
       // Allow to load a new page.

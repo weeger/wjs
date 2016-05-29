@@ -3,12 +3,12 @@
 namespace Wjs5;
 
 // Find Wjs if not loaded.
-require_once (defined('WJS5_ROOT') ? WJS5_ROOT : dirname(__FILE__) . '../../../../php/') . 'wjs.inc';
+require_once (defined('WJS5_ROOT') ? WJS5_ROOT : dirname(__FILE__) . '../../../../php/') . 'w.inc';
 
 use \Wjs5\Loader\WebPage\Page;
 
 /**
- * The website class can be used optionally used with wjs
+ * The website class can be used optionally used with w
  * to manage an advanced site and pages integration.
  * It works with WebPage extensions and expect a specific
  * management, se the demo source code for a live example.
@@ -32,7 +32,7 @@ class Website extends Atom {
   /**
    * Une one instance to load pages.
    * This instance is not exported in client side.
-   * Each page has also one specific wjs instance,
+   * Each page has also one specific w instance,
    * with the same extensions available.
    * @var Wjs
    */
@@ -58,7 +58,7 @@ class Website extends Atom {
     // Save resolved path to the website root.
     $this->serverPathWebsiteRootResolved = realpath($this->serverPathWebsiteRoot) . '/';
     // Create default options.
-    $settings = array('wjs' => array());
+    $settings = array('w' => array());
     // Env key found.
     if ($this->envKey) {
       // Load env.
@@ -80,14 +80,14 @@ class Website extends Atom {
     if (is_array($this->optionGet('pageLibraries'))) {
       $this->pageLibraries = array_merge($this->pageLibraries, $this->optionGet('pageLibraries'));
     }
-    // Create wjs instance.
-    $this->wjs = $this->wjsInstance($this->optionGet('wjs'));
+    // Create w instance.
+    $this->w = $this->wjsInstance($this->optionGet('w'));
   }
 
   /**
    * Create a new instance according to
    * given options. Used to instantiate
-   * wjs quickly into website and pages.
+   * w quickly into website and pages.
    *
    * @param $options
    *
@@ -125,10 +125,10 @@ class Website extends Atom {
    */
   function pageInstance($webPageName, $options = array()) {
     /** @var \Wjs5\Loader\WebPage $loader */
-    $loader = $this->wjs->loaderGet($this->pageClassType);
+    $loader = $this->w->loaderGet($this->pageClassType);
     // Return new page.
     /** @var \Wjs5\Loader\WebPage\Page $page */
-    $page = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['wjs']), $this);
+    $page = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['w']), $this);
     // Check if exists.
     if (!$page) {
       print 'Not found page ' . $webPageName;
@@ -154,11 +154,11 @@ class Website extends Atom {
 
   function render($webPageName = 'wjsDefault') {
     // Define if we are on an AJAX page or not.
-    $ajaxKey = $this->wjs->optionGet('paramInc');
+    $ajaxKey = $this->w->optionGet('paramInc');
     $options = array();
     // Query come from an AJAX call.
     if (isset($_GET[$ajaxKey])) {
-      // Use page specific wjs.
+      // Use page specific w.
       if (isset($_GET[$ajaxKey][$this->pageClassType])) {
         // Create page.
         $this->page = $this->pageInstance($_GET[$ajaxKey][$this->pageClassType]);
@@ -166,11 +166,11 @@ class Website extends Atom {
         $this->page->push($options);
         // Remove page from query.
         unset($_GET[$ajaxKey][$this->pageClassType]);
-        // Use the page wjs.
-        $this->page->wjs->response($_GET);
+        // Use the page w.
+        $this->page->w->response($_GET);
       }
-      // Or use the global wjs.
-      $this->wjs->response($_GET);
+      // Or use the global w.
+      $this->w->response($_GET);
     }
     // Test is a page is specified as as default
     // webcom arguments like WebPage=MyPage
@@ -185,7 +185,7 @@ class Website extends Atom {
       // Define html body as preloaded.
       'html' => WJS5_PUSH_WEBPAGE_PRELOADED
     ), $options);
-    // Push into own wjs.
+    // Push into own w.
     $this->page->push($options);
     $body = $this->renderBody();
     return $this->renderDoctype() . '<html>' .
@@ -196,23 +196,23 @@ class Website extends Atom {
 
   function pagePreloadInit() {
     // Add website root css if present.
-    $css = $this->page->wjs->optionGet('serverPathWebsite') . 'theme/styles.css';
+    $css = $this->page->w->optionGet('serverPathWebsite') . 'theme/styles.css';
     if (is_file($css)) {
-      $this->page->wjs->import('CssLink', 'theme/styles.css', array(
+      $this->page->w->import('CssLink', 'theme/styles.css', array(
         'client' => 'theme/styles.css',
         'server' => $css,
       ));
     }
     // Add website root js if present.
-    $css = $this->page->wjs->optionGet('serverPathWebsite') . 'theme/script.js';
+    $css = $this->page->w->optionGet('serverPathWebsite') . 'theme/script.js';
     if (is_file($css)) {
-      $this->page->wjs->import('JsLink', 'theme/script.js');
+      $this->page->w->import('JsLink', 'theme/script.js');
     }
     // Add extra website data.
     $this->websiteInfo = $this->websiteInfoGet();
     $this->page->librariesHook('WebsiteInfo', $this->websiteInfo);
-    $this->page->wjs->import('JsObject', 'WebsiteInfo', $this->websiteInfo);
-    $this->page->wjs->extensionPushRequest($this->extensionGlobal);
+    $this->page->w->import('JsObject', 'WebsiteInfo', $this->websiteInfo);
+    $this->page->w->extensionPushRequest($this->extensionGlobal);
   }
 
   function websiteInfoGet() {
@@ -237,7 +237,7 @@ class Website extends Atom {
   }
 
   function htmlFileGetContent($path) {
-    $path = $this->page->wjs->optionGet('serverPathWebsite') . $path;
+    $path = $this->page->w->optionGet('serverPathWebsite') . $path;
     if (is_file($path)) {
       return file_get_contents($path);
     }

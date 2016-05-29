@@ -7,8 +7,8 @@
     __construct: function () {
       this.queues = {};
       this.queuesStarted = {};
-      this.wjs.queueAdd = this.queueAdd.bind(this);
-      this.wjs.queueNext = this.queueNext.bind(this);
+      this.w.queueAdd = this.queueAdd.bind(this);
+      this.w.queueNext = this.queueNext.bind(this);
     },
 
     queueAdd: function (name, callback) {

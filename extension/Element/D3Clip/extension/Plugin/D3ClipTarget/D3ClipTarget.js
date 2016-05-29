@@ -14,7 +14,7 @@
 
     initPlugin: function () {
       // Target is a position vector.
-      this.target = new (this.wjs.classProto('MathVector3'))(0, 0, 0);
+      this.target = new (this.w.classProto('MathVector3'))(0, 0, 0);
     },
 
     elementInit: function (element) {
@@ -25,7 +25,7 @@
     renderDom: function (element) {
       element.object3d.updateMatrix();
       element.object3d.updateMatrixWorld();
-      var target = new (this.wjs.classProto('MathVector3'))(
+      var target = new (this.w.classProto('MathVector3'))(
         this.variableGet('targetX'),
         this.variableGet('targetY'),
         this.variableGet('targetZ')

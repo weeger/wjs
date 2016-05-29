@@ -34,7 +34,7 @@
             // Remove css property.
             item.style[prefixed] = null;
           });
-          // Bind to wjs on call.
+          // Bind to w on call.
         }).call(this, item, prefixed);
       }
     }

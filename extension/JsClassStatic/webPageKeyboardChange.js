@@ -6,7 +6,7 @@
   W.register('JsClassStatic', 'webPageKeyboardChange', {
     __construct: function () {
       // Key press handler.
-      this.wjs.window.addEventListener('keydown', this.eventKeydown.bind(this));
+      this.w.window.addEventListener('keydown', this.eventKeydown.bind(this));
     },
 
     /**
@@ -15,14 +15,14 @@
      * @param e
      */
     eventKeydown: function (e) {
-      switch (this.wjs.eventKeyCode(e)) {
+      switch (this.w.eventKeyCode(e)) {
         // Left arrow
         case 37 :
-          this.wjs.loaders.WebPage.pageChange('previous');
+          this.w.loaders.WebPage.pageChange('previous');
           break;
         // Right arrow
         case 39 :
-          this.wjs.loaders.WebPage.pageChange('next');
+          this.w.loaders.WebPage.pageChange('next');
           break;
       }
     }

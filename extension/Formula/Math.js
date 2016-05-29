@@ -13,7 +13,7 @@
       var i = 0, item, values = [];
       while (item = formula.values[i++]) {
         // Convert sub formulas to numbers.
-        values.push(this.wjs.formula.result(item, options));
+        values.push(this.w.formula.result(item, options));
       }
       return values.reduce(this[formula.method]);
     },

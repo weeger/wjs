@@ -32,7 +32,7 @@
         defaults: null,
         define: function (com, value, options) {
           com.optionApply('form', options);
-          var domFormId = this.wjs.document.createElement('input');
+          var domFormId = this.w.document.createElement('input');
           // Append id for submission.
           domFormId.setAttribute('name', 'formId');
           domFormId.setAttribute('type', 'hidden');
@@ -77,10 +77,10 @@
       }
       if (this.submit(data)) {
         // Send.
-        this.wjs.ajax({
+        this.w.ajax({
           method: 'POST',
           data: data,
-          url: this.wjs.settings.pathResponse + '?' + this.loader.type + '=1',
+          url: this.w.settings.pathResponse + '?' + this.loader.type + '=1',
           success: this.success.bind(this)
         });
         // Let form do action before receiving response.

@@ -48,7 +48,7 @@
           }
           if (!value || typeof value !== 'object' || !value.isA('Stage')) {
             // If dom destination is specified use it as stage container,
-            value = this.wjs.loaders.Element.stageDefaultCreate(options.domDestination);
+            value = this.w.loaders.Element.stageDefaultCreate(options.domDestination);
             // Use stage as new dom destination.
             options.domDestination = value.dom;
             // Stage can be not the parent if defined as an option,

@@ -11,11 +11,11 @@
 
     __construct: function () {
       this.mouseMoveBind = this.mouseMove.bind(this);
-      this.wjs.window.addEventListener('mousemove', this.mouseMoveBind);
+      this.w.window.addEventListener('mousemove', this.mouseMoveBind);
     },
 
     __destruct: function () {
-      this.wjs.window.removeEventListener('mousemove', this.mouseMoveBind);
+      this.w.window.removeEventListener('mousemove', this.mouseMoveBind);
     },
 
     mouseMove: function (e) {

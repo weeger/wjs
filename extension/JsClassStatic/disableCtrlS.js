@@ -5,7 +5,7 @@
    */
   W.register('JsClassStatic', 'DisableCtrlS', {
     __construct: function () {
-      this.wjs.document.onkeydown = function (event) {
+      this.w.document.onkeydown = function (event) {
         // The property to obtain a keycode depends on browsers you are using.
         // The following statement allows you to obtain a keycode
         var code = (event.keyCode || event.which);

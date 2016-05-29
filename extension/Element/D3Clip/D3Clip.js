@@ -14,7 +14,7 @@
       // Dom may be disabled.
       if (this.dom) {
         // Convert to CSS.
-        this.dom.style[this.wjs.cssVendorPrefix('transform')] = this.matrixToCss(this.object3d.matrixWorld);
+        this.dom.style[this.w.cssVendorPrefix('transform')] = this.matrixToCss(this.object3d.matrixWorld);
       }
     },
 

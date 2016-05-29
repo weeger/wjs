@@ -13,12 +13,12 @@
 
       this.parent = undefined;
 
-      this.up = new (this.wjs.classProto('MathVector3'))(0, 1, 0);
+      this.up = new (this.w.classProto('MathVector3'))(0, 1, 0);
 
-      var position = new (this.wjs.classProto('MathVector3'))();
-      var rotation = new (this.wjs.classProto('MathEuler'))();
-      var quaternion = new (this.wjs.classProto('MathQuaternion'))();
-      var scale = new (this.wjs.classProto('MathVector3'))(1, 1, 1);
+      var position = new (this.w.classProto('MathVector3'))();
+      var rotation = new (this.w.classProto('MathEuler'))();
+      var quaternion = new (this.w.classProto('MathQuaternion'))();
+      var scale = new (this.w.classProto('MathVector3'))(1, 1, 1);
 
       var onRotationChange = function () {
         quaternion.setFromEuler(rotation, false);
@@ -50,20 +50,20 @@
         }
       });
 
-      this.matrix = new (this.wjs.classProto('MathMatrix4'))();
-      this.matrixWorld = new (this.wjs.classProto('MathMatrix4'))();
+      this.matrix = new (this.w.classProto('MathMatrix4'))();
+      this.matrixWorld = new (this.w.classProto('MathMatrix4'))();
 
       // Code style adjustments.
-      this.rotateXv1 = new (this.wjs.classProto('MathVector3'))(1, 0, 0);
-      this.rotateYv1 = new (this.wjs.classProto('MathVector3'))(0, 1, 0);
-      this.rotateZv1 = new (this.wjs.classProto('MathVector3'))(0, 0, 1);
-      this.rotateOnAxisQ1 = new (this.wjs.classProto('MathQuaternion'))(0, 0, 1);
-      this.translateXv1 = new (this.wjs.classProto('MathVector3'))(1, 0, 0);
-      this.translateYv1 = new (this.wjs.classProto('MathVector3'))(0, 1, 0);
-      this.translateZv1 = new (this.wjs.classProto('MathVector3'))(0, 0, 1);
-      this.lookAtm1 = new (this.wjs.classProto('MathMatrix4'))();
-      this.translateOnAxisV1 = new (this.wjs.classProto('MathVector3'))(0, 0, 1);
-      this.worldToLocalM1 = new (this.wjs.classProto('MathMatrix4'))();
+      this.rotateXv1 = new (this.w.classProto('MathVector3'))(1, 0, 0);
+      this.rotateYv1 = new (this.w.classProto('MathVector3'))(0, 1, 0);
+      this.rotateZv1 = new (this.w.classProto('MathVector3'))(0, 0, 1);
+      this.rotateOnAxisQ1 = new (this.w.classProto('MathQuaternion'))(0, 0, 1);
+      this.translateXv1 = new (this.w.classProto('MathVector3'))(1, 0, 0);
+      this.translateYv1 = new (this.w.classProto('MathVector3'))(0, 1, 0);
+      this.translateZv1 = new (this.w.classProto('MathVector3'))(0, 0, 1);
+      this.lookAtm1 = new (this.w.classProto('MathMatrix4'))();
+      this.translateOnAxisV1 = new (this.w.classProto('MathVector3'))(0, 0, 1);
+      this.worldToLocalM1 = new (this.w.classProto('MathMatrix4'))();
     },
 
     rotateOnAxis: function (axis, angle) {
@@ -116,7 +116,7 @@
     },
 
     getWorldPosition: function (optionalTarget) {
-      var result = optionalTarget || new (this.wjs.classProto('MathVector3'))();
+      var result = optionalTarget || new (this.w.classProto('MathVector3'))();
       this.updateMatrixWorld();
       return result.setFromMatrixPosition(this.matrixWorld);
     },

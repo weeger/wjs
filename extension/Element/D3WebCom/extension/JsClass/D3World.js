@@ -11,14 +11,14 @@
       // This is probably not the best way to get the global dom container
       // at least we should not have a dependency to elements loader,
       // or we should define it more explicitly.
-      this.domStage = domContainer || this.wjs.loaders.Element.stageDefault;
+      this.domStage = domContainer || this.w.loaders.Element.stageDefault;
       this.domStage.dom.style.perspective = this.perspective + 'px';
       this.domStageUpdate = this.update.bind(this);
       this.domStage.dom.addEventListener('playPlayerRender', this.domStageUpdate);
       // Global array for z sorting.
       this.child3dSort = [];
       // Global camera.
-      this.camera = new (this.wjs.classProto('ThreeCamera'))(0, 1, 0);
+      this.camera = new (this.w.classProto('ThreeCamera'))(0, 1, 0);
       this.camera.translateZ(cameraZ || -1000);
       this.camera.updateMatrix();
       // First update.

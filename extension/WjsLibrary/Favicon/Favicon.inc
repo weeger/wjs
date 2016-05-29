@@ -56,7 +56,7 @@ class Favicon extends Library {
     foreach ($this->formats as $format) {
       $faviconFile = $this->formatFilePath($format);
       if (is_file($faviconFile)) {
-        $client = $this->page->wjs->pathClient(realpath($faviconFile));
+        $client = $this->page->w->pathClient(realpath($faviconFile));
         $output .= '<link rel="' . (isset($format['rel']) ? $format['rel'] : 'icon') . '" sizes="' . $format['size'] . '" href="' . $client . '">';
       }
     }

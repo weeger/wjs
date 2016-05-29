@@ -19,7 +19,7 @@
      * @require JsMethod > inheritMethod
      */
     __super: function (method, args) {
-      return this.wjs.inheritMethod(this, method, args);
+      return this.w.inheritMethod(this, method, args);
     },
 
     optionApply: function (com, value, options) {

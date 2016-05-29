@@ -50,10 +50,10 @@
          */
         define: function (com, value) {
           if (value) {
-            var wjs = this.wjs;
+            var w = this.w;
             // Load used class.
             var loaderType = com.loader.type,
-              params = wjs.urlQueryParse();
+              params = w.urlQueryParse();
             params[loaderType] = params[loaderType] || {};
             if (this.unique) {
               if (params[loaderType] !== com.type) {
@@ -66,7 +66,7 @@
             }
             // We use only query string,
             // so full path does not change.
-            wjs.urlQueryReplace(params);
+            w.urlQueryReplace(params);
           }
         },
         /**
@@ -74,7 +74,7 @@
          * @require JsMethod > urlQueryBuild
          */
         destroy: function (com) {
-          var loaderType = com.loader.type, params = this.wjs.urlQueryParse();
+          var loaderType = com.loader.type, params = this.w.urlQueryParse();
           if (params[loaderType]) {
             if (this.unique) {
               delete params[loaderType];
@@ -82,7 +82,7 @@
             else {
               delete params[loaderType][com.id];
             }
-            this.wjs.window.history.replaceState(null, null, '?' + this.wjs.urlQueryBuild(params));
+            this.w.window.history.replaceState(null, null, '?' + this.w.urlQueryBuild(params));
           }
         }
       },
@@ -115,12 +115,12 @@
             com.optionApply('cssClasses', options);
             com.optionApply('cssClassInteraction', options);
             com.optionApply('domImported', options);
-            var i = 0, item, dom, backup = com.optionsData.dom = {}, wjs = this.wjs;
-            backup.domCreated = !wjs.isDomNode(value);
+            var i = 0, item, dom, backup = com.optionsData.dom = {}, w = this.w;
+            backup.domCreated = !w.isDomNode(value);
             // Save reference.
-            dom = backup.domCreated ? wjs.document.createElement(value) : value;
+            dom = backup.domCreated ? w.document.createElement(value) : value;
             // Backup attributes.
-            backup.attributes = wjs.extendObject({}, wjs.domAttributes(dom));
+            backup.attributes = w.extendObject({}, w.domAttributes(dom));
             // Id can be used for css selectors.
             dom.setAttribute('id', com.id);
             // Backup current class name.
@@ -142,7 +142,7 @@
             var item, i = 0, backup = com.optionsData.dom, objectKeys = Object.keys,
             // Get list of all attributes to inspect,
             // from current sets,
-              keys = objectKeys(com.wjs.domAttributes(com.dom))
+              keys = objectKeys(com.w.domAttributes(com.dom))
                 // And from saved one.
                 .concat(objectKeys(backup.attributes));
             // Iterates over all attributes.
@@ -178,10 +178,10 @@
           if (!value && (!com.dom || com.dom.parentNode)) {
             return;
           }
-          if (com.dom && com.dom !== com.wjs.document.body) {
-            value = value || com.wjs.document.body;
+          if (com.dom && com.dom !== com.w.document.body) {
+            value = value || com.w.document.body;
             if (typeof value === 'string') {
-              value = com.wjs.document.querySelector(value);
+              value = com.w.document.querySelector(value);
             }
             value.appendChild(com.dom);
           }
@@ -203,7 +203,7 @@
       cssSheets: {
         defaults: [],
         define: function (com, value) {
-          var extRequire = com.wjs.extRequire[com.loader.type];
+          var extRequire = com.w.extRequire[com.loader.type];
           return extRequire && extRequire[com.type] ? extRequire[com.type].CssLink : value;
         }
       },
@@ -223,7 +223,7 @@
               // Get list of links.
               for (i = 0; item = cssSheets[i++];) {
                 // Get dom <style> element.
-                item = this.wjs.get('CssLink', item);
+                item = this.w.get('CssLink', item);
                 // Search for declared CSS rules.
                 if (com.cssRulesClassSearch(item.sheet, com.typeGlobal)) {
                   // If one rule exists, we need to add "typeGlobal" class name.
@@ -251,7 +251,7 @@
             }
             else {
               // Execute asynchronously.
-              this.wjs.async(fadeInComplete);
+              this.w.async(fadeInComplete);
             }
           }
         }
@@ -280,8 +280,8 @@
               com.__destructFadeOutOptionComplete();
             };
             // Search for <div data-wjsInclude="..."> tags.
-            self.wjs.wjsIncludeExit(com.domIncludes, function () {
-              self.wjs.webComExit(com.requiredInstances, function () {
+            self.w.wjsIncludeExit(com.domIncludes, function () {
+              self.w.webComExit(com.requiredInstances, function () {
                 // Launch fadeOut.
                 if (typeof com.classLoads.fadeOut === 'number') {
                   com.__destructOptionsWaiting = true;
@@ -321,14 +321,14 @@
      * @require JsMethod > inheritProperty
      */
     __construct: function (options) {
-      var wjs = this.wjs, i = 0,
+      var w = this.w, i = 0,
         keys, key, optionsNames = [],
         optionsDefault = {},
         option;
       // Create a local copy.
-      wjs.extendObject(optionsDefault, this.optionsDefault);
+      w.extendObject(optionsDefault, this.optionsDefault);
       // Add user options.
-      wjs.extendObject(optionsDefault, options || {});
+      w.extendObject(optionsDefault, options || {});
       // Init variables after mixin which have added some news.
       var variables = this.variables;
       // Flush variables to create a local copy.
@@ -336,7 +336,7 @@
       // Init variables.
       this.variableInitMultiple(variables);
       // Create a unique ID, useful when instances are listed.
-      this.readonly('id', 'w' + wjs.loaders.WebCom.webCompCounter);
+      this.readonly('id', 'w' + w.loaders.WebCom.webCompCounter);
       // Save reference.
       this.loader.instances[this.id] = this;
       // Append it.
@@ -416,10 +416,10 @@
       var self = this;
       // Ensure to execute callback async,
       // this keep code consistency.
-      this.wjs.async(function () {
+      this.w.async(function () {
         // Protect against further modifications.
         // Remove loader reference.
-        delete self.wjs.loaders.WebCom.webComList[self.id];
+        delete self.w.loaders.WebCom.webComList[self.id];
         // Remove instance from loader.
         self.loader.instanceRemove(self);
         // Remove variables created by call_base function,
@@ -477,7 +477,7 @@
     cssRulesClassSearch: function (sheet, mainClassName) {
       var rules, i, j, hasRule = false, className, classRule,
         classRuleIE, cssRule, classLoads = this.classLoads, classRuleFound, duration;
-      rules = this.wjs.cssSheetRules(sheet);
+      rules = this.w.cssSheetRules(sheet);
       for (i = 0; cssRule = rules[i++];) {
         // Selector can be missing into animation sections.
         if (cssRule.selectorText) {
@@ -530,7 +530,7 @@
 
     cssRuleNumberValue: function (cssRule, name) {
       var time;
-      name = this.wjs.cssVendorPrefix(name);
+      name = this.w.cssVendorPrefix(name);
       if (cssRule.style[name]) {
         // Treat string numeric value.
         time = parseFloat(cssRule.style[name].replace(',', '.'));
@@ -555,7 +555,7 @@
         }
         else {
           // Create.
-          domChild = this.wjs.document.createElement(tagName || 'div');
+          domChild = this.w.document.createElement(tagName || 'div');
         }
         // Add class
         domChild.classList.add(name);
@@ -589,8 +589,8 @@
         }
         dom.innerHTML = content;
       }
-      // Parse all node to search for wjs links.
-      this.wjs.wjsHrefInit(dom);
+      // Parse all node to search for w links.
+      this.w.wjsHrefInit(dom);
       // Parse dom.
       this.domParseInclude();
     },
@@ -600,7 +600,7 @@
       // Define destination (no parent allowed for simple web com)
       options.domDestination = options.domDestination || this.dom;
       // Search for <div data-wjsInclude="..."> tags.
-      this.domIncludes = this.domIncludes.concat(this.wjs.wjsIncludeInit(this.dom, options));
+      this.domIncludes = this.domIncludes.concat(this.w.wjsIncludeInit(this.dom, options));
     },
 
     /**
@@ -614,7 +614,7 @@
       if (typeof this.classLoads[className] === 'number') {
         // Add a listener if complete callback specified.
         if (animationCallback) {
-          this.wjs.cssAnimateCallback(this.dom, animationCallback, this.classLoads[className] * 1000);
+          this.w.cssAnimateCallback(this.dom, animationCallback, this.classLoads[className] * 1000);
         }
         // Adding class will launch animation.
         this.dom.classList.add(className);
@@ -631,7 +631,7 @@
       // Dom may be disabled.
       if (domHtml) {
         // Shutdown all animation into html (not into children).
-        this.wjs.cssAnimateStop(domHtml);
+        this.w.cssAnimateStop(domHtml);
       }
     },
 
@@ -652,8 +652,8 @@
         configurable: true
       });
       var isArray = Array.isArray(value);
-      if (this.wjs.isPlainObject(value) || isArray) {
-        value = this.wjs.extend(isArray ? [] : {}, value);
+      if (this.w.isPlainObject(value) || isArray) {
+        value = this.w.extend(isArray ? [] : {}, value);
       }
       this.variableSet(name, value);
     },
@@ -731,7 +731,7 @@
 
     createInstances: function (request) {
       var self = this, instances = [];
-      self.wjs.regEach(request, function (type, name) {
+      self.w.regEach(request, function (type, name) {
         instances.push(self.createInstance(type, name));
       });
       return instances;
@@ -741,7 +741,7 @@
       options = options || {};
       // Define destination (no parent allowed for simple web com)
       options.domDestination = options.domDestination || this.dom;
-      return this.wjs.loaders[type].instance(name, options);
+      return this.w.loaders[type].instance(name, options);
     },
 
     destroyInstances: function (instances) {
@@ -762,7 +762,7 @@
         item.exit(function () {
           if (++j === length) {
             // Launch destroy request.
-            self.wjs.destroy(request);
+            self.w.destroy(request);
           }
         });
       }
@@ -773,7 +773,7 @@
      * @require JsMethod > inheritProperty
      */
     isA: function (type) {
-      return (this.wjs.inheritProperty(this, 'type').indexOf(type) !== -1);
+      return (this.w.inheritProperty(this, 'type').indexOf(type) !== -1);
     },
 
     error: function (message) {

@@ -25,10 +25,10 @@
 
     init: function () {
       var self = this;
-      self.wjs.window.addEventListener('focus', function () {
+      self.w.window.addEventListener('focus', function () {
         self.play();
       });
-      self.wjs.window.addEventListener('blur', function () {
+      self.w.window.addEventListener('blur', function () {
         self.pause();
       });
     },
@@ -40,7 +40,7 @@
       var name = options.name;
       if (!this.tracks[name]) {
         options.player = this;
-        var track = new (this.wjs.classProto('AudioTrackPlayerTrack'))(options);
+        var track = new (this.w.classProto('AudioTrackPlayerTrack'))(options);
         this.tracks[name] = track;
         this.trackSync(track, 0);
         track.play();
@@ -78,7 +78,7 @@
 
     pause: function () {
       this.playing = false;
-      this.wjs.window.clearTimeout(this.timeout);
+      this.w.window.clearTimeout(this.timeout);
       this.hook('pause');
     },
 
@@ -110,7 +110,7 @@
       }
       this.beatCount++;
 
-      this.timeout = this.wjs.window.setTimeout(this.playBeat.bind(this),
+      this.timeout = this.w.window.setTimeout(this.playBeat.bind(this),
         // Compute the next stamp, using start stamp
         // and current music speed, it is much more average
         // than using a static value.

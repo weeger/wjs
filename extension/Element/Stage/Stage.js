@@ -11,26 +11,26 @@
         defaults: true,
         define: function (com, value) {
           if (value) {
-            com.domListen(com.wjs.window, 'resize', 'windowResize');
+            com.domListen(com.w.window, 'resize', 'windowResize');
           }
         },
         destroy: function (com) {
           // Remove event listener.
           if (com.fullScreen) {
-            com.domForget(com.wjs.window, 'resize', 'windowResize');
+            com.domForget(com.w.window, 'resize', 'windowResize');
           }
         }
       },
       dom: {
         define: function (com, value, options) {
           // Ensure to have body as default value.
-          value = value || com.wjs.document.body;
+          value = value || com.w.document.body;
           // Call base function.
           return this.__super('define', [com, value, options]);
         },
         destroy: function (com) {
           // Do not destroy body.
-          if (com.dom !== com.wjs.document.body) {
+          if (com.dom !== com.w.document.body) {
             return this.__super('destroy', arguments);
           }
         }
@@ -53,8 +53,8 @@
     },
 
     refreshSize: function () {
-      this.dom.style.width = this.wjs.window.innerWidth + 'px';
-      this.dom.style.height = this.wjs.window.innerHeight + 'px';
+      this.dom.style.width = this.w.window.innerWidth + 'px';
+      this.dom.style.height = this.w.window.innerHeight + 'px';
     },
 
     callbacks: {

@@ -94,9 +94,9 @@ class WebPage extends WebCom {
     $value = $this->valuePush($name);
     if (!$this->valueIsError($value)) {
       $options = array_merge($options, $value);
-      // Use current wjs if not defined.
+      // Use current w if not defined.
       if ($wjs === NULL) {
-        $wjs = $this->wjs;
+        $wjs = $this->w;
       }
       // Create page class.
       return new $className($this->type, $name, $options, $wjs, $this, $website);

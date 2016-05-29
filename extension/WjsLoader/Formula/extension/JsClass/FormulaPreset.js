@@ -9,15 +9,15 @@
 
     result: function (formula, options) {
       // Create a new object with preset.
-      var merged = this.wjs.extendObject({}, this.preset);
+      var merged = this.w.extendObject({}, this.preset);
       // Add formula params.
-      this.wjs.extendObject(merged, formula);
+      this.w.extendObject(merged, formula);
       // Except formula name.
       merged.formula = this.preset.formula;
       // Let subclasses connect formula params to preset.
       this.presetAlter(merged, formula, options);
       // Execute base preset formula.
-      return this.wjs.formula.result(merged, options);
+      return this.w.formula.result(merged, options);
     },
     // To override...
     presetAlter: W._e

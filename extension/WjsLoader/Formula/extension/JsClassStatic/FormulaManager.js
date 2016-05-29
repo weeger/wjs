@@ -6,14 +6,14 @@
   W.register('JsClassStatic', 'FormulaManager', {
     __construct: function () {
       this.formulas = {};
-      this.wjs.formula = this;
+      this.w.formula = this;
     },
 
     __destruct: function () {
       for (var i = 0, key, keys = Object.keys(this.formulas); key = keys[i++];) {
-        this.wjs.classProtoDestroy(this.className(key));
+        this.w.classProtoDestroy(this.className(key));
       }
-      delete this.wjs.formula;
+      delete this.w.formula;
     },
 
     className: function (name) {
@@ -25,14 +25,14 @@
       proto.classExtends = proto.classExtends || 'Formula';
       var className = this.className(name);
       // Extend prototype.
-      this.wjs.classExtend(className, proto);
+      this.w.classExtend(className, proto);
       // One instance by formula class.
-      this.formulas[name] = new (this.wjs.classProto(className))();
+      this.formulas[name] = new (this.w.classProto(className))();
     },
 
     remove: function () {
       // Remove proto.
-      this.wjs.classProtoDestroy('Formula' + name);
+      this.w.classProtoDestroy('Formula' + name);
       // Remove instance.
       delete this.formulas[name];
     },

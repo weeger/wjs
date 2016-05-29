@@ -7,15 +7,15 @@
     eventTrigger: true,
 
     initFormula: function () {
-      this.wjs.window.addEventListener('DeviceOrientationChange', this.updateEventProxy);
+      this.w.window.addEventListener('DeviceOrientationChange', this.updateEventProxy);
     },
 
     exitFormula: function () {
-      this.wjs.window.removeEventListener('DeviceOrientationChange', this.updateEventProxy);
+      this.w.window.removeEventListener('DeviceOrientationChange', this.updateEventProxy);
     },
 
     result: function (formula) {
-      return this.wjs.AccelerometerListener[formula.direction] || 0;
+      return this.w.AccelerometerListener[formula.direction] || 0;
     }
   });
 }(W));

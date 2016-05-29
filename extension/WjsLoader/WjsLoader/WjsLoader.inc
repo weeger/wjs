@@ -27,24 +27,24 @@ class WjsLoader extends JsLink {
       if (is_file($filePath)) {
         // Scan return resolved links,
         // so we have to locate loader,
-        // according to resolved path of wjs.
+        // according to resolved path of w.
         $value['serverPathJs'] = $filePath;
       }
     }
     // If only server path to js is found,
     // try to detect his path from client side.
     if (isset($value['serverPathJs']) && !isset($value['clientPathJs'])) {
-      $value['clientPathJs'] = $this->wjs->pathClient(realpath($value['serverPathJs']));
+      $value['clientPathJs'] = $this->w->pathClient(realpath($value['serverPathJs']));
     }
     // Load PHP class definition.
     // Data is a path pointing to the main folder.
     require_once $value['classFile'];
     $className = '\Wjs5\Loader\\' . $name;
     /* @var \Wjs5\Loader $loader */
-    $this->wjs->loaders[$name] = $loader = new $className($value, $this->wjs);
+    $this->w->loaders[$name] = $loader = new $className($value, $this->w);
     // Add requirement according to parent class.
-    if ($this->wjs->loaders[$name]->parentClass && $this->wjs->loaders[$name]->parentClass !== 'Loader') {
-      $this->wjs->extensionAddRequire('WjsLoader', $name, 'WjsLoader', $this->wjs->loaders[$name]->parentClass);
+    if ($this->w->loaders[$name]->parentClass && $this->w->loaders[$name]->parentClass !== 'Loader') {
+      $this->w->extensionAddRequire('WjsLoader', $name, 'WjsLoader', $this->w->loaders[$name]->parentClass);
     }
     // Exported data is file URL.
     $path = $loader->optionGet('clientPathJs');
@@ -65,7 +65,7 @@ class WjsLoader extends JsLink {
 
   function extensionPush($name, $options = array(), $value = NULL) {
     // Avoid to add core loaders as extensions.
-    if (!$this->wjs->isCoreExtension($this->type, $name)) {
+    if (!$this->w->isCoreExtension($this->type, $name)) {
       // WjsLoader value is a folder path,
       // expecting that a js file inside it exists,
       // It also can be equal to true if prototype is
@@ -93,13 +93,13 @@ class WjsLoader extends JsLink {
     parent::scanFolderExtensions($directory, $globalData, $order);
     // Now we can search for extra extensions.
     // Get items ordered.
-    $scan = $this->wjs->scanFolderOrdered($directory, $order);
+    $scan = $this->w->scanFolderOrdered($directory, $order);
     foreach ($scan as $item) {
       // Avoid all special folders.
       if ($item{0} !== '.') {
         $extensionPath = $directory . $item . '/extension/';
         if (is_dir($extensionPath)) {
-          $this->wjs->scanFolderExtensions($extensionPath);
+          $this->w->scanFolderExtensions($extensionPath);
         }
       }
     }
@@ -120,7 +120,7 @@ class WjsLoader extends JsLink {
         // Assume that php .inc file exists.
         'classFile' => $filePath . $item . '.inc',
       ), $globalData);
-      $this->wjs->extensionAdd($this->type, $item, $data);
+      $this->w->extensionAdd($this->type, $item, $data);
     }
   }
 }

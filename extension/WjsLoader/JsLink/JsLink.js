@@ -10,15 +10,15 @@
         // Choose dom element with query selector.
         // It can also be missing in case of js aggregation.
         // Then continue parsing.
-        return this.wjs.document.head.querySelector('script[src="' + name + '"]') || true;
+        return this.w.document.head.querySelector('script[src="' + name + '"]') || true;
       }
-      var self = this, wjs = self.wjs,
-        domScript = wjs.document.createElement('script');
+      var self = this, w = self.w,
+        domScript = w.document.createElement('script');
       // Url can be sent from server as a key name
       // or from client as a url name.
-      value = wjs.urlToken(value || name);
-      if (!(value instanceof wjs.window.Error)) {
-        wjs.onload(domScript, function () {
+      value = w.urlToken(value || name);
+      if (!(value instanceof w.window.Error)) {
+        w.onload(domScript, function () {
           // Continue.
           self.parseLinkLoaded(name, domScript, process);
         });
@@ -38,7 +38,7 @@
      */
     enable: function (name, value) {
       if (value.nodeType && !value.parentNode) {
-        this.wjs.document.head.appendChild(value);
+        this.w.document.head.appendChild(value);
       }
     },
 

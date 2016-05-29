@@ -6,6 +6,6 @@ use \Wjs5\Loader\WebPage\Page;
 
 class Wjs extends Library {
   function renderHeadJs(Page $page) {
-    return $page->wjs->renderHeader();
+    return $page->w->renderHeader();
   }
 }

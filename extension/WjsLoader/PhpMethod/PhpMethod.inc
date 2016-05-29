@@ -24,7 +24,7 @@ class PhpMethod extends Loader {
       $info = pathinfo($directory . $item);
       // Select .inc files
       if ($info['extension'] === 'inc') {
-        $this->wjs->extensionAdd($this->type, $info['filename'], $directory . $item);
+        $this->w->extensionAdd($this->type, $info['filename'], $directory . $item);
       }
     }
   }

@@ -15,7 +15,7 @@
      * @require JsMethod > urlQueryReplace
      */
     __construct: function () {
-      this.wjs.extendObject(this, {
+      this.w.extendObject(this, {
         webCompCounter: 0,
         webCompSchemes: {},
         wjsShortcuts: false,
@@ -28,21 +28,21 @@
       this.protoAddPartProxy = this.protoAddPart.bind(this);
       // Create base prototype.
       this.protoAdd(this.protoBaseClass, W.retrieve('WebComScheme', 'Scheme' + this.protoBaseClass));
-      if (!this.wjs.domStyleAnim) {
+      if (!this.w.domStyleAnim) {
         // Create global CSS void animation,
         // used to manage fades without visible changes.
-        this.wjs.domStyleAnim = this.wjs.document.createElement('style');
+        this.w.domStyleAnim = this.w.document.createElement('style');
         // Append keyframe animation,
         // IE can't animate an undefined property or a void animation
         // but it support transition to the same value.
-        this.wjs.domStyleAnim.innerHTML = '@keyframes wjsAnimVoid { from { opacity:inherit; } to { opacity:inherit; } }';
+        this.w.domStyleAnim.innerHTML = '@keyframes wjsAnimVoid { from { opacity:inherit; } to { opacity:inherit; } }';
         // Add to head.
-        this.wjs.document.head.appendChild(this.wjs.domStyleAnim);
+        this.w.document.head.appendChild(this.w.domStyleAnim);
       }
       // Use base construction.
       W.lib.Loader.__construct.call(this);
       // Load instances asked from URL
-      var params = this.wjs.urlQueryParse();
+      var params = this.w.urlQueryParse();
       // Some query are into URL
       if (params[this.type]) {
         var self = this, items = params[this.type], i = 0, key,
@@ -62,9 +62,9 @@
         }
         // Flush URL.
         delete params[type];
-        this.wjs.urlQueryReplace(params);
+        this.w.urlQueryReplace(params);
         // Launch use.
-        this.wjs.use(request, function () {
+        this.w.use(request, function () {
           var i = 0;
           while (key = request[type][i++]) {
             // Create one instance of each requested item.
@@ -76,7 +76,7 @@
 
     __destruct: function () {
       // Remove global keyframe animation.
-      this.wjs.document.head.removeChild(this.domStyleAnim);
+      this.w.document.head.removeChild(this.domStyleAnim);
       // Use base destruction.
       W.lib.Loader.__destruct.call(this);
     },
@@ -116,7 +116,7 @@
           __superProtos: {}
         };
       // Define default scheme data.
-      scheme = this.wjs.extendObject({
+      scheme = this.w.extendObject({
         variables: {},
         options: {},
         optionsDefault: {}
@@ -124,16 +124,16 @@
       // Scheme
       this.webCompSchemes[protoName] = scheme;
       // Create com proto
-      this.wjs.classExtend(protoName, proto);
+      this.w.classExtend(protoName, proto);
       // Build prototype;
-      proto = this.wjs.classProto(protoName).prototype;
+      proto = this.w.classProto(protoName).prototype;
       // Type global.
-      proto.typeGlobal = this.wjs.classProtoLineage(protoName).join('-');
+      proto.typeGlobal = this.w.classProtoLineage(protoName).join('-');
       // Now edit the prototype with inherited variables.
       var keys = Object.keys(scheme), item, i = 0, method;
       while (item = keys[i++]) {
         // Create method name.
-        method = 'protoParse' + this.wjs.upperCaseFirstLetter(item);
+        method = 'protoParse' + this.w.upperCaseFirstLetter(item);
         // Use default if undefined.
         method = this[method] ? method : 'protoParseDefault';
         // Parse.
@@ -172,9 +172,9 @@
       // Not required by default.
       this.optionCreateSetting(optionProto, protoParent, 'required', false);
       // Build prototype.
-      this.wjs.classExtend(optionProto.protoName, optionProto);
+      this.w.classExtend(optionProto.protoName, optionProto);
       // Return object.
-      return new (this.wjs.classProto(optionProto.protoName))(name);
+      return new (this.w.classProto(optionProto.protoName))(name);
     },
 
     /**
@@ -199,7 +199,7 @@
     },
 
     optionDestroy: function (option) {
-      this.wjs.classProtoDestroy(option.protoName);
+      this.w.classProtoDestroy(option.protoName);
     },
 
     /**
@@ -212,7 +212,7 @@
       level = level || 0;
       while (group = keys[i++]) {
         var propertyName = prefix + separator + group;
-        if (level + 1 < depth && this.wjs.isPlainObject(part[name][group])) {
+        if (level + 1 < depth && this.w.isPlainObject(part[name][group])) {
           this.methodsFlatten(proto, part[name], group, depth, level + 1, propertyName);
         }
         else {
@@ -224,9 +224,9 @@
     inheritObject: function (proto, scheme, item) {
       // Variable are unique for each instance.
       var protoParent = Object.getPrototypeOf(proto),
-        base = protoParent[item] ? this.wjs.extend(true, {}, protoParent[item]) : {};
+        base = protoParent[item] ? this.w.extend(true, {}, protoParent[item]) : {};
       // Inherit variables from direct parent.
-      proto[item] = this.wjs.extend(true, base, scheme[item]);
+      proto[item] = this.w.extend(true, base, scheme[item]);
     },
 
     protoParseDefault: function (proto, scheme, item) {
@@ -236,7 +236,7 @@
       }
       // Clone objects
       else {
-        proto[item] = this.wjs.extend(Array.isArray(scheme[item]) ? [] : {}, scheme[item]);
+        proto[item] = this.w.extend(Array.isArray(scheme[item]) ? [] : {}, scheme[item]);
       }
     },
 
@@ -255,10 +255,10 @@
         for (keys = Object.keys(scheme.options); key = keys[i++];) {
           // Create a custom name
           var optionProtoName = 'BasicWebComOption#' + proto.typeGlobal + '#' + key,
-          // Find itself event not already registered into wjs.
+          // Find itself event not already registered into w.
           // Store all protos into WebCom loader only
-          // It is not referenced into wjs when called from construct method.
-            self = (this.wjs.loaders.WebCom || this),
+          // It is not referenced into w when called from construct method.
+            self = (this.w.loaders.WebCom || this),
           // Try to find option.
             option = self.optionsProtos[optionProtoName],
           // Find option proto from scheme.
@@ -307,7 +307,7 @@
      */
     _mixinProto: function (proto, name) {
       // Method must be loaded.
-      var methods = this.wjs.classProtos[name].prototype;
+      var methods = this.w.classProtos[name].prototype;
       this._mixinProtoItem(proto, methods, 'variables');
       this._mixinProtoItem(proto, methods, 'options');
       this._mixinProtoItem(proto, methods, 'optionsDefault');
@@ -325,7 +325,7 @@
           // Create object if not defined.
           proto[name] = Array.isArray(methods[name]) ? [] : {};
         }
-        this.wjs.objectFill(proto[name], methods[name], true);
+        this.w.objectFill(proto[name], methods[name], true);
       }
     },
 
@@ -337,21 +337,21 @@
      * Create a new instance of specified factory class.
      */
     instance: function (name, options) {
-      var wjs = this.wjs, protoName = this.protoName(name),
+      var w = this.w, protoName = this.protoName(name),
       // Base options can be defined from server side.
-        optionsBase = wjs.extendObject({}, wjs.get(this.type, name) || {});
+        optionsBase = w.extendObject({}, w.get(this.type, name) || {});
       // Local options overrides.
-      wjs.extendObject(optionsBase, options || {});
+      w.extendObject(optionsBase, options || {});
       // Prevent to create undefined instances.
-      if (this.wjs.classMethods[protoName]) {
-        return new (wjs.classProto(protoName))(optionsBase);
+      if (this.w.classMethods[protoName]) {
+        return new (w.classProto(protoName))(optionsBase);
       }
-      wjs.err('Trying to create undefined instance ' + protoName);
+      w.err('Trying to create undefined instance ' + protoName);
     },
 
     instanceRegister: function (com) {
       // Save into webcom global registry.
-      this.wjs.loaders.WebCom.webComRegister(com);
+      this.w.loaders.WebCom.webComRegister(com);
       // Count.
       this.instancesCount[com.type] = (this.instancesCount[com.type] || 0) + 1;
       // Local register.
@@ -360,7 +360,7 @@
 
     instanceRemove: function (com) {
       // Remove from webcom global registry.
-      this.wjs.loaders.WebCom.webComRemove(com);
+      this.w.loaders.WebCom.webComRemove(com);
       // Count.
       this.instancesCount[com.type]--;
       if (!this.instancesCount[com.type]) {
@@ -383,7 +383,7 @@
     },
 
     wjsInclude: function (type, name, dom, options) {
-      options = this.wjs.extendObject(options || {}, this.wjs.get(type, name));
+      options = this.w.extendObject(options || {}, this.w.get(type, name));
       options.dom = dom;
       options.domImported = true;
       // Create instance.

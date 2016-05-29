@@ -1,9 +1,9 @@
 (function (W) {
   'use strict';
-  var letterAnimationCallback = function (domElement, wjs) {
+  var letterAnimationCallback = function (domElement, w) {
     var domLetter = domElement.getElementsByClassName('letter')[0];
     // Wait for item animation end.
-    wjs.cssAnimateCallback(domLetter, function () {
+    w.cssAnimateCallback(domLetter, function () {
       // Insert "text" letter before node.
       domElement.insertAdjacentHTML('beforebegin', domLetter.innerHTML !== '&nbsp;' ? domLetter.innerHTML : ' ');
       // Remove node.

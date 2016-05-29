@@ -75,6 +75,6 @@ class WebForm extends WebCom {
       $className = '\\Wjs5\\Loader\\WebForm\\Form';
     }
     // Create class.
-    return new $className($this->type, $name, $data, $this->wjs);
+    return new $className($this->type, $name, $data, $this->w);
   }
 }

@@ -12,17 +12,17 @@
       if (value === 'WJS5_PUSH_CSSLINK_INCLUDED') {
         // Choose dom element with query selector.
         // Then continue parsing.
-        return this.wjs.document.head.querySelector('link[href="' + name + '"]') || true;
+        return this.w.document.head.querySelector('link[href="' + name + '"]') || true;
       }
       var self = this,
-        domLink = self.wjs.document.createElement('link');
+        domLink = self.w.document.createElement('link');
       // Url can be sent from server as a key name
       // or from client as a url name.
-      value = self.wjs.urlToken(value || name);
-      if (!(value instanceof self.wjs.window.Error)) {
-        self.wjs.onload(domLink, function () {
+      value = self.w.urlToken(value || name);
+      if (!(value instanceof self.w.window.Error)) {
+        self.w.onload(domLink, function () {
           // Wait for CSS rules to be loaded.
-          self.wjs.cssSheetLoad(domLink, function (domLink) {
+          self.w.cssSheetLoad(domLink, function (domLink) {
             // Continue.
             self.parseLinkLoaded(name, domLink, process);
           });
@@ -41,7 +41,7 @@
 
     enable: function (name, value) {
       if (value.nodeType && !value.parentNode) {
-        this.wjs.document.head.appendChild(value);
+        this.w.document.head.appendChild(value);
       }
     },
 

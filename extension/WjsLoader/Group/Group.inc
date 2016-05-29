@@ -16,7 +16,7 @@ class Group extends Loader {
       // Values are just requirements.
       foreach ($value as $group => $items) {
         foreach ($items as $item) {
-          $this->wjs->extensionAddRequire($this->type, $name, $group, $item);
+          $this->w->extensionAddRequire($this->type, $name, $group, $item);
         }
       }
       // Save value as true.

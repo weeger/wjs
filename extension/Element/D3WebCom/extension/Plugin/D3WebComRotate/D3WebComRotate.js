@@ -14,7 +14,7 @@
     },
 
     renderDom: function (element) {
-      var Math = this.wjs.Math, object3d = element.object3d,
+      var Math = this.w.Math, object3d = element.object3d,
         frameNumber = element.playPlayer.playFrameCurrent;
       object3d.rotateX(Math.degToRad((frameNumber * this.speedH) % 360));
       object3d.rotateY(Math.degToRad((frameNumber * this.speedP) % 360));

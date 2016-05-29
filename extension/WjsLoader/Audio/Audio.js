@@ -8,9 +8,9 @@
     parse: function (name, value, process) {
       // Create a new Audio object.
       var self = this, type = self.type,
-        audio = new self.wjs.window.Audio(name);
+        audio = new self.w.window.Audio(name);
       // Wait for load completed (no progressive playing)
-      self.wjs.onload(audio, function () {
+      self.w.onload(audio, function () {
         // Allow inherited to place image somewhere.
         self.enable();
         // Continue.

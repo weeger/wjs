@@ -12,7 +12,7 @@
       if (child.getAttribute('data-wjsInclude')) {
         output.push(child);
       }
-      // Element is not a wjs include so we
+      // Element is not a w include so we
       // search recursively into it.
       else {
         output = output.concat(this.wjsIncludeScan(child));

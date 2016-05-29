@@ -13,11 +13,11 @@
       // the not cached json response, so
       // we are forced to evaluate it.
       if (typeof value !== 'function') {
-        // wjs, process and loader variables
+        // w, process and loader variables
         // can be used by scripts to register data.
         // We have to add local vars here, this allow to give
         // references to these vars into parsed script,
-        // also after wjs script compression, who rename local vars.
+        // also after w script compression, who rename local vars.
         eval(value);
       }
       else {

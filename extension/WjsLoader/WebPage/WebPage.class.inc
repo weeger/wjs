@@ -36,8 +36,8 @@ class Page {
   function __construct($type, $name, $options, Wjs $wjs, Loader $loader, Website $website = NULL) {
     $this->extensionType = $type;
     $this->extensionName = $name;
-    // Load own wjs instance.
-    $this->wjs        = $wjs;
+    // Load own w instance.
+    $this->w        = $wjs;
     $this->loader     = $loader;
     $this->website    = $website;
     $this->serverPath = $options['server'];
@@ -48,25 +48,25 @@ class Page {
     if (isset($aliases[$name])) {
       $this->urlAlias = $aliases[$name];
     }
-    // Init wjs as normal library.
-    $this->libraryLoad('Wjs', array('wjs' => $this->wjs));
+    // Init w as normal library.
+    $this->libraryLoad('Wjs', array('w' => $this->w));
     // Load required libraries.
     $this->libraryLoadMultiple($this->librariesRequired);
     // Load other requirements
     foreach ($this->requirements as $extensionType => $extensions) {
       foreach ($extensions as $extensionName) {
-        $this->wjs->import($extensionType, $extensionName);
+        $this->w->import($extensionType, $extensionName);
       }
     }
     $lineage = $this->lineageFilesNames();
     // Load associated css / js after requirements.
     foreach ($lineage as $filePath) {
-      $this->wjs->requireLinksClassFile($filePath, 'css', 'WebPage', $this->extensionName);
-      $js = $this->wjs->requireLinksClassFile($filePath, 'js', 'WebPage', $this->extensionName);
-      // Add requirement into own wjs.
+      $this->w->requireLinksClassFile($filePath, 'css', 'WebPage', $this->extensionName);
+      $js = $this->w->requireLinksClassFile($filePath, 'js', 'WebPage', $this->extensionName);
+      // Add requirement into own w.
       if (is_file($js)) {
         // Import requirements.
-        $this->wjs->jsParseRequire('WebPage', $this->extensionName, file_get_contents($js));
+        $this->w->jsParseRequire('WebPage', $this->extensionName, file_get_contents($js));
       }
     }
   }
@@ -89,7 +89,7 @@ class Page {
 
   function libraryLoad($name, $options = array()) {
     $options['page'] = $this;
-    $this->wjs->extensionPush('WjsLibrary', $name, $options);
+    $this->w->extensionPush('WjsLibrary', $name, $options);
     return end($this->libraries);
   }
 
@@ -177,7 +177,7 @@ class Page {
     }
     $options['title'] = $this->title;
     // Rendering is made during push.
-    $this->wjs->extensionPush($this->extensionType, $this->extensionName, $options);
+    $this->w->extensionPush($this->extensionType, $this->extensionName, $options);
   }
 
   function websiteRenderHead() {
@@ -203,11 +203,11 @@ class Page {
   }
 
   function renderJsInclude($path, $inline = '') {
-    return $this->wjs->renderJsInclude($path, $inline);
+    return $this->w->renderJsInclude($path, $inline);
   }
 
   function renderCssInclude($file) {
-    return $this->wjs->renderCssInclude($file);
+    return $this->w->renderCssInclude($file);
   }
 
   function renderBody($params = array()) {

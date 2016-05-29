@@ -44,7 +44,7 @@
       if (this.fadeController) {
         this.fadeController.stop();
       }
-      this.fadeController = this.wjs.animate(this.audio, {volume: to}, options)
+      this.fadeController = this.w.animate(this.audio, {volume: to}, options)
     },
 
     fadeSync: function (to, complete) {

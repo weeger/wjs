@@ -11,7 +11,7 @@
 
     __construct: function () {
       this.items = {};
-      this.wjs.loaders.JsScript.__construct.call(this);
+      this.w.loaders.JsScript.__construct.call(this);
     },
 
     /**
@@ -27,7 +27,7 @@
       // Start listening for method registering
       this.registerListen(this.type, name, process, value);
       // Parse as a normal script.
-      this.wjs.loaders.JsScript.parse.call(this, name, value, process);
+      this.w.loaders.JsScript.parse.call(this, name, value, process);
       // Return false stops parsing process.
       return false;
     },
@@ -35,9 +35,9 @@
     register: function (type, name, process, value) {
       // Get method
       value = value || W.retrieve(this.type, name);
-      // Localize functions to wjs.
+      // Localize functions to w.
       if (typeof value === 'function') {
-        value = value.bind(this.wjs);
+        value = value.bind(this.w);
       }
       // Save method internally, loaders sub classes
       // may have already created entry.
@@ -57,16 +57,16 @@
     },
 
     enable: function (name) {
-      // Add shortcut into wjs[name].
-      if (this.wjsShortcuts === true && !this.wjs[name]) {
-        this.wjs[name] = this.items[name];
+      // Add shortcut into w[name].
+      if (this.wjsShortcuts === true && !this.w[name]) {
+        this.w[name] = this.items[name];
       }
     },
 
     disable: function (name) {
-      // Remove shortcut from wjs[name].
-      if (this.wjsShortcuts === true && this.wjs[name]) {
-        delete this.wjs[name];
+      // Remove shortcut from w[name].
+      if (this.wjsShortcuts === true && this.w[name]) {
+        delete this.w[name];
       }
     }
   });

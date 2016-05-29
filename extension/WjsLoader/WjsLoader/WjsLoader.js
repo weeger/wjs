@@ -7,32 +7,32 @@
     processType: 'server',
 
     destroy: function (name, data) {
-      var wjs = this.wjs, loaders = wjs.loaders;
+      var w = this.w, loaders = w.loaders;
       // Handle missing loaders.
       if (loaders[name]) {
         loaders[name].__destruct();
         // Remove prototype.
-        wjs.classProtoDestroy('WjsLoader' + name);
+        w.classProtoDestroy('WjsLoader' + name);
         delete loaders[name];
-        delete wjs.extLoaded[name];
-        delete wjs.extRequire[name];
+        delete w.extLoaded[name];
+        delete w.extRequire[name];
       }
       return loaders.JsLink.destroy.call(this, name, data);
     },
 
     parse: function (name, value, process) {
-      var wjs = this.wjs;
+      var w = this.w;
       // If value is true, build loader
       // with the default prototype.
       if (value === true) {
-        wjs.loaderAdd(name);
+        w.loaderAdd(name);
         return true;
       }
       else {
         // Listen for item registry.
         this.registerListen(this.type, name, process);
         // De not return JsScript return.
-        wjs.loaders.JsLink.parse.call(this, name, value, process);
+        w.loaders.JsLink.parse.call(this, name, value, process);
         // Block process in all cases.
         return false;
       }
@@ -45,8 +45,8 @@
 
     register: function (type, name, process) {
       var proto = W.retrieve(this.type, name);
-      // Append loader for this wjs instance.
-      this.wjs.loaderAdd(name, proto);
+      // Append loader for this w instance.
+      this.w.loaderAdd(name, proto);
       // Continue parsing.
       process.itemParseComplete(this.type, name, proto);
     }

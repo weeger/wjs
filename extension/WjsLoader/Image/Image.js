@@ -8,9 +8,9 @@
     parse: function (name, value, process) {
       // Create a new Image object.
       var self = this, type = self.type,
-        image = new self.wjs.window.Image();
+        image = new self.w.window.Image();
       // Wait for load completed.
-      self.wjs.onload(image, function () {
+      self.w.onload(image, function () {
         // Allow inherited to place image somewhere.
         self.enable();
         // Continue.

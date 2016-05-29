@@ -12,20 +12,20 @@
     __construct: function () {
       this.windowScrollBind = this.windowScroll.bind(this);
       this.windowResizeBind = this.windowResize.bind(this);
-      this.wjs.window.addEventListener('scroll', this.windowScrollBind);
-      this.wjs.window.addEventListener('resize', this.windowResizeBind);
+      this.w.window.addEventListener('scroll', this.windowScrollBind);
+      this.w.window.addEventListener('resize', this.windowResizeBind);
     },
 
     __destruct: function () {
-      this.wjs.window.removeEventListener('scroll', this.windowScrollBind);
-      this.wjs.window.removeEventListener('resize', this.windowResizeBind);
+      this.w.window.removeEventListener('scroll', this.windowScrollBind);
+      this.w.window.removeEventListener('resize', this.windowResizeBind);
     },
 
     scrollEnable: function (direction, speed) {
       var domName = 'domScroll' + direction;
       if (!this[domName]) {
-        var domScroll = this.wjs.document.createElement('div'), style = domScroll.style;
-        this.wjs.document.body.appendChild(domScroll);
+        var domScroll = this.w.document.createElement('div'), style = domScroll.style;
+        this.w.document.body.appendChild(domScroll);
         style.position = 'absolute';
         style.visibility = 'hidden';
         style.top =
@@ -55,14 +55,14 @@
     scrollRefresh: function (direction) {
       var style = this['domScroll' + direction].style;
       // Define width / height.
-      style[direction === 'X' ? 'width' : 'height'] = (this.wjs.window.innerWidth * this['scrollSpeed' + direction]) + 'px';
+      style[direction === 'X' ? 'width' : 'height'] = (this.w.window.innerWidth * this['scrollSpeed' + direction]) + 'px';
       // Need at least one pixel to be active.
       style[direction === 'X' ? 'height' : 'width'] = '1px';
     },
 
     scrollGet: function (direction) {
       var method = 'scroll' + direction;
-      return this.wjs.document.body[method] || this.wjs.document.documentElement[method];
+      return this.w.document.body[method] || this.w.document.documentElement[method];
     },
 
     windowResize: function () {
@@ -76,9 +76,9 @@
 
     windowScroll: function () {
       this.scrollX = this.scrollGet('Left');
-      this.scrollXPercent = this.scrollX / this.wjs.window.innerWidth;
+      this.scrollXPercent = this.scrollX / this.w.window.innerWidth;
       this.scrollY = this.scrollGet('Top');
-      this.scrollYPercent = this.scrollY / this.wjs.window.innerHeight;
+      this.scrollYPercent = this.scrollY / this.w.window.innerHeight;
       W.trigger('ScrollManagerChange', [this]);
     }
   });

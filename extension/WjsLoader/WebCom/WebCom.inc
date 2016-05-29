@@ -21,9 +21,9 @@ class WebCom extends Loader {
       );
     }
     if (!isset($data['client'])) {
-      // Define path according wjs, this path can be wrong
+      // Define path according w, this path can be wrong
       // if component is accessed into a rewritten client path.
-      $data['client'] = $this->wjs->pathClient(realpath($data['server']) . '/');
+      $data['client'] = $this->w->pathClient(realpath($data['server']) . '/');
     }
     // Do not add requirements as part of data.
     $require = FALSE;
@@ -34,13 +34,13 @@ class WebCom extends Loader {
     // Load sub extensions
     $extension = $data['server'] . '/extension/';
     if (is_dir($extension)) {
-      $this->wjs->scanFolderExtensions($extension);
+      $this->w->scanFolderExtensions($extension);
     }
     // Normal add.
     parent::extensionAdd($name, $data);
     // Load requirements.
     if ($require) {
-      $this->wjs->extensionAddRequireArray($this->type, $name, $require);
+      $this->w->extensionAddRequireArray($this->type, $name, $require);
     }
   }
 
@@ -70,11 +70,11 @@ class WebCom extends Loader {
         if ($this->requireCssLinks) {
           $cssPath = realpath($value['server']) . '/' . $name;
           // Loads css or min.css
-          $this->wjs->requireLinksClassFile($cssPath . '.css', 'css', $this->type, $name);
+          $this->w->requireLinksClassFile($cssPath . '.css', 'css', $this->type, $name);
         }
         if ($this->requireJsLinks) {
           // Search for extra js file.
-          $this->wjs->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.js', 'js', $this->type, $name);
+          $this->w->requireLinksClassFile(realpath($value['server']) . '/' . $name . '.js', 'js', $this->type, $name);
         }
         // Remove unsafe data.
         unset($value['server']);
@@ -96,8 +96,8 @@ class WebCom extends Loader {
   function htmlParse($name, $html) {
     $value = $this->valuePush($name);
     // Rebase links / images to web component folder.
-    $html = $this->wjs->htmlRebase($html, $value['client']);
-    $this->wjs->htmlParseIncludeRequire($html, $this->type, $name, array(), TRUE);
+    $html = $this->w->htmlRebase($html, $value['client']);
+    $this->w->htmlParseIncludeRequire($html, $this->type, $name, array(), TRUE);
     return $html;
   }
 
@@ -107,21 +107,21 @@ class WebCom extends Loader {
   function scanFolderItem($directory, $item, $globalData) {
     if (is_dir($directory . $item)) {
       // Append global data.
-      $this->wjs->extensionAdd($this->type, $item, $directory . $item . '/', $globalData);
+      $this->w->extensionAdd($this->type, $item, $directory . $item . '/', $globalData);
     }
   }
 
   function urlHistoryLoad() {
     if (isset($_GET, $_GET[$this->type])) {
       foreach ($_GET[$this->type] as $item) {
-        $this->wjs->import($this->type, $item);
+        $this->w->import($this->type, $item);
       }
     }
   }
 
   function query($group) {
     if (isset($_GET, $_GET[$this->type], $_GET[$this->type][$group])) {
-      $this->wjs->import($this->type, $_GET[$this->type][$group]);
+      $this->w->import($this->type, $_GET[$this->type][$group]);
       return TRUE;
     }
     return FALSE;

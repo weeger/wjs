@@ -10,7 +10,7 @@ define('WJS5_ERR_PUSH_UNDEFINED_EXTENSION_TYPE', 'WJS5_ERR_PUSH_UNDEFINED_EXTENS
 if (!defined('WJS5_ROOT')) {
   // Wjs root contains path to this file like and
   // can be defined externally in order to keep
-  // unresolved symlinks to wjs, when used.
+  // unresolved symlinks to w, when used.
   // It has better results on client relative
   // paths detection. This behavior is due to PHP
   // limitation who always resolve symlinks and
@@ -31,31 +31,37 @@ class Wjs extends Atom {
   var $optionsDefault = array(
     'serverPathCache'     => FALSE, // Cache directory.
     'clientPathCache'     => '', // Cache directory.
-    'staticFilesEnabled'  => FALSE, // Name of aggregated wjs file.
+    'staticFilesEnabled'  => FALSE, // Name of aggregated w file.
     'staticFilesFlush'    => FALSE, // Allow to override existing files.
     'autoResponse'        => FALSE, // When true, execute ajax() method on Wjs instance.
     // These options will be transmitted to JS,
     // that's why some parameters are shorts.
-    'aggregationFileName' => FALSE, // Name of aggregated wjs file.
-    'clientName'          => 'wjs', // Wjs javascript object name like window.wjs.
+    'aggregationFileName' => FALSE, // Name of aggregated w file.
+    'clientName'          => 'w', // Wjs javascript object name like window.w.
     'paramExtra'          => '', // Parameters appended to AJAX requests.
-    'paramInc'            => 'wjs', // Name of AJAX parameter.
-    'paramExc'            => 'wjs-exc', // Name of AJAX parameter (exclusions).
-    'paramToken'          => 'wjs-tok', // Name of URL extra token (AJAX and cache flush).
+    'paramInc'            => 'w', // Name of AJAX parameter.
+    'paramExc'            => 'w-exc', // Name of AJAX parameter (exclusions).
+    'paramToken'          => 'w-tok', // Name of URL extra token (AJAX and cache flush).
   );
+  var $id;
   /**
    * Contain loaders objects.
-   * @var array
+   * @var Loader[]
    */
   var $loaders = array();
   /**
-   * Contain data to transmit to wjs javascript object.
+   * Contain data to transmit to w javascript object.
    */
   var $outputPackage = array();
+    /**
+   * Contain extension to transmit to w javascript object.
+   * @var Extension[]
+   */
+  var $extensionsPushed = array();
   /**
    * Contain list of core files, used to complete list
    * of output js files list. Core files can differ from
-   * wjs versions, public version have core file aggregated
+   * w versions, public version have core file aggregated
    * into one file at the library root.
    * @var array
    */
@@ -66,7 +72,7 @@ class Wjs extends Atom {
       'w.min.js',
     ),
     'jQuery' => array(
-      'wjs.jquery.js',
+      'w.jquery.js',
     ),
     'source' => array(
       // Files order is important.
@@ -92,20 +98,27 @@ class Wjs extends Atom {
   var $extensionExclude = array();
   /**
    * Allow to send user extra settings
-   * to client side wjs instance.
+   * to client side w instance.
    * @var array
    */
   var $settings = array();
 
+  static $wjsInstancesCounter = 0;
+
   /**
-   * Initialize wjs.
+   * Initialize w.
    * Can take multiple options types, if no option, try
-   * to detect current wjs location path, if a string is
+   * to detect current w location path, if a string is
    * given, consider it as location path, otherwise
    * user argument is an options collection.
    */
   function __construct($options = array()) {
     parent::__construct($options);
+    // Define core version.
+    $this->subversion = isset($options['subversion']) ? $options['subversion'] : 'master';
+
+    // Use an internal id to identify instances.
+    $this->id = self::$wjsInstancesCounter++;
 
     // Save real working directory, it can be another
     // directory that website root when website is included.
@@ -135,6 +148,7 @@ class Wjs extends Atom {
         explode('/', $this->optionGet('clientPathFull')),
         explode('/', dirname($_SERVER['SCRIPT_NAME']))
       ));
+      // Add a trailing slash if not empty.
       if ($folder) {
         $folder = $this->pathAddSlash($folder);
       }
@@ -168,7 +182,7 @@ class Wjs extends Atom {
     // Relocate response path to client site root.
     $this->optionSet('clientPathResponse', $this->pathClientRebase($this->optionGet('clientPathResponse')));
 
-    // Define relative path of wjs folder,
+    // Define relative path of w folder,
     // with cwd and unresolved root path.
     $this->optionSet('serverPathWjs', $this->pathRelative(
     // Use cwd as base path.
@@ -176,7 +190,7 @@ class Wjs extends Atom {
       // Subtract link.
       WJS5_ROOT));
 
-    // Fill wjs client path if still missing.
+    // Fill w client path if still missing.
     // Defining it manually can be useful
     // when URL rewriting is used.
     if (!$this->optionGet('clientPathWjs')) {
@@ -277,7 +291,7 @@ class Wjs extends Atom {
   }
 
   /**
-   * Transform $_GET style array to wjs response package.
+   * Transform $_GET style array to w response package.
    *
    * @param null $get
    */
@@ -498,7 +512,7 @@ class Wjs extends Atom {
   }
 
   /**
-   * Return true if extension is part of the wjs core,
+   * Return true if extension is part of the w core,
    * which is no need to be loaded or required as dependency.
    *
    * @param $extensionType
@@ -553,7 +567,7 @@ class Wjs extends Atom {
     }
     $outputJson[] = '"loadersBasic":' . json_encode($loadersBasic);
     // Add list of WjsLoader available remotely,
-    // it prevent wjs to fail when retrieving undefined loaders.
+    // it prevent w to fail when retrieving undefined loaders.
     $outputJson[] = '"loadersExtra":' . json_encode(array_keys($this->loaderGet('WjsLoader')->extensions));
     // Load functions and class called in server side for this page.
     $jsPackage = $this->responsePackage();
@@ -574,7 +588,7 @@ class Wjs extends Atom {
   }
 
   /**
-   * List of required javascript files for wjs to works properly.
+   * List of required javascript files for w to works properly.
    * It includes loader's javascript from core and extra loaders
    * append from external applications.
    */
@@ -620,7 +634,7 @@ class Wjs extends Atom {
 
   /**
    * Return the .min.js file path of a given file
-   * if exists and current wjs version is master.
+   * if exists and current w version is master.
    */
   function jsFileVersioned($jsFile) {
     if ($this->subversion === 'master') {
@@ -681,7 +695,7 @@ class Wjs extends Atom {
   }
 
   /**
-   * Return all needed scripts for HTML head to init wjs.
+   * Return all needed scripts for HTML head to init w.
    *
    * @param int $indentLength Allow links to be indented.
    *
@@ -702,7 +716,7 @@ class Wjs extends Atom {
     // In case of cache we aggregate files in one.
     if ($this->optionGet('aggregationEnabled')) {
       $aggregationFileName = $this->optionGet('aggregationFileName');
-      $aggregationFileName = $this->optionGet('serverPathCache') . ($aggregationFileName ? $aggregationFileName : 'wjs' . $this->optionGet('cacheToken') . '.js');
+      $aggregationFileName = $this->optionGet('serverPathCache') . ($aggregationFileName ? $aggregationFileName : 'w' . $this->optionGet('cacheToken') . '.js');
       $files               = $this->jsFiles('server', TRUE);
       // Create file.
       if ($this->optionGet('aggregationFlush') === TRUE || !is_file($aggregationFileName)) {
@@ -749,7 +763,7 @@ class Wjs extends Atom {
   }
 
   /**
-   * Render javascript used to start wjs.
+   * Render javascript used to start w.
    * @return string
    */
   function renderJsUnpacker() {

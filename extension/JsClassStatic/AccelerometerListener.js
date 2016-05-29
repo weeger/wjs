@@ -7,11 +7,11 @@
 
     __construct: function () {
       this.deviceOrientationBind = this.deviceOrientation.bind(this);
-      this.wjs.window.addEventListener('deviceorientation', this.deviceOrientationBind);
+      this.w.window.addEventListener('deviceorientation', this.deviceOrientationBind);
     },
 
     __destruct: function () {
-      this.wjs.window.removeEventListener('deviceorientation', this.deviceOrientationBind);
+      this.w.window.removeEventListener('deviceorientation', this.deviceOrientationBind);
     },
 
     deviceOrientation: function (e) {

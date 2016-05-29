@@ -24,7 +24,7 @@
     };
   /**
    * Return prefixed name of the given CSS property.
-   * Only supports methods used internally by wjs.
+   * Only supports methods used internally by w.
    */
   W.register('JsMethod', 'cssVendorPrefix', function (name) {
     if (!buffer[name]) {

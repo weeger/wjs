@@ -14,7 +14,7 @@ class Binder extends WebCom {
     $output = parent::extensionPush($name, $excludeRequire, $value);
     if (!$this->valueIsError($value)) {
       // CSS for binders is not a link, but is loaded and parsed.
-      $pathCss = $this->wjs->filePathMinExists($value['server'] . '/' . $name . '.css', 'css');
+      $pathCss = $this->w->filePathMinExists($value['server'] . '/' . $name . '.css', 'css');
       if (file_exists($pathCss)) {
         $output['#data']['css'] = file_get_contents($pathCss);
       }

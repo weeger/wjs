@@ -18,7 +18,7 @@ class Form {
     foreach ($data as $key => $value) {
       $this->$key = $value;
     }
-    $this->wjs = $wjs;
+    $this->w = $wjs;
   }
 
   function submitCall($post) {

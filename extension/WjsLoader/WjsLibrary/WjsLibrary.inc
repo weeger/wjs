@@ -51,7 +51,7 @@ class WjsLibrary extends WebCom {
         'server' => $value['server']
       ));
       // Add requirements for library.
-      $this->wjs->extensionAddRequireArray($this->type, $name, $library->requirements());
+      $this->w->extensionAddRequireArray($this->type, $name, $library->requirements());
       $output = parent::extensionPush($name, $options, $value);
       // Libraries can be only a collection of requirements.
       if ($library->hiddenPush) {
@@ -68,7 +68,7 @@ class WjsLibrary extends WebCom {
   function scanFolderItem($directory, $item, $globalData) {
     // Resolve path to support symlinks.
     if (is_dir(realpath($directory) . '/' . $item)) {
-      $this->wjs->extensionAdd($this->type, $item, $directory . $item);
+      $this->w->extensionAdd($this->type, $item, $directory . $item);
     }
   }
 }

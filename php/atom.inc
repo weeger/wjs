@@ -70,12 +70,12 @@ class Atom {
   }
 
   /**
-   * Trigger wjs error.
+   * Trigger w error.
    *
    * @param string $message
    */
   function error($message) {
-    trigger_error('wjs error : ' . $message, $this->errorLevel);
+    trigger_error('w error : ' . $message, $this->errorLevel);
     exit;
   }
 

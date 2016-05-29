@@ -30,8 +30,8 @@ class CssLink extends Loader {
       if ($render) {
         // Remove internally.
         $this->extensionsPushed[$name]['#data'] =
-          // Remove into wjs registry.
-        $this->wjs->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_CSSLINK_INCLUDED;
+          // Remove into w registry.
+        $this->w->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_CSSLINK_INCLUDED;
       }
       // Return always server path.
       return $this->extensions[$name][$side];

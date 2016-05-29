@@ -31,10 +31,10 @@
       D3World: {
         define: function (com, value) {
           if (!value) {
-            if (!this.wjs.D3WorldGlobal) {
-              this.wjs.D3WorldGlobal = new (this.wjs.classProto('D3World'))();
+            if (!this.w.D3WorldGlobal) {
+              this.w.D3WorldGlobal = new (this.w.classProto('D3World'))();
             }
-            value = this.wjs.D3WorldGlobal;
+            value = this.w.D3WorldGlobal;
           }
           return value;
         },
@@ -44,7 +44,7 @@
         destroy: function (com, value) {
           if (value) {
             // Remove
-            this.wjs.arrayDeleteItem(value.child3dSort, com);
+            this.w.arrayDeleteItem(value.child3dSort, com);
           }
         }
       }
@@ -52,7 +52,7 @@
 
     __construct: function () {
       // Create object for 3D calculations.
-      this.object3d = new (this.wjs.classProto('ThreeObject3d'))(0, 1, 0);
+      this.object3d = new (this.w.classProto('ThreeObject3d'))(0, 1, 0);
       // Normal com construct.
       this.__super('__construct', arguments);
       // Custom init.
@@ -90,9 +90,9 @@
       object3d.translateY(-this.translateY);
       object3d.translateZ(-this.translateZ);
       // Apply rotation.
-      object3d.rotateX(this.wjs.Math.degToRad(this.variableGet('rotateH')));
-      object3d.rotateY(this.wjs.Math.degToRad(this.variableGet('rotateP')));
-      object3d.rotateZ(this.wjs.Math.degToRad(this.variableGet('rotateB')));
+      object3d.rotateX(this.w.Math.degToRad(this.variableGet('rotateH')));
+      object3d.rotateY(this.w.Math.degToRad(this.variableGet('rotateP')));
+      object3d.rotateZ(this.w.Math.degToRad(this.variableGet('rotateB')));
 
       return renderData;
     },

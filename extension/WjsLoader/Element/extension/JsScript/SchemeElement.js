@@ -105,7 +105,7 @@
             while (options = value[keys[i++]]) {
               // Options, object is extended to break the link
               // between sent object and optionsDefaults parent reference.
-              options = com.wjs.extendObject({}, options);
+              options = com.w.extendObject({}, options);
               // Create child.
               output.push(com.childAdd(options));
             }
@@ -169,7 +169,7 @@
      * Create a binder, set this as parent.
      */
     childAdd: function (options) {
-      var wjs = this.wjs, split;
+      var w = this.w, split;
       // Parse type string, format loader::type.
       split = options.type ? options.type.split('::') : ['Element', false];
       // Type is no more used.
@@ -177,7 +177,7 @@
       // Attach parent.
       options.parent = this;
       // Create instance, all constructors must exist.
-      return wjs.loaders[split[0]].instance(split[1], options);
+      return w.loaders[split[0]].instance(split[1], options);
     },
 
     /**
@@ -207,7 +207,7 @@
      * @require JsMethod > arrayDeleteItem
      */
     elementRemove: function (element) {
-      this.wjs.arrayDeleteItem(this.children, element);
+      this.w.arrayDeleteItem(this.children, element);
       element.parent = null;
     },
 
@@ -246,7 +246,7 @@
      * Plugin should have been preloaded.
      */
     pluginAdd: function (name, options, callback) {
-      var wjs = this.wjs,
+      var w = this.w,
         plugins = this.plugins, plugin,
         pluginsList = this.pluginsList;
       // A plugin instance can be sent.
@@ -257,7 +257,7 @@
       }
       else {
         // Create plugin.
-        plugin = wjs.loaders.Plugin.instance(name, options);
+        plugin = w.loaders.Plugin.instance(name, options);
       }
       // Init binder.
       plugin.elementAdd(this);
@@ -279,7 +279,7 @@
         if (!addOnce || !this.pluginGet(options.type)) {
           // Add options for all plugins.
           if (globalOptions) {
-            this.wjs.extendObject(options, globalOptions);
+            this.w.extendObject(options, globalOptions);
           }
           // Manage case of already created plugins objects.
           if (options.isA && options.isA('Plugin')) {
@@ -338,8 +338,8 @@
       // Kill plugin.
       plugin.elementRemove(this);
       // Cleanup.
-      this.wjs.arrayDeleteItem(plugins[plugin.type], plugin);
-      this.wjs.arrayDeleteItem(this.pluginsList, plugin);
+      this.w.arrayDeleteItem(plugins[plugin.type], plugin);
+      this.w.arrayDeleteItem(this.pluginsList, plugin);
       if (Object.keys(plugins[plugin.type]).length === 0) {
         delete plugins[plugin.type];
       }
@@ -389,7 +389,7 @@
         this.renderChildren();
         // Player trigger an event on dom tree.
         if (this.playPlayer === this && this.dom) {
-          this.wjs.trigger('playPlayerRender', this.playPlayerOptions, this.dom);
+          this.w.trigger('playPlayerRender', this.playPlayerOptions, this.dom);
         }
       }
     },
@@ -420,7 +420,7 @@
         if (animation.options.complete) {
           animation.options.complete();
         }
-        this.wjs.arrayDeleteByIndex(this.animations, animationIndex);
+        this.w.arrayDeleteByIndex(this.animations, animationIndex);
         return animationIndex;
       }
       return ++animationIndex;
@@ -516,7 +516,7 @@
     playFrameNextLaunch: function () {
       if (this.frameNextEnabled) {
         // Launch next frame.
-        this.wjs.window.setTimeout(this.playFrameExecuteProxy, this.playFrameNext);
+        this.w.window.setTimeout(this.playFrameExecuteProxy, this.playFrameNext);
       }
     },
 
@@ -524,7 +524,7 @@
       // Convert numeric to object.
       options = typeof options === 'object' ? options : {duration: options};
       // Convert other format to object with complete callback.
-      options = this.wjs.extendOptions(options);
+      options = this.w.extendOptions(options);
       // Save start stamp.
       options.timeStart = (new Date()).getTime();
       // Save stop stamp.
@@ -546,7 +546,7 @@
       }
       // Create easing.
       if (options.easing) {
-        options.easing = new (this.wjs.classProto('BezierEasing'))(
+        options.easing = new (this.w.classProto('BezierEasing'))(
           options.easing[0],
           options.easing[1],
           options.easing[2],

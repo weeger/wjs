@@ -8,11 +8,11 @@
     },
 
     initFormula: function () {
-      this.wjs.window.addEventListener('resize', this.updateEventProxy);
+      this.w.window.addEventListener('resize', this.updateEventProxy);
     },
 
     exitFormula: function () {
-      this.wjs.window.removeEventListener('resize', this.updateEventProxy);
+      this.w.window.removeEventListener('resize', this.updateEventProxy);
     },
 
     result: function (formula) {

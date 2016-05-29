@@ -11,7 +11,7 @@
     protoBaseClass: 'Binder',
 
     __construct: function () {
-      this.wjs.extendObject(this, {
+      this.w.extendObject(this, {
         domStyle: {},
         cssSheetLoadQueue: [],
         classSaved: {},
@@ -20,7 +20,7 @@
         cssDomItems: {},
         cssRewritten: {}
       });
-      this.wjs.loaders.WebCom.__construct.call(this);
+      this.w.loaders.WebCom.__construct.call(this);
     },
 
     parse: function (name, value, process) {
@@ -38,7 +38,7 @@
         // Complete loading.
         process.itemParseComplete(type, name,
           // Parse components.
-          self.wjs.loaders.WebCom.parse.apply(self, args));
+          self.w.loaders.WebCom.parse.apply(self, args));
       });
       // Wait for load complete.
       return false;
@@ -46,7 +46,7 @@
 
     protoAddPart: function (name) {
       var protoName = this.protoName(name);
-      this.wjs.loaders.WebCom.protoAddPart.apply(this, arguments);
+      this.w.loaders.WebCom.protoAddPart.apply(this, arguments);
       // Create CSS classes for dom,
       // css can be inherited from parent.
       this.cssClassInit(protoName, true);
@@ -56,7 +56,7 @@
       var self = this, check = function () {
         var domCss = self.cssSheetLoadQueue.shift();
         if (domCss) {
-          self.wjs.cssSheetLoad(domCss, check);
+          self.w.cssSheetLoad(domCss, check);
         }
         else if (complete) {
           complete();
@@ -80,14 +80,14 @@
         // Create CSS for whole bundle if not exists.
         if (data.css && !domStyle[protoName]) {
           // Append new style tag
-          domStyle[protoName] = this.wjs.document.createElement('style');
+          domStyle[protoName] = this.w.document.createElement('style');
           // Place CSS into it.
           // Add client path to relative URLs.
           domStyle[protoName].innerHTML = data.css.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + data.client);
           // Add to load queue.
           this.cssSheetLoadQueueAppend(domStyle[protoName]);
           // Append to head.
-          this.wjs.document.head.appendChild(domStyle[protoName]);
+          this.w.document.head.appendChild(domStyle[protoName]);
         }
       }
       else {
@@ -111,7 +111,7 @@
         insideBinder = false,
         typeCss,
         typePart,
-        lineage = this.wjs.classProtoLineage(protoName),
+        lineage = this.w.classProtoLineage(protoName),
         lineagePart = [],
         typeGlobal = lineage.join('-'),
         cssRewritten = this.cssRewritten;

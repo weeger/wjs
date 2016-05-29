@@ -13,9 +13,9 @@
         0, 0, 1, 0,
         0, 0, 0, 1
       ]);
-      this.lookAtX = new (this.wjs.classProto('MathVector3'))();
-      this.lookAtY = new (this.wjs.classProto('MathVector3'))();
-      this.lookAtZ = new (this.wjs.classProto('MathVector3'))();
+      this.lookAtX = new (this.w.classProto('MathVector3'))();
+      this.lookAtY = new (this.w.classProto('MathVector3'))();
+      this.lookAtZ = new (this.w.classProto('MathVector3'))();
     },
 
     set: function (n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44) {
@@ -220,7 +220,7 @@
 
         } else {
 
-          this.wjs.err(msg);
+          this.w.err(msg);
 
         }
 

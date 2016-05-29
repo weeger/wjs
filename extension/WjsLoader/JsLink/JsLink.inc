@@ -18,18 +18,18 @@ class JsLink extends Loader {
       $value = array('server' => $value);
     }
     if (is_array($value) && !isset($value['client'])) {
-      $value['client'] = $this->wjs->pathClient(realpath($value['server']));
+      $value['client'] = $this->w->pathClient(realpath($value['server']));
     }
     // Use minified files for master versions.
-    if ($this->wjs->subversion !== 'source' && isset($value['server'])) {
+    if ($this->w->subversion !== 'source' && isset($value['server'])) {
       // Get minified path.
-      $minJs = $this->wjs->filePathMin($value['server'], 'js');
+      $minJs = $this->w->filePathMin($value['server'], 'js');
       // Minified file must exists.
       if (is_file($minJs)) {
         $value['server'] = $minJs;
         // Minify also client path.
         if (isset($value['client'])) {
-          $value['client'] = $this->wjs->filePathMin($value['client'], 'js');
+          $value['client'] = $this->w->filePathMin($value['client'], 'js');
         }
       }
     }
@@ -37,7 +37,7 @@ class JsLink extends Loader {
     // Try to load file content,
     // and search for @require declarations.
     if (is_array($value) && is_string($value['server']) && is_file($value['server'])) {
-      $this->wjs->jsParseRequire($this->type, $name, file_get_contents($value['server']));
+      $this->w->jsParseRequire($this->type, $name, file_get_contents($value['server']));
     }
   }
 
@@ -59,8 +59,8 @@ class JsLink extends Loader {
       if ($render) {
         // Remove internally.
         $this->extensionsPushed[$name]['#data'] =
-          // Remove into wjs registry.
-        $this->wjs->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_JSLINK_INCLUDED;
+          // Remove into w registry.
+        $this->w->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_JSLINK_INCLUDED;
       }
       // Avoid duplicates, it can occur when
       // loader have parent or dependencies.

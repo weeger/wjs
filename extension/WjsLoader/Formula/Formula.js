@@ -10,23 +10,23 @@
     wjsShortcuts: false,
 
     __destruct: function () {
-      this.wjs.loaders.JsClass.__destruct.call(this);
+      this.w.loaders.JsClass.__destruct.call(this);
       // Remove manager.
-      this.wjs.destroy('JsClassStatic', 'FormulaManager', true);
+      this.w.destroy('JsClassStatic', 'FormulaManager', true);
     },
 
     register: function (type, name, process, value) {
       // Add to manager.
-      this.wjs.formula.append(name, value || W.retrieve(this.type, name));
+      this.w.formula.append(name, value || W.retrieve(this.type, name));
       // Skip JsClass inheritance level.
-      this.wjs.loaders.JsMethod.register.apply(this, [type, name, process, value]);
+      this.w.loaders.JsMethod.register.apply(this, [type, name, process, value]);
     },
 
     destroy: function (name) {
       // Remove from manager.
-      this.wjs.formula.remove(name);
+      this.w.formula.remove(name);
       // Normal destruct.
-      return this.wjs.loaders.JsClass.destroy.apply(this, arguments);
+      return this.w.loaders.JsClass.destroy.apply(this, arguments);
     }
   });
 }(W));

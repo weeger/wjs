@@ -2,14 +2,14 @@
   'use strict';
 
   /**
-   * Callback on click on wjs links.
+   * Callback on click on w links.
    * @param {Event} e
    */
-  var linkReg = new RegExp('^wjs://([a-zA-Z0-9]*):([a-zA-Z0-9]*)$'),
+  var linkReg = new RegExp('^w://([a-zA-Z0-9]*):([a-zA-Z0-9]*)$'),
     linksClick = function (e) {
-      // Points to current wjs.
+      // Points to current w.
       var self = this,
-        link = e.target.getAttribute('data-wjs-link').match(linkReg);
+        link = e.target.getAttribute('data-w-link').match(linkReg);
       this.loadersExists([link[1]], function () {
         self.loaders[link[1]].link(link[2]);
       });
@@ -17,12 +17,12 @@
     };
 
   /**
-   * Detects links containing href with wjs://extensionType:extensionName
+   * Detects links containing href with w://extensionType:extensionName
    * @param {Object} domElement
    */
   W.register('JsMethod', 'wjsHrefInit', function (dom) {
-    // Search for html containing href="wjs://..."
-    var wjsLinks = dom.querySelectorAll('a[href^="wjs://"]'),
+    // Search for html containing href="w://..."
+    var wjsLinks = dom.querySelectorAll('a[href^="w://"]'),
       i = 0, href, disable = function () {
         return false;
       };
@@ -31,7 +31,7 @@
       wjsLinks[i].setAttribute('href', 'javascript:void(0)');
       // Firefox need to disable onclick for some links.
       wjsLinks[i].onclick = disable;
-      wjsLinks[i].setAttribute('data-wjs-link', href);
+      wjsLinks[i].setAttribute('data-w-link', href);
       wjsLinks[i].addEventListener('click', linksClick.bind(this));
     }
   });

@@ -64,7 +64,7 @@
       // Base method.
       this.__super('__construct', arguments);
       // Inherit callbacks methods.
-      this.wjs.inheritLinage(this, 'states');
+      this.w.inheritLinage(this, 'states');
     },
 
     callbackFind: function (callback, group) {
@@ -92,7 +92,7 @@
     },
 
     domStyleGet: function (name) {
-      return this.wjs.window.getComputedStyle(this.dom, null).getPropertyValue(name);
+      return this.w.window.getComputedStyle(this.dom, null).getPropertyValue(name);
     },
 
     domRect: function () {
@@ -119,7 +119,7 @@
     variableGet: function (name) {
       var value = this.__super('variableGet', arguments);
       if (value !== undefined && value.formula) {
-        return this.wjs.formula.result(value, this);
+        return this.w.formula.result(value, this);
       }
       // Use protected inheritance.
       return value;
@@ -133,7 +133,7 @@
       // Item is a formula / sub formula.
       if (item && item.formula) {
         var formulaName = item.formula,
-          formula = this.wjs.formula.formulas[formulaName];
+          formula = this.w.formula.formulas[formulaName];
         // Formula exists and is an event trigger.
         if (formula && formula.eventTrigger && this.formulaChangeCallback) {
           var counter = this.formulaVarListenersCounter;
@@ -143,7 +143,7 @@
             counter[formulaName]--;
             // All formulas removed.
             if (counter[formulaName] === 0) {
-              this.wjs.window.removeEventListener(formula.eventNameUpdate, this.formulaChangeCallback);
+              this.w.window.removeEventListener(formula.eventNameUpdate, this.formulaChangeCallback);
               delete counter[formulaName];
             }
           }
@@ -151,7 +151,7 @@
           else {
             // Listen only once for each formula type.
             if (!counter[formulaName]) {
-              this.wjs.window.addEventListener(formula.eventNameUpdate, this.formulaChangeCallback);
+              this.w.window.addEventListener(formula.eventNameUpdate, this.formulaChangeCallback);
             }
             // Count.
             counter[formulaName] = counter[formulaName] || 0;
@@ -161,7 +161,7 @@
       }
     },
 
-// TODO this.wjs FOR THIS METHOD
+// TODO this.w FOR THIS METHOD
     objectInspect: function (object, callback, args, level) {
       level = level || 0;
       if (typeof object === 'object') {
@@ -189,7 +189,7 @@
         this.states[name] = value;
         // Save state vars.
         this.statesVars[name] = this.statesVars[name] || {};
-        this.wjs.extendObject(this.statesVars[name], vars || {});
+        this.w.extendObject(this.statesVars[name], vars || {});
         // Execute internal callback if exists,
         // it avoid binder to listen itself on
         // states changes.
@@ -266,7 +266,7 @@
       var stateConnected = this.stateConnected,
         localStates = stateConnected[binder.id] ? stateConnected[binder.id][name] : undefined;
       if (localStates) {
-        this.wjs.arrayDeleteItem(localStates, localState);
+        this.w.arrayDeleteItem(localStates, localState);
         this.stateForget(binder, name, this.callbackFind('stateConnect', 'stateListen'), execute);
       }
     },
@@ -320,7 +320,7 @@
       args.unshift(this);
       while (key = keys[i++]) {
         // Listener must still exists and saved into loader
-        listener = this.wjs.loaders.WebCom.webComList[key];
+        listener = this.w.loaders.WebCom.webComList[key];
         // But it can disappear during the actual process.
         if (listener) {
           output[listener.id] = listeners[key].apply(listener, args);
@@ -351,8 +351,8 @@
      */
     domNodeListMap: function (name, args) {
       var self = this, argsCopy;
-      if (args[0] instanceof self.wjs.window.NodeList) {
-        argsCopy = self.wjs.extendObject([], args);
+      if (args[0] instanceof self.w.window.NodeList) {
+        argsCopy = self.w.extendObject([], args);
         // Convert NodeList to array,
         // Then apply function on each item.
         Array.prototype.slice.call(args[0]).map(function (item) {

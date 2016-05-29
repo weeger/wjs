@@ -8,7 +8,7 @@
 (function (W) {
   'use strict';
   // <--]
-  // Save declaration statically into wjs proto.
+  // Save declaration statically into w proto.
   W.lib.Loader = {
     type: '',
     preventReload: true,
@@ -48,15 +48,15 @@
 
     /**
      * Called when a user click on a link
-     * containing a wjs://type:name data link.
+     * containing a w://type:name data link.
      */
     link: function (name) {
       // By default just load extension.
-      this.wjs.use(this.type, name);
+      this.w.use(this.type, name);
     },
 
     /**
-     * Hook called by wjs on destroying extension.
+     * Hook called by w on destroying extension.
      * @param {string} name
      * @param {?} data
      */

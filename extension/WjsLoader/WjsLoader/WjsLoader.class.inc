@@ -45,7 +45,7 @@ abstract class Loader extends Atom {
     parent::__construct($options);
     $reflector       = new \ReflectionClass($this);
     $this->type      = $reflector->getShortName();
-    $this->wjs       = $wjs;
+    $this->w       = $wjs;
     $this->hasJsFile = $this->optionGet('serverPathJs');
     $this->hasJsFile = file_exists($this->hasJsFile);
     // Get parent class type for
@@ -78,7 +78,7 @@ abstract class Loader extends Atom {
    */
   function extensionAddRequire($name, $requireType, $requireName, $pushOptions = array()) {
     // Core extensions requirement is assumed.
-    if (!$this->wjs->isCoreExtension($requireType, $requireName)) {
+    if (!$this->w->isCoreExtension($requireType, $requireName)) {
       if (!isset($this->extensionsRequire[$name])) {
         $this->extensionsRequire[$name]        = array();
         $this->extensionsRequireOptions[$name] = array();
@@ -108,7 +108,7 @@ abstract class Loader extends Atom {
     $package = array(
       '#data' => $value,
     );
-    $require = $this->extensionGetRequire($name, $this->wjs->extensionExclude);
+    $require = $this->extensionGetRequire($name, $this->w->extensionExclude);
     // Push requirements.
     if (!empty($require)) {
       $requireOutput = $require;
@@ -117,7 +117,7 @@ abstract class Loader extends Atom {
         foreach ($items as $key => $requireName) {
           $requireOutput[$requireType][] = $requireName;
           $options                       = $this->extensionsRequireOptions[$name][$requireType][$key];
-          $this->wjs->extensionPush($requireType, $requireName, $options);
+          $this->w->extensionPush($requireType, $requireName, $options);
         }
       }
       // Save require for javascript parsing.
@@ -134,12 +134,12 @@ abstract class Loader extends Atom {
   function extensionPushRemove($name) {
     // Remove internally.
     unset($this->extensionsPushed[$name]);
-    // Remove into wjs registry.
-    unset($this->wjs->outputPackage[$this->type][$name]);
+    // Remove into w registry.
+    unset($this->w->outputPackage[$this->type][$name]);
     // Cleanup empty entry,
     // it avoid javascript to parse it.
-    if (empty($this->wjs->outputPackage[$this->type])) {
-      unset($this->wjs->outputPackage[$this->type]);
+    if (empty($this->w->outputPackage[$this->type])) {
+      unset($this->w->outputPackage[$this->type]);
     }
   }
 
@@ -179,7 +179,7 @@ abstract class Loader extends Atom {
   }
 
   /**
-   * Called when wjs core is asked for main js files list.
+   * Called when w core is asked for main js files list.
    * Render option defines if list is retrieved for information
    * only, or for final rendering process of html head.
    * It allows scripts tags to not be added via javascript,
@@ -191,16 +191,16 @@ abstract class Loader extends Atom {
     foreach ($this->extensionsPushed as $extensionName => $pushedData) {
       // Load js from dependencies,
       // duplication is managed into files addition.
-      $dependencies = $this->extensionGetRequire($extensionName, $this->wjs->extensionExclude);
+      $dependencies = $this->extensionGetRequire($extensionName, $this->w->extensionExclude);
       foreach ($dependencies as $requiredType => $items) {
         foreach ($items as $requiredName) {
           if ($requiredType !== $this->type || $requiredName !== $extensionName) {
-            $this->wjs->loaderGet($requiredType)->headerFilesExtension($type, $files, $side, $render, $requiredName);
+            $this->w->loaderGet($requiredType)->headerFilesExtension($type, $files, $side, $render, $requiredName);
           }
         }
       }
       // Exclude non allowed js files.
-      if (!$this->wjs->optionGet('staticFilesEnabled') || $type !== 'js' || $this->allowJsCache) {
+      if (!$this->w->optionGet('staticFilesEnabled') || $type !== 'js' || $this->allowJsCache) {
         $file = $this->headerFilesExtension($type, $files, $side, $render, $extensionName);
         if ($file && !in_array($file, $files)) {
           $files[] = $file;
@@ -256,7 +256,7 @@ abstract class Loader extends Atom {
    */
   function scanFolderExtensions($directory, $globalData = array(), $order = array()) {
     // Get items ordered.
-    $scan = $this->wjs->scanFolderOrdered($directory, $order);
+    $scan = $this->w->scanFolderOrdered($directory, $order);
     foreach ($scan as $item) {
       // Avoid all special folders.
       if ($item{0} !== '.') {
