@@ -84,6 +84,7 @@
           paramExc: '',
           paramToken: '',
           pathResponse: '',
+          cachePath:'',
           cacheToken: ''
         }
       });

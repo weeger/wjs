@@ -5,6 +5,11 @@ namespace Wjs5\Loader;
 use \Wjs5\Loader\JsScript;
 
 class JsMethod extends JsScript {
-  var $allowJsCache = TRUE;
-  var $allowRequireJs = TRUE;
+
+}
+
+namespace Wjs5\Loader\JsMethod;
+
+class Extension extends \Wjs5\Loader\JsScript\Extension {
+
 }

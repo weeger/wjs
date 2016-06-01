@@ -18,17 +18,10 @@ class Website extends Atom {
    * Name is used into page cache files names.
    * @var string
    */
-  var $name = 'website';
-  /**
-   * Define the environment key name used into htaccess.
-   * ex : SetEnv YOUR_SITE_ENV dev
-   */
-  var $envKey = 'WJS5_ENV';
-  /**
-   * Define the environment name.
-   */
-  var $env;
-  var $envDefault = FALSE;
+  var $name = 'Wjs default website';
+  var $serverPathWebsiteRoot;
+  var $serverPathWebsiteRootResolved;
+  var $router = array();
   /**
    * Une one instance to load pages.
    * This instance is not exported in client side.
@@ -44,44 +37,31 @@ class Website extends Atom {
   var $page;
   var $pageClassType = 'WebPage';
   var $pathAliasQuery = 'q';
-  var $websiteInfo = array();
-  var $pageSummary = array();
-  var $pageAliases = array();
-  var $pageLibraries = array();
-  var $extensionGlobal = array();
-  var $serverPathWebsiteRoot;
-  var $serverPathWebsiteRootResolved;
+  var $globalLibraries = array();
 
   function __construct($callerFile = '') {
     // Save the raw path to the website root (allow symlinks).
     $this->serverPathWebsiteRoot = dirname($callerFile) . '/';
     // Save resolved path to the website root.
     $this->serverPathWebsiteRootResolved = realpath($this->serverPathWebsiteRoot) . '/';
+    // Search for a local router.
+    // It may be replaced as an external library.
+    $routerJson   = $this->serverPathWebsiteRootResolved . 'router.json';
+    $this->router = file_exists($routerJson) ? json_decode(file_get_contents($routerJson), JSON_OBJECT_AS_ARRAY) : $this->router;
     // Create default options.
     $settings = array('w' => array());
-    // Env key found.
-    if ($this->envKey) {
-      // Load env.
-      $this->env = getenv($this->envKey);
-      if (!$this->env) {
-        $this->env = $this->envDefault;
-      }
-      if (!$this->env) {
-        print 'No env found for ' . $this->envKey;
-        exit;
-      }
-      // Load env options,
-      // it will override $options variable.
-      require $this->serverPathWebsiteRootResolved . 'settings/settings.' . $this->env . '.inc';
-    }
-    // Init router.
+    // Init options.
     parent::__construct($settings);
     // Append options from environment settings.
-    if (is_array($this->optionGet('pageLibraries'))) {
-      $this->pageLibraries = array_merge($this->pageLibraries, $this->optionGet('pageLibraries'));
+    if (is_array($this->optionGet('globalLibraries'))) {
+      // Contains list of global libraries.
+      $this->globalLibraries = array_merge($this->globalLibraries, $this->optionGet('globalLibraries'));
     }
     // Create w instance.
-    $this->w = $this->wjsInstance($this->optionGet('w'));
+    $this->w = $this->wInstance();
+    // TODO temp
+    $this->w->push('WjsLibrary', 'WjsDebug');
+    $this->w->subversion = 'source';
   }
 
   /**
@@ -89,177 +69,149 @@ class Website extends Atom {
    * given options. Used to instantiate
    * w quickly into website and pages.
    *
-   * @param $options
+   * @param array $options
    *
-   * @return \Wjs
+   * @return Wjs
    */
-  function wjsInstance($options = array()) {
+  function wInstance($options = array()) {
+    // Merge options with defaults.
+    $options = array_merge($this->optionGet('w'), $options);
+    // Adjust website path.
     $options['serverPathWebsite'] = $this->serverPathWebsiteRoot;
-    $wjs                          = new \Wjs($options);
-    // Scan specific extensions.
+    // Build instance.
+    $w = new Wjs($options);
+    // Scanning specific extensions need to respect pages order.
+    $order = array();
+    // We may use a subclass of WebPage.
+    $order[$this->pageClassType] = $this->routerGetPages();
     // We have to use unresolved symlink
     // to build relative client paths.
-    $order                       = array();
-    $order[$this->pageClassType] = $this->pageSummary;
-    $wjs->scanFolderExtensions($wjs->optionGet('serverPathWebsite') . 'extension/', array(), $order);
-    $request = $wjs->optionGet('clientRequest');
-    $request = $this->urlToFilename($request ? $request : 'home') . '.js';
-    $wjs->optionSet('aggregationFileName', $request);
-    return $wjs;
-  }
-
-  function urlToFilename($file) {
-    // Remove anything which isn't a word, whitespace, number
-    // or any of the following caracters -_~,;:[]().
-    $file = preg_replace('([^\w\s\d\-_~,;:\[\]\(\).])', '', $file);
-    // Remove any runs of periods
-    $file = preg_replace('([\.]{2,})', '', $file);
-    return $file;
+    $w->scanFolderExtensions($w->optionGet('serverPathWebsite') . 'extension/', array(), $order);
+    // Get the requested page.
+    $request = $w->optionGet('clientRequest');
+    // Build a filename in case of aggregation is enabled.
+    $w->optionSet('aggregationFileName', $this->urlToFilename($request ? $request : 'home') . '.js');
+    // Return instance.
+    return $w;
   }
 
   /**
-   * @param $webPageName
-   * @param $options
-   *
-   * @return Page
+   * Return all pages class names from router.
+   * It may be rewritten when router will be replaced by a separated library.
    */
-  function pageInstance($webPageName, $options = array()) {
-    /** @var \Wjs5\Loader\WebPage $loader */
-    $loader = $this->w->loaderGet($this->pageClassType);
-    // Return new page.
-    /** @var \Wjs5\Loader\WebPage\Page $page */
-    $page = $loader->instance($webPageName, $options, $this->wjsInstance($this->options['w']), $this);
-    // Check if exists.
-    if (!$page) {
-      print 'Not found page ' . $webPageName;
-      exit;
-    }
-    // Add global libraries.
-    $page->libraryLoadMultiple($this->pageLibraries);
-    // Return instance.
-    return $page;
+  function routerGetPages() {
+    return array_values($this->router);
   }
 
-  function renderDefault($webPageName = 'wjsDefault', $params = array()) {
+  /**
+   * Convert an URL string to a filename.
+   *
+   * @param string $file
+   *
+   * @return string
+   */
+  function urlToFilename($file) {
+    // Remove anything which isn't a word, whitespace, number
+    // or any of the following characters -_~,;:[]().
+    $file = preg_replace('([^\w\s\d\-_~,;:\[\]\(\).])', '', $file);
+    // Remove any runs of periods
+    return preg_replace('([\.]{2,})', '', $file);
+  }
+
+  function renderDefault($webPageName = 'wDefault') {
     // Search first for aliases.
-    if (isset($_GET[$this->pathAliasQuery]) && isset($this->pageAliases[$_GET[$this->pathAliasQuery]])) {
-      $webPageName = $this->pageAliases[$_GET[$this->pathAliasQuery]];
+    if (isset($_GET[$this->pathAliasQuery]) && isset($this->router[$_GET[$this->pathAliasQuery]])) {
+      $webPageName = $this->router[$_GET[$this->pathAliasQuery]];
     }
     // Search for query string.
     else if (isset($_GET[$this->pageClassType])) {
       $webPageName = $_GET[$this->pageClassType];
     }
-    return $this->render($webPageName, $params);
+    return $this->render($webPageName);
   }
 
-  function render($webPageName = 'wjsDefault') {
+  function render($webPageName = 'wDefault') {
     // Define if we are on an AJAX page or not.
     $ajaxKey = $this->w->optionGet('paramInc');
     $options = array();
     // Query come from an AJAX call.
     if (isset($_GET[$ajaxKey])) {
       // Use page specific w.
-      if (isset($_GET[$ajaxKey][$this->pageClassType])) {
-        // Create page.
-        $this->page = $this->pageInstance($_GET[$ajaxKey][$this->pageClassType]);
-        // Push.
-        $this->page->push($options);
-        // Remove page from query.
-        unset($_GET[$ajaxKey][$this->pageClassType]);
-        // Use the page w.
-        $this->page->w->response($_GET);
-      }
+//      if (isset($_GET[$ajaxKey][$this->pageClassType])) {
+//        // Create page.
+//        $this->page = $this->pageInstance($_GET[$ajaxKey][$this->pageClassType]);
+//        // Push.
+//        $this->page->push($options);
+//        // Remove page from query.
+//        unset($_GET[$ajaxKey][$this->pageClassType]);
+//        // Use the page w.
+//        $this->page->w->response($_GET);
+//      }
       // Or use the global w.
       $this->w->response($_GET);
     }
-    // Test is a page is specified as as default
-    // webcom arguments like WebPage=MyPage
-    if (isset($_GET[$this->pageClassType])) {
-      $webPageName = $_GET[$this->pageClassType];
-    }
-    // Create main page.
-    $this->page = $this->pageInstance($webPageName);
-    // Add extra libraries.
-    $this->pagePreloadInit();
-    $options = array_merge(array(
+//    // Test is a page is specified as as default
+//    // webcom arguments like WebPage=MyPage
+//    if (isset($_GET[$this->pageClassType])) {
+//      $webPageName = $_GET[$this->pageClassType];
+//    }
+//    // Create main page.
+//    $this->page = $this->pageInstance($webPageName);
+//    // Add extra libraries.
+//    $this->pagePreloadInit();
+//    $options = array_merge(array(
+//      // Define html body as preloaded.
+//      'html' => WJS_PUSH_WEBPAGE_PRELOADED
+//    ), $options);
+//    // Push into own w.
+    // Page has appended itself to website.
+    $this->w->extensionPush($this->pageClassType, $webPageName, array(
       // Define html body as preloaded.
-      'html' => WJS5_PUSH_WEBPAGE_PRELOADED
-    ), $options);
-    // Push into own w.
-    $this->page->push($options);
+      'html'      => WJS5_PUSH_WEBPAGE_PRELOADED,
+      // The page will attach itself to this.
+      'website'   => $this,
+      // Add global libraries.
+      'libraries' => $this->globalLibraries
+    ));
+    // Render body before head.
     $body = $this->renderBody();
+    // Return html content.
     return $this->renderDoctype() . '<html>' .
-    $this->renderHead($this->page->websiteRenderHead()) .
+    $this->renderHead() .
     $body .
     '</html>';
   }
 
-  function pagePreloadInit() {
-    // Add website root css if present.
-    $css = $this->page->w->optionGet('serverPathWebsite') . 'theme/styles.css';
-    if (is_file($css)) {
-      $this->page->w->import('CssLink', 'theme/styles.css', array(
-        'client' => 'theme/styles.css',
-        'server' => $css,
-      ));
-    }
-    // Add website root js if present.
-    $css = $this->page->w->optionGet('serverPathWebsite') . 'theme/script.js';
-    if (is_file($css)) {
-      $this->page->w->import('JsLink', 'theme/script.js');
-    }
-    // Add extra website data.
-    $this->websiteInfo = $this->websiteInfoGet();
-    $this->page->librariesHook('WebsiteInfo', $this->websiteInfo);
-    $this->page->w->import('JsObject', 'WebsiteInfo', $this->websiteInfo);
-    $this->page->w->extensionPushRequest($this->extensionGlobal);
-  }
-
-  function websiteInfoGet() {
-    return array(
-      'pageTitle' => $this->optionGet('pageTitle')
-    );
-  }
-
   function pageRenderParams() {
+    // TODO Why ??
     return array();
   }
 
-  /**
-   * Scan dir without '.', '..' and hidden files.
-   */
-  function directoryScanPlainFiles($dir) {
-    // Remove all hidden files ("." && "..").
-    if (is_dir($dir)) {
-      return array_values(preg_grep('/^([^.])/', scandir($dir)));
-    }
-    return array();
-  }
 
   function htmlFileGetContent($path) {
-    $path = $this->page->w->optionGet('serverPathWebsite') . $path;
-    if (is_file($path)) {
-      return file_get_contents($path);
-    }
-    return '';
+    // Get the site root path.
+    $path = $this->w->optionGet('serverPathWebsite') . $path;
+    // File may not exist.
+    return is_file($path) ? file_get_contents($path) : '';
   }
 
   function renderDoctype() {
     return '<!DOCTYPE html>';
   }
 
-  function renderHead($content) {
+  function renderHead() {
     return '<head>' .
-    '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' .
-    $content .
+    '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' .
+    '<meta name="generator" content="WJS ' . WJS_VERSION . '-' . $this->w->subversion . '" />' .
+    $this->page->websiteRenderHead() .
     '</head>';
   }
 
   function renderBody() {
     // Use global template.
-    $template     = $this->htmlFileGetContent('theme/page.html');
-    $output       = '<body>';
-    $output .= '<div id="' . $this->page->extensionName . '-preloaded" style="display:none">' .
+    $template = $this->htmlFileGetContent('theme/page.html');
+    $output   = '<body>';
+    $output .= '<div id="' . $this->page->extension->extensionName . '-preloaded" style="display:none">' .
       '<div class="html">' . $this->page->render($this->pageRenderParams()) . '</div>' .
       $template .
       '</div>';

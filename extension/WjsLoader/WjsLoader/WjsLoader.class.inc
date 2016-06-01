@@ -7,7 +7,7 @@ namespace Wjs5;
  * and parse extensions from server side to client site
  * depending from extension type.
  */
-abstract class Loader extends Atom {
+abstract class Loader {
   /**
    * @var string $type
    */
@@ -22,6 +22,10 @@ abstract class Loader extends Atom {
    */
   var $extensions = array();
   var $extensionsPushed = array();
+  /**
+   * Contain list of registered items.
+   * @var ExtensionDependency[]
+   */
   var $extensionsRequire = array();
   var $extensionsRequireOptions = array();
   var $hasJsFile = FALSE;
@@ -41,13 +45,24 @@ abstract class Loader extends Atom {
    */
   var $parentClass = FALSE;
 
-  function __construct($options, \Wjs5\Wjs $wjs) {
-    parent::__construct($options);
-    $reflector       = new \ReflectionClass($this);
-    $this->type      = $reflector->getShortName();
-    $this->w       = $wjs;
-    $this->hasJsFile = $this->optionGet('serverPathJs');
-    $this->hasJsFile = file_exists($this->hasJsFile);
+  /**
+   * @param Wjs $wjs
+   */
+  function __construct(Wjs $wjs) {
+    $reflector  =
+    $this->reflector = new \ReflectionClass($this);
+    $this->type = $reflector->getShortName();
+    $this->w    = $wjs;
+    // Add an entry.
+    $this->w->extensionsPushed[$this->type] = array();
+    // Append to wjs.
+    $this->w->loaders[$this->type] = $this;
+    // Save class path.
+    $this->classFile = $this->reflector->getFileName();
+    // Find dir.
+    $this->serverPath = dirname($this->classFile) . '/';
+    // Check once if js exists.
+    $this->hasJsFile = file_exists($this->serverPath . $this->type . '.js');
     // Get parent class type for
     // javascript inheritance.
     $parent = $reflector->getParentClass();
@@ -57,94 +72,17 @@ abstract class Loader extends Atom {
   }
 
   /**
-   * Register new extension.
+   * Allow some action when a missing extension is asked.
    *
-   * @param $name
-   * @param $data
+   * @param $extensionName
    */
-  function extensionAdd($name, $data) {
-    $this->extensions[$name] =
-    $this->extensions[$name] = $data;
-  }
-
-  /**
-   * Link extension to another one,
-   * When pushed both extensions will be pushed.
-   *
-   * @param       $name
-   * @param       $requireType
-   * @param       $requireName
-   * @param array $pushOptions
-   */
-  function extensionAddRequire($name, $requireType, $requireName, $pushOptions = array()) {
-    // Core extensions requirement is assumed.
-    if (!$this->w->isCoreExtension($requireType, $requireName)) {
-      if (!isset($this->extensionsRequire[$name])) {
-        $this->extensionsRequire[$name]        = array();
-        $this->extensionsRequireOptions[$name] = array();
-      }
-      if (!isset($this->extensionsRequire[$name][$requireType])) {
-        $this->extensionsRequire[$name][$requireType]        = array();
-        $this->extensionsRequireOptions[$name][$requireType] = array();
-      }
-      // Add requirements only once.
-      if (!in_array($requireName, $this->extensionsRequire[$name][$requireType])) {
-        $this->extensionsRequire[$name][$requireType][]        = $requireName;
-        $this->extensionsRequireOptions[$name][$requireType][] = $pushOptions;
-      }
-    }
-  }
-
-  /**
-   * @param       $name
-   * @param array $options
-   * @param null  $value
-   *
-   * @return mixed
-   */
-  function extensionPush($name, $options = array(), $value = NULL) {
-    $value = $this->valuePush($name, $value);
-    // Package base.
-    $package = array(
-      '#data' => $value,
-    );
-    $require = $this->extensionGetRequire($name, $this->w->extensionExclude);
-    // Push requirements.
-    if (!empty($require)) {
-      $requireOutput = $require;
-      foreach ($require as $requireType => $items) {
-        $requireOutput[$requireType] = array();
-        foreach ($items as $key => $requireName) {
-          $requireOutput[$requireType][] = $requireName;
-          $options                       = $this->extensionsRequireOptions[$name][$requireType][$key];
-          $this->w->extensionPush($requireType, $requireName, $options);
-        }
-      }
-      // Save require for javascript parsing.
-      $package['#require'] = $requireOutput;
-    }
-    return $package;
-  }
-
-  /**
-   * Can be useful, for example when converting
-   * javascript files data into javascript links
-   * into page header.
-   */
-  function extensionPushRemove($name) {
-    // Remove internally.
-    unset($this->extensionsPushed[$name]);
-    // Remove into w registry.
-    unset($this->w->outputPackage[$this->type][$name]);
-    // Cleanup empty entry,
-    // it avoid javascript to parse it.
-    if (empty($this->w->outputPackage[$this->type])) {
-      unset($this->w->outputPackage[$this->type]);
-    }
+  function extensionGetMissing($extensionName) {
+    // To override...
   }
 
   /**
    * Return the list of direct dependencies for given extension.
+   * TODO Check
    */
   function extensionGetRequire($name, $excludeRequire = array()) {
     $require = array();
@@ -195,7 +133,8 @@ abstract class Loader extends Atom {
       foreach ($dependencies as $requiredType => $items) {
         foreach ($items as $requiredName) {
           if ($requiredType !== $this->type || $requiredName !== $extensionName) {
-            $this->w->loaderGet($requiredType)->headerFilesExtension($type, $files, $side, $render, $requiredName);
+            $this->w->loaderGet($requiredType)
+              ->headerFilesExtension($type, $files, $side, $render, $requiredName);
           }
         }
       }
@@ -246,24 +185,6 @@ abstract class Loader extends Atom {
     return is_string($value) && strpos($value, 'WJS5_ERR_PUSH') === 0;
   }
 
-  /**
-   * Register extensions from a folder content.
-   * Each subdirectory is considered as an extension.
-   *
-   * @param string $directory The directory to scan with a trailing slash
-   * @param array  $globalData
-   * @param array  $order
-   */
-  function scanFolderExtensions($directory, $globalData = array(), $order = array()) {
-    // Get items ordered.
-    $scan = $this->w->scanFolderOrdered($directory, $order);
-    foreach ($scan as $item) {
-      // Avoid all special folders.
-      if ($item{0} !== '.') {
-        $this->scanFolderItem($directory, $item, $globalData);
-      }
-    }
-  }
 
   /**
    * Define what to do width found item

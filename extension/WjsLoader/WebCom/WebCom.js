@@ -5,6 +5,7 @@
  * @require WjsLoader > CssLink
  * @require JsScript > SchemeWebCom
  * @require JsClass > BasicWebComOption
+ * @require JsMethod > wjsIncludeInit
  */
 (function (W) {
   'use strict';
@@ -254,6 +255,11 @@
       this.inheritObject(proto, scheme, item);
     },
 
+    protoParseStates: function (proto, scheme, item) {
+      // Create a unique object, inherit parent properties.
+      this.inheritObject(proto, scheme, item);
+    },
+
     protoParseOptions: function (proto, scheme) {
       var key, i = 0, keys;
       proto.options = {};
@@ -338,8 +344,17 @@
       }
     },
 
-    protoParseCallbacks: function (proto, scheme) {
-      this.methodsFlatten(proto, scheme, 'callbacks', 2);
+    protoParseCallbacks: function (proto, scheme, item) {
+      this.methodsFlatten(proto, scheme, item, 2);
+      // Create entry if not exists.
+      if (!proto.domListeners) {
+        proto.domListeners = [];
+      }
+      // Quit if not more dom listeners.
+      if (scheme[item].domListen) {
+        // Add names of new listeners.
+        proto.domListeners = proto.domListeners.concat(Object.keys(scheme[item].domListen));
+      }
     },
 
     /**

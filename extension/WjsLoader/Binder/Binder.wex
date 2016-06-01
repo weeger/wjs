@@ -1,0 +1,7 @@
+{
+  "require": {
+    "WjsLoader": [
+      "WebCom"
+    ]
+  }
+}

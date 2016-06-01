@@ -19,6 +19,7 @@ if (!defined('WJS5_ROOT')) {
 }
 
 require_once WJS5_ROOT . 'php/atom.inc';
+require_once WJS5_ROOT . 'php/extension.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.class.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/JsLink/JsLink.inc';
 require_once WJS5_ROOT . 'extension/WjsLoader/WjsLoader/WjsLoader.inc';
@@ -29,19 +30,30 @@ class Wjs extends Atom {
    * @var array
    */
   var $optionsDefault = array(
-    'serverPathCache'     => FALSE, // Cache directory.
-    'clientPathCache'     => '', // Cache directory.
-    'staticFilesEnabled'  => FALSE, // Name of aggregated w file.
-    'staticFilesFlush'    => FALSE, // Allow to override existing files.
-    'autoResponse'        => FALSE, // When true, execute ajax() method on Wjs instance.
+    'serverPathCache'     => FALSE,
+    // Cache directory.
+    'clientPathCache'     => '',
+    // Cache directory.
+    'staticFilesEnabled'  => FALSE,
+    // Name of aggregated w file.
+    'staticFilesFlush'    => FALSE,
+    // Allow to override existing files.
+    'autoResponse'        => FALSE,
+    // When true, execute ajax() method on Wjs instance.
     // These options will be transmitted to JS,
     // that's why some parameters are shorts.
-    'aggregationFileName' => FALSE, // Name of aggregated w file.
-    'clientName'          => 'w', // Wjs javascript object name like window.w.
-    'paramExtra'          => '', // Parameters appended to AJAX requests.
-    'paramInc'            => 'w', // Name of AJAX parameter.
-    'paramExc'            => 'w-exc', // Name of AJAX parameter (exclusions).
-    'paramToken'          => 'w-tok', // Name of URL extra token (AJAX and cache flush).
+    'aggregationFileName' => FALSE,
+    // Name of aggregated w file.
+    'clientName'          => 'w',
+    // Wjs javascript object name like window.w.
+    'paramExtra'          => '',
+    // Parameters appended to AJAX requests.
+    'paramInc'            => 'w',
+    // Name of AJAX parameter.
+    'paramExc'            => 'w-exc',
+    // Name of AJAX parameter (exclusions).
+    'paramToken'          => 'w-tok',
+    // Name of URL extra token (AJAX and cache flush).
   );
   var $id;
   /**
@@ -53,7 +65,7 @@ class Wjs extends Atom {
    * Contain data to transmit to w javascript object.
    */
   var $outputPackage = array();
-    /**
+  /**
    * Contain extension to transmit to w javascript object.
    * @var Extension[]
    */
@@ -180,7 +192,7 @@ class Wjs extends Atom {
     }
 
     // Relocate response path to client site root.
-    $this->optionSet('clientPathResponse', $this->pathClientRebase($this->optionGet('clientPathResponse')));
+    $this->optionSet('clientPathResponse', $this->clientPathRebase($this->optionGet('clientPathResponse')));
 
     // Define relative path of w folder,
     // with cwd and unresolved root path.
@@ -194,40 +206,25 @@ class Wjs extends Atom {
     // Defining it manually can be useful
     // when URL rewriting is used.
     if (!$this->optionGet('clientPathWjs')) {
-      $this->optionSet('clientPathWjs', $this->pathClient(WJS5_ROOT));
+      $this->optionSet('clientPathWjs', $this->clientPath(WJS5_ROOT));
     }
 
-    // Define core version.
-    $this->subversion = isset($options['subversion']) ? $options['subversion'] : 'master';
-
-    // Add core loaders.
-    $filePath                   = 'extension/WjsLoader/WjsLoader/WjsLoader';
-    $wjsLoaderData              = array(
-      'serverPathClass' => $this->optionGet('serverPathWjs') . $filePath . '.inc',
-      'serverPathJs'    => $this->optionGet('serverPathWjs') . $filePath . '.min.js',
-      'clientPathJs'    => $this->optionGet('clientPathWjs') . $filePath . '.min.js',
-    );
-    $this->loaders['WjsLoader'] = new \Wjs5\Loader\WjsLoader($wjsLoaderData, $this);
-    $this->loaders['WjsLoader']
-      ->extensions['WjsLoader'] = $wjsLoaderData;
-
+    // Create loader of loaders manually.
+    // Add it by the classic way,
+    // it will register itself into itself.
+    $this->extensionAdd('WjsLoader', 'WjsLoader', new \Wjs5\Loader\WjsLoader($this));
     // Scan core extensions.
-    $this->scanFolderExtensions(WJS5_ROOT . 'extension/', array(), array(
+    $this->scanFolderExtensions(WJS5_ROOT . 'extension/', array(), array(), array(
+      // Do not reload WjsLoader.
       'WjsLoader' => array(
-        // Specify some loading priorities.
-        'WjsLoader',
-        'JsLink',
-        'JsScript',
-        'JsMethod',
-        'JsClass',
-        'Formula',
+        'WjsLoader'
       )
     ));
 
     if ($this->optionGet('staticFilesEnabled')) {
 
       // Find cache path from client side.
-      $this->optionSet('clientPathCache', $this->pathClient($this->optionGet('serverPathCache')));
+      $this->optionSet('clientPathCache', $this->clientPath($this->optionGet('serverPathCache')));
 
       // If token sent in URL, use it as cacheToken.
       $paramName = $this->optionGet('paramToken');
@@ -339,6 +336,10 @@ class Wjs extends Atom {
    * @return \Wjs5\Loader
    */
   function loaderGet($name) {
+    if (!isset($this->loaders[$name])) {
+      // Try to add extension from queue.
+      $this->extensionAddQueueLoad('WjsLoader', $name);
+    }
     return isset($this->loaders[$name]) ? $this->loaders[$name] : FALSE;
   }
 
@@ -346,9 +347,26 @@ class Wjs extends Atom {
    * Register extension file / folder into available list of extensions.
    * This will not push extension to output package.
    */
-  function extensionAdd($extensionType, $extensionName, $extensionData, $requirements = array()) {
-    // Save extensions into according loader.
-    $this->loaderGet($extensionType)->extensionAdd($extensionName, $extensionData);
+  function extensionAdd($extensionType, $extensionName, $settings, $requirements = array(), $infoFile = FALSE) {
+    if ($infoFile && is_file($infoFile)) {
+      $json = json_decode(file_get_contents($infoFile), JSON_OBJECT_AS_ARRAY);
+      if (isset($json['require'])) {
+        $requirements = array_merge_recursive($requirements, $json['require']);
+      }
+    }
+    foreach ($requirements as $requiredType => $requiredNames) {
+      foreach ($requiredNames as $requiredName) {
+        // Manage sub dependencies.
+        $this->extensionAddQueueLoad($requiredType, $requiredName);
+      }
+    }
+    // Find the good class name.
+    $className = '\Wjs5\Loader\\' . $extensionType . '\\Extension';
+    // Use default class if missing.
+    $className = class_exists($className) ? $className : '\\Wjs5\\Extension';
+    // Build instance.
+    /* @var Extension $extension */
+    $extension = new $className($this, $extensionType, $extensionName, $settings);
     // Apply given requirements.
     $this->extensionAddRequireArray($extensionType, $extensionName, $requirements);
   }
@@ -376,13 +394,34 @@ class Wjs extends Atom {
    * @param $extensionName
    * @param $requireType
    * @param $requireName
-   * @param $pushOptions
+   * @param $options
    */
-  function extensionAddRequire($extensionType, $extensionName, $requireType, $requireName, $pushOptions = array()) {
-    // Save requirement into according loader.
-    $this->loaderGet($extensionType)->extensionAddRequire($extensionName, $requireType, $requireName, $pushOptions);
+  function extensionAddRequire($extensionType, $extensionName, $requireType, $requireName, $options = array()) {
+    // Core extensions requirement is assumed.
+    if ($this->isCoreExtension($requireType, $requireName)) {
+      return;
+    }
+    // Check extension.
+    $extension = $this->extensionGet($extensionType, $extensionName);
+    if (!$extension) {
+      // Trigger error.
+      $this->error('Requiring extension not found : ' . $extensionType . '::' . $extensionType);
+    }
+    // Only one dependency.
+    if (isset($extension->require[$requireType . '::' . $requireName])) {
+      return;
+    }
+    // Check requirement.
+    $require = $this->extensionGet($requireType, $requireName);
+    if (!$require) {
+      // Trigger error.
+      $this->error('Required extension not found : ' . $requireType . '::' . $requireName . ' (used by ' . $extensionType . '::' . $extensionName . ')');
+    }
+    if (is_object($extension)) {
+      // Set requirement.
+      new ExtensionDependency($this, $extension, $require, $options);
+    }
   }
-
 
   /**
    * Return saved extension.
@@ -393,11 +432,21 @@ class Wjs extends Atom {
    * @return mixed
    */
   function extensionGet($extensionType, $extensionName) {
-    $loader = $this->loaderGet($extensionType);
-    if ($loader && isset($loader->extensions[$extensionName])) {
-      return $loader->extensions[$extensionName];
+    // Check if extension is not pending.
+    $this->extensionAddQueueLoad($extensionType, $extensionName);
+    // Prevent recursion by getting loader manually.
+    $loader = $this->loaders[$extensionType];
+    if ($loader) {
+      // Extension still not exists.
+      if (!isset($loader->extensions[$extensionName])) {
+        $loader->extensionGetMissing($extensionName);
+      }
+      if (isset($loader->extensions[$extensionName])) {
+        return $loader->extensions[$extensionName];
+      }
+      return new \Wjs5\ExtensionMissing($this, $extensionType, $extensionName, WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME);
     }
-    return FALSE;
+    return new \Wjs5\ExtensionMissing($this, $extensionType, $extensionName, WJS5_ERR_PUSH_UNDEFINED_EXTENSION_TYPE);
   }
 
   /**
@@ -414,54 +463,20 @@ class Wjs extends Atom {
     if ($this->isCoreExtension($extensionType, $extensionName)) {
       return NULL;
     }
-    $loader = $this->loaderGet($extensionType);
-    if ($loader) {
-      $useJsCache = $this->optionGet('staticFilesEnabled') && $loader->allowJsCache;
-      if ($useJsCache) {
-        // Get path for this specific type.
-        $pathCache = $extensionType . '/' . $extensionName . $this->optionGet('cacheToken') . '.js';
-        // Get path for file on the server.
-        $pathCacheServer    = $this->optionGet('serverPathCache') . $pathCache;
-        $pathCacheServerDir = dirname($pathCacheServer);
-        // Add new dependency.
-        $this->register('CacheLink', $pathCache, $this->optionGet('serverPathCache') . $pathCache);
-        // Add JsLink requirement.
-        $this->extensionAddRequire($extensionType, $extensionName, 'CacheLink', $pathCache);
-        // Build output package.
-        $extensionData = $loader->extensionPush($extensionName, $options);
-        // Avoid missing extensions errors.
-        if ($extensionData !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
-          // Recreate cache file.
-          if ($this->optionGet('staticFilesFlush') === TRUE || !is_file($pathCacheServer)) {
-            // Create directory.
-            if (!is_dir($pathCacheServerDir)) {
-              mkdir($pathCacheServerDir);
-            }
-            // Create file.
-            file_put_contents($pathCacheServer,
-              'W.cache("' . $extensionType . '","' . $extensionName . '",' . $loader->cacheJsEncode($extensionData['#data']) . ');');
-          }
-          // Replace data by logical cache path.
-          $extensionData['#data'] = 'cache://' . $pathCache;
-        }
-      }
-      else {
-        // Build output package.
-        $extensionData = $loader->extensionPush($extensionName, $options);
-      }
+    $extension = $this->extensionGet($extensionType, $extensionName);
+    if (!$extension->pushCache() && !$this->extensionIsPushed($extensionType, $extensionName)) {
+      // Executed once for each extension,
+      // contain common data.
+      $extension->push($options);
     }
-    else {
-      $extensionData = WJS5_ERR_PUSH_UNDEFINED_EXTENSION_TYPE;
-    }
-    // Save into loader.
-    $loader->extensionsPushed[$extensionName] = $extensionData;
-    // Allow to not really push data to client side.
-    if ($extensionData !== WJS5_PUSH_HIDDEN_EXTENSION) {
-      // Save into output package.
-      $this->outputPackage[$extensionType][$extensionName] = $extensionData;
-    }
-    // Return saved data.
-    return $loader->extensionsPushed[$extensionName];
+    // Dependencies...
+    $extension->pushDependencies();
+    // Save.
+    $this->extensionsPushed[$extensionType][$extensionName] = $extension;
+    // Execute at each push.
+    $instance               = $extension->instance();
+    $extension->instances[] = $instance;
+    return $instance;
   }
 
   /**
@@ -482,6 +497,10 @@ class Wjs extends Atom {
         }
       }
     }
+  }
+
+  function extensionIsPushed($extensionType, $extensionName) {
+    return isset($this->extensionsPushed[$extensionType][$extensionName]);
   }
 
   /**
@@ -530,7 +549,18 @@ class Wjs extends Atom {
    * @return string
    */
   function responsePackage() {
-    return (!empty($this->outputPackage)) ? json_encode($this->outputPackage) : '{}';
+    $output = array();
+    foreach ($this->extensionsPushed as $extensionType => $extensions) {
+      foreach ($extensions as $extensionName => $extension) {
+        if (!$extension->outputHidden) {
+          $output[$extensionType][$extensionName] = $extension->output();
+          // TODO TEMP
+          unset($this->outputPackage[$extensionType][$extensionName]);
+        }
+      }
+    }
+    $output = array_merge_recursive($this->outputPackage, $output); // TODO TEMP REMOVE THIS LINE
+    return (!empty($output)) ? json_encode($output) : '{}';
   }
 
   /**
@@ -551,6 +581,7 @@ class Wjs extends Atom {
       'pathWebsite'          => $this->optionGet('clientPathWebsite'),
       'pathRequest'          => $this->optionGet('clientRequest'),
       'pathRequestDirectory' => $this->optionGet('clientRequestDirectory'),
+      'cachePath'            => $this->optionGet('clientPathCache'),
       'cacheToken'           => $this->optionGet('cacheToken'),
     ));
     $outputJson = array();
@@ -677,17 +708,17 @@ class Wjs extends Atom {
     return FALSE;
   }
 
-  function requireLinksClassFile($classPath, $type, $extensionType, $extensionName) {
+  function extensionsAddLink($classPath, $type, $extensionType, $extensionName) {
     // Get "JsLinks" name from "js" type.
     $requireType  = ucfirst($type) . 'Link';
     $linkFilePath = $this->findLinksClassFile($classPath, $type);
     $linkFilePath = $this->filePathMinExists($linkFilePath, $type);
     if ($linkFilePath) {
-      $clientPath = $this->pathClient($linkFilePath);
+      $clientPath = $this->clientPath($linkFilePath);
       // Add.
       $this->extensionAdd($requireType, $clientPath, array(
-        'server' => $linkFilePath,
-        'client' => $clientPath,
+        'serverPath' => $linkFilePath,
+        'clientPath' => $clientPath,
       ));
       $this->extensionAddRequire($extensionType, $extensionName, $requireType, $clientPath);
       return $clientPath;
@@ -729,7 +760,7 @@ class Wjs extends Atom {
         file_put_contents($aggregationFileName, $cacheContent . $this->renderJsUnpacker());
       }
       // Add link from client.
-      $output .= $indent . $this->renderJsInclude($this->pathClient(realpath($aggregationFileName)));
+      $output .= $indent . $this->renderJsInclude($this->clientPath(realpath($aggregationFileName)));
     }
     else {
       $output .= $this->renderHeaderLinks('js', $this->jsFiles('client', TRUE), $indent);
@@ -774,34 +805,87 @@ class Wjs extends Atom {
     return 'new ' . ($this->subversion === 'jQuery' ? 'jQuery' : 'window') . '.W(' . $this->initPackage() . ');';
   }
 
+  var $extensionsAddQueue = array();
+
   /**
    * Search for extensions into a folder.
    * Allows to transmit data options for all extensions found.
    * Allow to define a loading order, to respect dependencies.
    */
-  function scanFolderExtensions($directory, $globalData = array(), $order = array()) {
+  function scanFolderExtensions($directory, $globalData = array(), $order = array(), $exclude = array()) {
+    // Prevent errors.
+    if (!is_dir($directory)) {
+      return;
+    }
     // Allow multidimensional arrays.
     $orderBase = isset($order[0]) ? $order : array_keys($order);
-    // If WjsLoader exists, prepend it to scan.
-    if (is_dir($directory . 'WjsLoader')) {
+    // If WjsLoader exists, and not specified into ordered list
+    // prepend it to scan before every other types.
+    if (is_dir($directory . 'WjsLoader') && !isset($order['WjsLoader'])) {
+      if (($key = array_search('WjsLoader', $orderBase)) !== FALSE) {
+        unset($orderBase[$key]);
+      }
       array_unshift($orderBase, 'WjsLoader');
     }
     // This function allow to take symlinks as argument,
     // but scandir fails to explore recursive links, so we have
     // to use real path as base path for exploration.
-    $scan = $this->scanFolderOrdered(realpath($directory) . '/', $orderBase);
-    foreach ($scan as $item) {
-      if ($this->loaderGet($item)) {
-        // Get item specific params.
-        $itemGlobalData = isset($globalData[$item]) ? $globalData[$item] : array();
-        $itemOrder      = isset($order[$item]) ? $order[$item] : array();
-        $subDirectory   = $directory . $item . '/';
-        // As directories can be manually ordered,
-        // directory may not exists.
-        if (is_dir($subDirectory)) {
-          $this->loaderGet($item)->scanFolderExtensions($subDirectory, $itemGlobalData, $itemOrder);
+    $directoryRealPath = realpath($directory);
+    $scan              = $this->scanFolderOrdered($directoryRealPath . '/', $orderBase);
+
+    // Create scan registry.
+    $queue = array();
+    foreach ($scan as $extensionType) {
+      if ($extensionType{0} !== '.' && !in_array($extensionType, $exclude)) {
+        $queue[$extensionType]  = array();
+        $scanExtensionDirectory = $directoryRealPath . '/' . $extensionType . '/';
+        $scanExtension          = $this->scanFolderOrdered($scanExtensionDirectory, $orderBase);
+        foreach ($scanExtension as $file) {
+          if ($file{0} !== '.') {
+            $info          = pathinfo($directory . $file);
+            $extensionName = $info['filename'];
+            if (!isset($exclude[$extensionType]) || !in_array($extensionName, $exclude[$extensionType])) {
+              $queue[$extensionType][$extensionName] = array(
+                'file'       => $file,
+                'directory'  => $scanExtensionDirectory,
+                'globalData' => $globalData
+              );
+            }
+          }
         }
       }
+    }
+
+    // Merge to global queue.
+    $this->extensionsAddQueue = array_merge_recursive($this->extensionsAddQueue, $queue);
+    // Treat only locally discovered extensions.
+    foreach ($queue as $extensionType => $extensions) {
+      $loader = $this->loaderGet($extensionType);
+      if ($loader) {
+        foreach ($extensions as $extensionName => $data) {
+          $this->extensionAddQueueLoad($extensionType, $extensionName);
+        }
+      }
+    }
+  }
+
+  /**
+   * Add extension found from directory scan.
+   * Use global registry to manage dependencies defined into info files.
+   */
+  function extensionAddQueueLoad($extensionType, $extensionName) {
+    // Get user manually to prevent recursions.
+    $loader = $this->loaders[$extensionType];
+    // It have been queued.
+    if (!isset($loader->extensions[$extensionName]) &&
+      isset($this->extensionsAddQueue[$extensionType]) &&
+      isset($this->extensionsAddQueue[$extensionType][$extensionName])
+    ) {
+      // Get saved path.
+      $settings = $this->extensionsAddQueue[$extensionType][$extensionName];
+      $loader->scanFolderItem($settings['directory'], $settings['file'], $settings['globalData']);
+      // Clean registry.
+      unset($this->extensionsAddQueue[$extensionType][$extensionName]);
     }
   }
 
@@ -809,7 +893,7 @@ class Wjs extends Atom {
    * Scan a directory, but sort result
    * in a specified order, for known results.
    */
-  function scanFolderOrdered($directory, $order) {
+  function scanFolderOrdered($directory, $order = array()) {
     return array_merge($order, array_diff(scandir($directory), $order));
   }
 
@@ -827,8 +911,8 @@ class Wjs extends Atom {
    * it is not used internally to let work
    * with non existing files paths.
    */
-  function pathClient($pathServerAbsolute, $serverWorkingDirectory = NULL, $clientRequestDirectory = NULL) {
-    return parent::pathClient($pathServerAbsolute,
+  function clientPath($serverPathAbsolute, $serverWorkingDirectory = NULL, $clientRequestDirectory = NULL) {
+    return parent::clientPath($serverPathAbsolute,
       // Subtract cwd.
       $serverWorkingDirectory !== NULL ? $serverWorkingDirectory : $this->optionGet('serverWorkingDirectory'),
       // Subtract website base directory (add ../.. to site client root).
@@ -839,27 +923,53 @@ class Wjs extends Atom {
    * Relocate client path relative to root
    * to current client directory.
    */
-  function pathClientRebase($path) {
+  function clientPathRebase($path) {
     $root = $this->optionGet('clientRequestDirectory');
     // Get path relative to site client root.
     return ($root === '/' ? '' : $this->pathRelative($this->optionGet('clientRequestDirectory'), '')) . $path;
   }
 
-  function htmlParseIncludeRequire($html, $extensionType, $extensionName, $options = array(), $push = FALSE) {
-    $result = array();
-    // Search for <div data-wjsInclude="...">
-    // Get text content if present.
-    preg_match_all('`<div[^<]*data\-wjsInclude="([^"]*)\:([^"]*)"([^>|\/>])*(?:\/>|(?!\/)>([\s\S]*?)<\/div>)`i', $html, $result);
-    foreach ($result[1] as $key => $requireType) {
-      $this->extensionAddRequire($extensionType, $extensionName, $requireType, $result[2][$key], $options);
-      if ($push) {
-        $this->extensionPush($requireType, $result[2][$key]);
-      }
+  /**
+   * @param $html string
+   *
+   * @return \DOMElement
+   */
+  function htmlLoad($html) {
+    // Parse with native PHP dom parser.
+    $dom = new \DOMDocument;
+    // Remove errors like parsing non encoded question marks in urls.
+    libxml_use_internal_errors(TRUE);
+    // We need to add main wrappers around our document content.
+    $wrapped = '<div>' . $html . '</div>';
+    $domSave = NULL;
+    // Load depending of PHP version.
+    // Do not work wit PHP 5.4.38 && libxml 2.7.8
+    // But works with PHP 5.5.9 && libxml 2.9.1
+    if (version_compare(PHP_VERSION, '5.5.0') >= 0) {
+      $dom->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     }
-    if (!empty($result[1])) {
-      // Automatically push include tag detection.
-      $this->extensionPush('JsMethod', 'wjsIncludeInit');
+    // Version under PHP 5.4 do not support second argument in loadHTML,
+    // so we have to remove manually
+    else {
+      $dom->loadHTML($wrapped);
+      // Remove doctype.
+      $dom->removeChild($dom->doctype);
+      // Search for our div through html / body tags.
+      $dom->replaceChild($dom->firstChild->firstChild->firstChild, $dom->firstChild);
     }
+    return $dom;
+  }
+
+  /**
+   * @param $dom \DOMDocument
+   *
+   * @return string
+   */
+  function htmlSave($dom) {
+    // Convert to text.
+    $html = $dom->saveHTML();
+    // Remove the temporary wrapper.
+    return trim(preg_replace('!^<div>([\s\S]*?)</div>$!i', '$1', $html));
   }
 
   function htmlRebase($html, $basePath) {

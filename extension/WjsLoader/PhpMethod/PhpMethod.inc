@@ -5,20 +5,9 @@ namespace Wjs5\Loader;
 use \Wjs5\Loader;
 
 /**
- * @package Wjs\Loader
+ * @package Wjs5\Loader
  */
 class PhpMethod extends Loader {
-
-  function extensionPush($name, $options = array(), $value = NULL) {
-    $value = $this->valuePush($name, $value);
-    if (!$this->valueIsError($value)) {
-      // Data should be Php file path.
-      require_once $this->valuePush($name, $value);
-    }
-    // Do not push anything to client.
-    return WJS5_PUSH_HIDDEN_EXTENSION;
-  }
-
   function scanFolderItem($directory, $item, $globalData) {
     if (is_file($directory . $item)) {
       $info = pathinfo($directory . $item);
@@ -29,3 +18,24 @@ class PhpMethod extends Loader {
     }
   }
 }
+
+namespace Wjs5\Loader\PhpMethod;
+
+class Extension extends \Wjs5\Extension {
+  var $serverPath;
+
+  /**
+   * Append object to the output array.
+   */
+  function add($settings) {
+    $this->serverPath = $settings;
+    // Data should be Php file path.
+    require_once $this->serverPath;
+  }
+
+  function output($data = NULL) {
+    // Do not push anything to client.
+    return WJS5_PUSH_HIDDEN_EXTENSION;
+  }
+}
+

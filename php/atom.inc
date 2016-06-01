@@ -98,17 +98,17 @@ class Atom {
    * All path used by this function to be located on client side
    * should be placed into this working directory by as symlink or not.
    *
-   * @param string      $pathServerAbsolute
+   * @param string      $serverPathAbsolute
    * @param string      $serverWorkingDirectory
    * @param string|null $clientRequestDirectory
    *
    * @return string
    */
-  function pathClient($pathServerAbsolute, $serverWorkingDirectory, $clientRequestDirectory = NULL) {
+  function clientPath($serverPathAbsolute, $serverWorkingDirectory, $clientRequestDirectory = NULL) {
     // Relative position from site base path used
     // to find site root before to reach path.
     return $this->pathRelative($clientRequestDirectory,
-      $this->pathRelative($serverWorkingDirectory, $pathServerAbsolute)
+      $this->pathRelative($serverWorkingDirectory, $serverPathAbsolute)
     );
   }
 

@@ -10,21 +10,6 @@ use \Wjs5\Loader;
 class JsScript extends Loader {
   var $allowJsCache = TRUE;
   var $allowRequireJs = TRUE;
-  /**
-   * Append object to the output array.
-   */
-  function extensionPush($name, $options = array(), $value = NULL) {
-    $value = $this->valuePush($name, $value);
-    if ($value !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
-      if (is_file($value)) {
-        $value = file_get_contents($value);
-        $this->w->jsParseRequire($this->type, $name, $value);
-      }
-      $output = parent::extensionPush($name, $options, $value);
-      return $output;
-    }
-    return parent::extensionPush($name, $options, $value);
-  }
 
   function cacheJsEncode($data) {
     // Wrap data into a function, so cached file
@@ -37,10 +22,45 @@ class JsScript extends Loader {
       $info = pathinfo($directory . $item);
       // Avoid minified files.
       if (substr($info['filename'], -4) !== '.min') {
-        $this->w->extensionAdd($this->type, $info['filename'],
+        return $this->w->extensionAdd($this->type, $info['filename'], array(
           // Return good version
-          $this->w->jsFileVersioned($directory . $item));
+          'serverPath' => $this->w->jsFileVersioned($directory . $item)
+        ));
       }
     }
+  }
+}
+
+namespace Wjs5\Loader\JsScript;
+
+class Extension extends \Wjs5\Extension {
+  var $serverPath;
+  var $script;
+
+  function add($settings) {
+    $serverPath = $settings;
+    if (is_array($settings) && isset($settings['serverPath'])) {
+      $serverPath = $settings['serverPath'];
+    }
+    if (is_file($serverPath)) {
+      $this->serverPath = $serverPath;
+    }
+    else {
+      $this->script = $settings;
+    }
+  }
+
+  function push() {
+    // Script has not been initialized with inline data.
+    if (!$this->script) {
+      // Load file content.
+      $this->script = file_get_contents($this->serverPath);
+    }
+    // Search dependencies.
+    $this->w->jsParseRequire($this->extensionType, $this->extensionName, $this->script);
+  }
+
+  function output($data = NULL) {
+    return parent::output($this->script);
   }
 }

@@ -2,11 +2,14 @@
 
 namespace Wjs5\Loader\WebPage;
 
-use \Wjs5\Loader\WjsLibrary\Library;
+use \Wjs5\Wjs;
 use \Wjs5\Website;
 use \Wjs5\Loader;
+use \Wjs5\ExtensionClass;
+use \Wjs5\Loader\WebPage\Extension;
+use \Wjs5\Loader\WjsLibrary\Library;
 
-class Page {
+class Page extends ExtensionClass {
   /**
    * @var Website
    */
@@ -16,65 +19,59 @@ class Page {
    */
   var $w;
   /**
-   * @var \Wjs5\Loader\WebCom
+   * @var Extension
    */
-  var $loader;
+  var $extension;
   var $title = 'Page';
-  var $extensionType = 'undefined';
-  var $extensionName = 'undefined';
-  var $rendered = '';
-  var $requirements = array();
   var $libraries = array();
   var $librariesRequired = array();
   var $librariesHookQueue = array();
   var $librariesHookOutput = array();
   var $librariesHookCurrent = '';
-  var $serverPath = '';
-  var $clientPath = '';
-  var $urlAlias = FALSE;
+  var $rendered;
 
-  function __construct($type, $name, $options, \Wjs5\Wjs $wjs, Loader $loader, Website $website = NULL) {
-    $this->extensionType = $type;
-    $this->extensionName = $name;
-    // Load own w instance.
-    $this->w        = $wjs;
-    $this->loader     = $loader;
-    $this->website    = $website;
-    $this->serverPath = $options['server'];
-    $this->clientPath = $options['client'];
-    $this->title      = $name;
-    // Not sure if website is expected.
-    if ($this->website) {
-      // Search for page alias.
-      $aliases = array_flip($this->website->pageAliases);
-      if (isset($aliases[$name])) {
-        $this->urlAlias = $aliases[$name];
-      }
-    }
+  function __construct(Extension $extension) {
+    $this->extension = $extension;
+    $this->w         = $this->extension->w;
+//    // Link to website (only one page).
+//    if (isset($options['website'])) {
+//      $this->website       = isset($options['website']) ? $options['website'] : FALSE;
+//      $this->website->page = $this;
+//    }
+//    $this->serverPath = $options['serverPath'];
+//    $this->clientPath = $options['clientPath'];
+//    $this->title      = $name;
+//    // Search for page alias.
+//    $aliases = array_flip($this->website->router);
+//    if (isset($aliases[$name])) {
+//      $this->urlAlias = $aliases[$name];
+//    }
     // Init w as normal library.
     $this->libraryLoad('Wjs', array('w' => $this->w));
     // Load required libraries.
     $this->libraryLoadMultiple($this->librariesRequired);
-    // Load other requirements
-    foreach ($this->requirements as $extensionType => $extensions) {
-      foreach ($extensions as $extensionName) {
-        $this->w->import($extensionType, $extensionName);
-      }
-    }
-    $lineage = $this->lineageFilesNames();
+    $lineage = $this->lineageClassNames();
     // Load associated css / js after requirements.
-    foreach ($lineage as $filePath) {
-      $this->w->requireLinksClassFile($filePath, 'css', 'WebPage', $this->extensionName);
-      $js = $this->w->requireLinksClassFile($filePath, 'js', 'WebPage', $this->extensionName);
-      // Add requirement into own w.
-      if (is_file($js)) {
-        // Import requirements.
-        $this->w->jsParseRequire('WebPage', $this->extensionName, file_get_contents($js));
+    foreach ($lineage as $parentExtensionName) {
+      if ($parentExtensionName !== $this->extension->extensionName) {
+        $extensionParent = $this->w->extensionGet('WebPage', $parentExtensionName);
+        if (!($extensionParent instanceof \Wjs5\ExtensionMissing)) {
+          // We try tu rebuild parent path,
+          // in order to keep symlinks.
+          $parentClassPath = $extensionParent->serverPath . $parentExtensionName . '.inc';
+          $this->w->extensionsAddLink($parentClassPath, 'css', 'WebPage', $this->extensionName);
+          $js = $this->w->extensionsAddLink($parentClassPath, 'js', 'WebPage', $this->extensionName);
+          // Add requirement into own w.
+          if (is_file($js)) {
+            // Import requirements.
+            $this->w->jsParseRequire('WebPage', $this->extensionName, file_get_contents($js));
+          }
+        }
       }
     }
   }
 
-  function lineageFilesNames() {
+  function lineageClassNames() {
     static $lineage;
     // Only once.
     if (empty($lineage)) {
@@ -82,7 +79,7 @@ class Page {
       $reflector = new \ReflectionClass($this);
       $lineage   = array();
       do {
-        $lineage[] = $reflector->getFileName();
+        $lineage[] = $reflector->getShortName();
       } while ($reflector = $reflector->getParentClass());
       // Revert array to get links in inheritance order.
       $lineage = array_reverse($lineage);
@@ -91,9 +88,14 @@ class Page {
   }
 
   function libraryLoad($name, $options = array()) {
+    // Add page to library options.
     $options['page'] = $this;
-    $this->w->extensionPush('WjsLibrary', $name, $options);
-    return end($this->libraries);
+    // Create library will append it to page libraries.
+    $library = $this->w->extensionPush('WjsLibrary', $name, $options);
+    // Append to page.
+    $this->libraries[] = $library;
+    // Return the last library created.
+    return $library;
   }
 
   function libraryLoadMultiple($libraries) {
@@ -185,8 +187,11 @@ class Page {
 
   function websiteRenderHead() {
     return $this->renderHeadTitle() .
-    $this->website->htmlFileGetContent('theme/head.html') .
-    implode($this->librariesHook('renderHeadMeta')) .
+    $this->website->htmlFileGetContent('theme/head.html');
+  }
+
+  function renderHead() {
+    return implode($this->librariesHook('renderHeadMeta')) .
     implode($this->librariesHook('renderHeadCss')) .
     implode($this->librariesHook('renderHeadJs'));
   }
@@ -214,9 +219,9 @@ class Page {
   }
 
   function renderBody($params = array()) {
-    $html     = $this->loader->htmlLoad($this->extensionName);
+    $html     = $this->extension->htmlLoad($this->extensionName);
     $output   = '';
-    $template = $this->serverPath . $this->extensionName . '.tpl.inc';
+    $template = $this->extension->serverPath . $this->extensionName . '.tpl.inc';
     if (is_file($template)) {
       $output .= $this->renderTemplate($template, array_merge(array(
         'title' => $this->title,

@@ -1,0 +1,8 @@
+{
+  "require": {
+    "WjsLoader": [
+      "WjsLoader",
+      "JsScript"
+    ]
+  }
+}

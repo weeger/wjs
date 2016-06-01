@@ -2,23 +2,32 @@
 
 namespace Wjs5\Loader;
 
-require_once WJS5_ROOT . 'extension/WjsLoader/WebCom/WebCom.inc';
+use \Wjs5\Loader\WebCom;
 
 class Binder extends WebCom {
+
+}
+
+namespace Wjs5\Loader\Binder;
+
+class Extension extends \Wjs5\Loader\WebCom\Extension {
   // Do not use WebCom css links detection.
   var $requireCssLinks = FALSE;
-  function extensionPush($name, $excludeRequire = array(), $value = NULL) {
-    // Get values.
-    $value  = $this->valuePush($name, $value);
+  var $cssStyles;
+
+  function push() {
     // Push as a webcom.
-    $output = parent::extensionPush($name, $excludeRequire, $value);
-    if (!$this->valueIsError($value)) {
-      // CSS for binders is not a link, but is loaded and parsed.
-      $pathCss = $this->w->filePathMinExists($value['server'] . '/' . $name . '.css', 'css');
-      if (file_exists($pathCss)) {
-        $output['#data']['css'] = file_get_contents($pathCss);
-      }
+    parent::push();
+    // CSS for binders is not a link, but is loaded and parsed.
+    $pathCss = $this->w->filePathMinExists($this->serverPath . '/' . $this->extensionName . '.css', 'css');
+    if (file_exists($pathCss)) {
+      $this->cssStyles = file_get_contents($pathCss);
     }
-    return $output;
+  }
+
+  function instance() {
+    $instance = parent::instance();
+    $instance['css'] = $this->cssStyles;
+    return $instance;
   }
 }

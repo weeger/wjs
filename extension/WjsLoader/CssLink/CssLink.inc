@@ -7,18 +7,10 @@ use \Wjs5\Loader;
 define('WJS5_PUSH_CSSLINK_INCLUDED', 'WJS5_PUSH_CSSLINK_INCLUDED');
 
 /**
- * @package Wjs\Loader
+ * @package Wjs5\Loader
  */
 class CssLink extends Loader {
   var $allowRequireJs = TRUE;
-
-  function extensionPush($name, $options = array(), $value = NULL) {
-    $value = $this->valuePush($name, $value);
-    if ($value !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME && is_array($value) && isset($value['client'])) {
-      $value = $value['client'];
-    }
-    return parent::extensionPush($name, $options, $value);
-  }
 
   /**
    * On head render process, give list of js files
@@ -37,5 +29,23 @@ class CssLink extends Loader {
       return $this->extensions[$name][$side];
     }
     return '';
+  }
+}
+
+namespace Wjs5\Loader\CssLink;
+
+class Extension extends \Wjs5\Extension {
+  var $clientPath;
+
+  function add($settings) {
+    $this->clientPath = is_array($settings) && isset($settings['clientPath']) ? $settings['clientPath'] : $settings;
+  }
+
+  /**
+   * Append object to the output array.
+   */
+  function output($data = NULL) {
+    // There is no value for css link, value = name = url.
+    return parent::output($this->clientPath);
   }
 }

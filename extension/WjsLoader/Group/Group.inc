@@ -5,23 +5,21 @@ namespace Wjs5\Loader;
 use \Wjs5\Loader;
 
 /**
- * @package Wjs\Loader
+ * @package Wjs5\Loader
  */
 class Group extends Loader {
   var $allowRequireJs = TRUE;
+}
 
-  function extensionPush($name, $options = array(), $value = NULL) {
-    $value = $this->valuePush($name, $value);
-    if ($value !== WJS5_ERR_PUSH_UNDEFINED_EXTENSION_NAME) {
-      // Values are just requirements.
-      foreach ($value as $group => $items) {
-        foreach ($items as $item) {
-          $this->w->extensionAddRequire($this->type, $name, $group, $item);
-        }
+namespace Wjs5\Loader\Group;
+
+class Extension extends \Wjs5\Extension {
+  function add($settings) {
+    // Values are just requirements.
+    foreach ($settings as $group => $items) {
+      foreach ($items as $item) {
+        $this->w->extensionAddRequire($this->extensionType, $this->extensionName, $group, $item);
       }
-      // Save value as true.
-      $value = TRUE;
     }
-    return parent::extensionPush($name, $options, $value);
   }
 }

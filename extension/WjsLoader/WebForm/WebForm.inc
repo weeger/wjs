@@ -10,7 +10,14 @@ use \Wjs5\Loader;
  * @package Wjs\Loader
  */
 class WebForm extends WebCom {
-  var $lastAdded;
+
+}
+
+namespace Wjs5\Loader\WebForm;
+
+class Extension extends \Wjs5\Loader\WebCom\Extension {
+  var $classFile;
+  var $className;
 
   function sessionInit() {
     if (session_status() === PHP_SESSION_NONE) {
@@ -18,34 +25,34 @@ class WebForm extends WebCom {
     }
   }
 
-  function extensionAdd($name, $data) {
-    $classPath = $data . $name . '.inc';
+  function add($settings) {
+    parent::add($settings);
+    $classPath = $this->serverPath . $this->extensionName . '.inc';
     if (is_file($classPath)) {
       require_once $classPath;
     }
-    parent::extensionAdd($name, $data);
     if (isset($_POST) && isset($_POST['formId']) &&
       // Url contains loader type
-      isset($_GET) && isset($_GET[$this->type])
+      isset($_GET) && isset($_GET[$this->extensionType])
     ) {
       // Start session.
       $this->sessionInit();
       // Session ID must exist.
       if (isset($_SESSION[$_POST['formId']])) {
         // Create instance.
-        $form = $this->instance($name, $_SESSION[$_POST['formId']]);
+        $form = $this->instance();
         // Destroy, prevent multiple submissions.
         unset($_SESSION[$_POST['formId']]);
         // Execute submit.
-        print $form->submitCall($_POST);
+        print $form->submit($_POST);
       }
       exit;
     }
   }
 
-  function extensionPush($name, $options = array(), $value = NULL) {
+  function push() {
     // Treat value as a classic WebCom
-    $output = parent::extensionPush($name, $options, $value);
+    $output = parent::push();
     // Start session.
     $this->sessionInit();
     $formId = 'form-' . md5(time() . rand(0, 1000));
@@ -60,21 +67,18 @@ class WebForm extends WebCom {
   }
 
   /**
-   * @param $name
-   * @param $data
-   *
    * @return \Wjs5\Loader\WebForm\Form
    */
-  function instance($name, $data) {
+  function instance() {
     // Find page class name.
-    $className = '\\Wjs5\\Loader\\' . $this->type . '\\' . $name;
+    $className = '\\Wjs5\\Loader\\' . $this->extensionType . '\\' . $this->extensionName;
     if (!class_exists($className)) {
-      $className = '\\Wjs5\\Loader\\' . $this->type . '\\Page';
+      $className = '\\Wjs5\\Loader\\' . $this->extensionType . '\\Page';
     }
     if (!class_exists($className)) {
       $className = '\\Wjs5\\Loader\\WebForm\\Form';
     }
     // Create class.
-    return new $className($this->type, $name, $data, $this->w);
+    return new $className($this);
   }
 }

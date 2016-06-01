@@ -1,5 +1,5 @@
 /**
- * @require WjsLoader > JsMethod
+ * @require WjsLoader > JsClass
  * @require WjsLoader > JsClassStatic
  * @require JsClassStatic > FormulaManager
  */
@@ -10,6 +10,7 @@
     wjsShortcuts: false,
 
     __destruct: function () {
+      // Call super method.
       this.w.loaders.JsClass.__destruct.call(this);
       // Remove manager.
       this.w.destroy('JsClassStatic', 'FormulaManager', true);

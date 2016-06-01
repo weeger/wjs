@@ -438,7 +438,10 @@
     /**
      * Call super method of current object.
      * Lighten implementation than JsMethod > inheritMethod,
-     * but do not support complex super imbrication.
+     * but do not support complex super imbrication, ex
+     * if a super1.super1 method call a method who
+     * call a super2.super2, who call super1 again,
+     * into the same object scope.
      */
     __super: function (method, args) {
       // Backup current context.

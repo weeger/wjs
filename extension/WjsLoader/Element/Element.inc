@@ -2,7 +2,7 @@
 
 namespace Wjs5\Loader;
 
-require_once WJS5_ROOT . 'extension/WjsLoader/Binder/Binder.inc';
+use \Wjs5\Loader\Binder;
 
 class Element extends Binder {
 

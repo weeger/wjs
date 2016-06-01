@@ -1,5 +1,8 @@
 (function (W) {
   'use strict';
+  /**
+   * TODO Rename to Singleton
+   */
   W.register('WjsLoader', 'JsClassStatic', {
     loaderExtends: 'JsClass',
     wjsShortcuts: true,
@@ -19,7 +22,6 @@
     },
 
     destroy: function (name, data, process) {
-      err(this.type + ' >>> ' + name);
       // Destruct class.
       if (this.items[name].__destruct) {
         this.items[name].__destruct();

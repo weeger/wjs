@@ -2,8 +2,12 @@
 
 namespace Wjs5\Loader;
 
-use \Wjs5\Loader\JsMethod;
-
 class Formula extends JsClass {
+
+}
+
+namespace Wjs5\Loader\Formula;
+
+class Extension extends \Wjs5\Loader\JsClass\Extension {
 
 }
