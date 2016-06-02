@@ -30,17 +30,14 @@ class Page extends ExtensionClass {
   var $librariesHookCurrent = '';
   var $rendered;
 
-  function __construct(Extension $extension) {
+  function __construct(Extension $extension, $options) {
     $this->extension = $extension;
     $this->w         = $this->extension->w;
-//    // Link to website (only one page).
-//    if (isset($options['website'])) {
-//      $this->website       = isset($options['website']) ? $options['website'] : FALSE;
-//      $this->website->page = $this;
-//    }
-//    $this->serverPath = $options['serverPath'];
-//    $this->clientPath = $options['clientPath'];
-//    $this->title      = $name;
+    // Link to website (only one page).
+    if (isset($options['website'])) {
+      $this->website       = isset($options['website']) ? $options['website'] : FALSE;
+      $this->website->page = $this;
+    }
 //    // Search for page alias.
 //    $aliases = array_flip($this->website->router);
 //    if (isset($aliases[$name])) {
@@ -186,7 +183,7 @@ class Page extends ExtensionClass {
   }
 
   function websiteRenderHead() {
-    return $this->renderHeadTitle() .
+    return $this->renderHeadTitle() . $this->renderHead() .
     $this->website->htmlFileGetContent('theme/head.html');
   }
 
@@ -202,8 +199,7 @@ class Page extends ExtensionClass {
    */
   function render($params = array()) {
     // Find template name.
-    $this->rendered = $this->renderBody($params);
-    return $this->rendered;
+    return $this->extension->html;
   }
 
   function renderHeadTitle() {

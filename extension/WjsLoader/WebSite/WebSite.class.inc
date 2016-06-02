@@ -60,7 +60,7 @@ class Website extends Atom {
     // Create w instance.
     $this->w = $this->wInstance();
     // TODO temp
-    $this->w->push('WjsLibrary', 'WjsDebug');
+    $this->w->extensionPush('WjsLibrary', 'WjsDebug');
     $this->w->subversion = 'source';
   }
 
@@ -118,7 +118,7 @@ class Website extends Atom {
     return preg_replace('([\.]{2,})', '', $file);
   }
 
-  function renderDefault($webPageName = 'wDefault') {
+  function renderDefault($webPageName = 'wjsDefault') {
     // Search first for aliases.
     if (isset($_GET[$this->pathAliasQuery]) && isset($this->router[$_GET[$this->pathAliasQuery]])) {
       $webPageName = $this->router[$_GET[$this->pathAliasQuery]];
@@ -130,7 +130,7 @@ class Website extends Atom {
     return $this->render($webPageName);
   }
 
-  function render($webPageName = 'wDefault') {
+  function render($webPageName = 'wjsDefault') {
     // Define if we are on an AJAX page or not.
     $ajaxKey = $this->w->optionGet('paramInc');
     $options = array();
@@ -202,7 +202,7 @@ class Website extends Atom {
   function renderHead() {
     return '<head>' .
     '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' .
-    '<meta name="generator" content="WJS ' . WJS_VERSION . '-' . $this->w->subversion . '" />' .
+    '<meta name="generator" content="WJS ' . WJS5_VERSION . '-' . $this->w->subversion . '" />' .
     $this->page->websiteRenderHead() .
     '</head>';
   }

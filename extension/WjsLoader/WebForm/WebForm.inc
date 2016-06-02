@@ -69,7 +69,7 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
   /**
    * @return \Wjs5\Loader\WebForm\Form
    */
-  function instance() {
+  function instance($options) {
     // Find page class name.
     $className = '\\Wjs5\\Loader\\' . $this->extensionType . '\\' . $this->extensionName;
     if (!class_exists($className)) {
@@ -79,6 +79,6 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       $className = '\\Wjs5\\Loader\\WebForm\\Form';
     }
     // Create class.
-    return new $className($this);
+    return new $className($this, $options);
   }
 }

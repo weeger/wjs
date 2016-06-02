@@ -129,7 +129,7 @@ class Extension extends ExtensionRequest {
   /**
    * Create a new instance (multiple).
    */
-  function instance() {
+  function instance($options) {
     // To override...
     return FALSE;
   }

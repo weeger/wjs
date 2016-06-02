@@ -474,7 +474,7 @@ class Wjs extends Atom {
     // Save.
     $this->extensionsPushed[$extensionType][$extensionName] = $extension;
     // Execute at each push.
-    $instance               = $extension->instance();
+    $instance               = $extension->instance($options);
     $extension->instances[] = $instance;
     return $instance;
   }
@@ -832,24 +832,25 @@ class Wjs extends Atom {
     // to use real path as base path for exploration.
     $directoryRealPath = realpath($directory);
     $scan              = $this->scanFolderOrdered($directoryRealPath . '/', $orderBase);
-
     // Create scan registry.
     $queue = array();
     foreach ($scan as $extensionType) {
       if ($extensionType{0} !== '.' && !in_array($extensionType, $exclude)) {
         $queue[$extensionType]  = array();
         $scanExtensionDirectory = $directoryRealPath . '/' . $extensionType . '/';
-        $scanExtension          = $this->scanFolderOrdered($scanExtensionDirectory, $orderBase);
-        foreach ($scanExtension as $file) {
-          if ($file{0} !== '.') {
-            $info          = pathinfo($directory . $file);
-            $extensionName = $info['filename'];
-            if (!isset($exclude[$extensionType]) || !in_array($extensionName, $exclude[$extensionType])) {
-              $queue[$extensionType][$extensionName] = array(
-                'file'       => $file,
-                'directory'  => $scanExtensionDirectory,
-                'globalData' => $globalData
-              );
+        if (file_exists($scanExtensionDirectory)) {
+          $scanExtension = $this->scanFolderOrdered($scanExtensionDirectory, $orderBase);
+          foreach ($scanExtension as $file) {
+            if ($file{0} !== '.') {
+              $info          = pathinfo($directory . $file);
+              $extensionName = $info['filename'];
+              if (!isset($exclude[$extensionType]) || !in_array($extensionName, $exclude[$extensionType])) {
+                $queue[$extensionType][$extensionName] = array(
+                  'file'       => $file,
+                  'directory'  => $scanExtensionDirectory,
+                  'globalData' => $globalData
+                );
+              }
             }
           }
         }

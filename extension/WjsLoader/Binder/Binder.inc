@@ -25,8 +25,8 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
     }
   }
 
-  function instance() {
-    $instance = parent::instance();
+  function instance($options) {
+    $instance = parent::instance($options);
     $instance['css'] = $this->cssStyles;
     return $instance;
   }

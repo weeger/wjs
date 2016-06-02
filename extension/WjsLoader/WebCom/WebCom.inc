@@ -98,10 +98,10 @@ class Extension extends \Wjs5\Extension {
    * Get content of WebCom. HTML file is loaded,
    * image links are parsed.
    */
-  function instance() {
+  function instance($options) {
     return array(
       // Replacement of include tags is made during page rendering.
-      'html' => $this->html
+      'html' => isset($options['html']) ? $options['html'] : $this->html
     );
   }
 

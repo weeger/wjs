@@ -35,8 +35,8 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
     $this->className = '\\Wjs5\\Loader\\WjsLibrary\\' . $this->extensionName;
   }
 
-  function instance() {
+  function instance($options) {
     require_once $this->classFile;
-    return new $this->className();
+    return new $this->className($options);
   }
 }

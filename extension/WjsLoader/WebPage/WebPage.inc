@@ -77,12 +77,12 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
    * Get content of WebCom. HTML file is loaded,
    * image links are parsed.
    */
-  function instance() {
+  function instance($options) {
     /* @var $pageInstance \Wjs5\Loader\WebPage\Page */
-    $pageInstance = new $this->className($this, $this->loader);
+    $pageInstance = new $this->className($this, $options);
     $this->html  = $pageInstance->renderBody();
     // Create page class.
     $this->pageInstances[] = $pageInstance;
-    return parent::instance();
+    return parent::instance($options);
   }
 }
