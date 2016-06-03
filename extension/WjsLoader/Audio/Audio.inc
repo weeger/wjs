@@ -8,3 +8,8 @@ class Audio extends File {
 
 }
 
+namespace Wjs5\Loader\Audio;
+
+class Extension extends \Wjs5\Loader\File\Extension {
+
+}

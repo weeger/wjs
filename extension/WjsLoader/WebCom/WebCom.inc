@@ -81,6 +81,7 @@ class Extension extends \Wjs5\Extension {
     }
     // Search for a js file.
     if ($this->requireJsLinks) {
+      // Adding link will parse it for @require tags.
       $this->requireLinkFile('js');
     }
     if ($this->htmlFile) {

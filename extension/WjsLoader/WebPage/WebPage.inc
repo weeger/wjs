@@ -13,7 +13,6 @@ use \Wjs5\Loader;
  */
 class WebPage extends WebCom {
   var $lastAdded;
-  var $requireCssLinks = TRUE;
 }
 
 namespace Wjs5\Loader\WebPage;

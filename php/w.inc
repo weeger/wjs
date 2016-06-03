@@ -463,11 +463,12 @@ class Wjs extends Atom {
     if ($this->isCoreExtension($extensionType, $extensionName)) {
       return NULL;
     }
+    /* @var \Wjs5\Extension $extension */
     $extension = $this->extensionGet($extensionType, $extensionName);
     if (!$extension->pushCache() && !$this->extensionIsPushed($extensionType, $extensionName)) {
       // Executed once for each extension,
       // contain common data.
-      $extension->push($options);
+      $extension->push();
     }
     // Dependencies...
     $extension->pushDependencies();

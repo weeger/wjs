@@ -119,9 +119,10 @@ class Website extends Atom {
   }
 
   function renderDefault($webPageName = 'wjsDefault') {
+    $clientRequest = isset($_GET[$this->pathAliasQuery]) ? $_GET[$this->pathAliasQuery] : '';
     // Search first for aliases.
-    if (isset($_GET[$this->pathAliasQuery]) && isset($this->router[$_GET[$this->pathAliasQuery]])) {
-      $webPageName = $this->router[$_GET[$this->pathAliasQuery]];
+    if (isset($this->router[$clientRequest])) {
+      $webPageName = $this->router[$clientRequest];
     }
     // Search for query string.
     else if (isset($_GET[$this->pageClassType])) {
