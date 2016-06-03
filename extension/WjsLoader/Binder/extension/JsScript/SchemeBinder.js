@@ -53,9 +53,8 @@
 
     __construct: function (options) {
       // Bind callbacks for dom.
-      var scheme = this.loader.webCompSchemes[this.protoClassName];
-      if (scheme.callbacks && scheme.callbacks.domListen) {
-        for (var i = 0, key, keys = Object.keys(scheme.callbacks.domListen); key = keys[i++];) {
+      if (this.domListeners) {
+        for (var i = 0, key, keys = this.domListeners; key = keys[i++];) {
           key = this.methodName('callbacks.domListen.' + key);
           // Bind.
           this[key] = this[key].bind(this);

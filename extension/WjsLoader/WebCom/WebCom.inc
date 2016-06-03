@@ -101,6 +101,7 @@ class Extension extends \Wjs5\Extension {
    */
   function instance($options) {
     return array(
+      'clientPath' => $this->clientPath,
       // Replacement of include tags is made during page rendering.
       'html' => isset($options['html']) ? $options['html'] : $this->html
     );

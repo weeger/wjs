@@ -22,8 +22,7 @@
       classLoads: {typeGlobal: true},
       cssStyleNames: {},
       readyCallbacks: [],
-      requiredInstances: {},
-      webComConstruct: false
+      requiredInstances: {}
     },
 
     options: {
@@ -373,8 +372,6 @@
       // to use all defined variables into
       // parsed html templates.
       this.optionApply('html', optionsDefault);
-      this.webComConstruct = true;
-      this.init();
       // Send modified options to sub instance.
       return optionsDefault;
     },

@@ -83,7 +83,7 @@
           domStyle[protoName] = this.w.document.createElement('style');
           // Place CSS into it.
           // Add client path to relative URLs.
-          domStyle[protoName].innerHTML = data.css.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + data.client);
+          domStyle[protoName].innerHTML = data.css.replace(new RegExp('(url\\(["\'])(?!http[s]*:\/\/)', 'g'), '$1' + data.clientPath);
           // Add to load queue.
           this.cssSheetLoadQueueAppend(domStyle[protoName]);
           // Append to head.
