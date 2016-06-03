@@ -131,7 +131,7 @@
       // Custom init.
       this.initElement(options);
       // Children should be created on construct complete.
-      this.optionApply('children', options);
+      this.optionApply('children');
       // Render element.
       this.render();
     },
@@ -369,10 +369,10 @@
      */
     render: function (player) {
       if (this.stateGet('renderEnabled') === true &&
-        // Block plays if player is not one attached
-        // to this sprite, and this one does not allow propagation
-        // from an external player. Render with no player defined
-        // is still authorized. TODO check if still needed (ex: multiple async players)
+          // Block plays if player is not one attached
+          // to this sprite, and this one does not allow propagation
+          // from an external player. Render with no player defined
+          // is still authorized. TODO check if still needed (ex: multiple async players)
         (!player || player === this.playPlayer || this.playerPropagate === true)) {
         // Compute once by render process.
         this.domBoundingClientRect = this.dom ? this.dom.getBoundingClientRect() : false;

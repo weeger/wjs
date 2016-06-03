@@ -143,7 +143,7 @@
             // Get list of all attributes to inspect,
             // from current sets,
               keys = objectKeys(com.w.domAttributes(com.dom))
-                // And from saved one.
+              // And from saved one.
                 .concat(objectKeys(backup.attributes));
             // Iterates over all attributes.
             while (item = keys[i++]) {
@@ -306,6 +306,7 @@
      * fill values of options.optionName.defaults.
      */
     optionsDefault: {},
+    optionsMerged: {},
 
     /**
      * List of prototypes names to import data from.
@@ -350,9 +351,9 @@
         }
         // Check for required missing options.
         if (option.required &&
-          // Not defined by user.
+            // Not defined by user.
           optionsDefault[key] === undefined &&
-          // No default value.
+            // No default value.
           option.defaults === undefined) {
           // Fatal error.
           this.error('Missing option "' + key + '" and no defaults value');
@@ -365,6 +366,7 @@
           optionsNames.push(key);
         }
       }
+      this.optionsMerged = optionsDefault;
       // Apply.
       this.optionApplyMultiple(optionsNames, optionsDefault);
       // Apply html at end, it allows
@@ -372,6 +374,7 @@
       // parsed html templates.
       this.optionApply('html', optionsDefault);
       this.webComConstruct = true;
+      this.init();
       // Send modified options to sub instance.
       return optionsDefault;
     },
@@ -465,6 +468,8 @@
       // Return content.
       return output;
     },
+
+    init: W._e,
 
     exit: function (callback) {
       this.__destruct(callback);
@@ -715,6 +720,7 @@
      * @require JsMethod > isPlainObject
      */
     optionApply: function (optionName, optionsList) {
+      optionsList = optionsList || this.optionsMerged;
       var option = this.options[optionName];
       // Create custom option object if missing.
       if (!option) {

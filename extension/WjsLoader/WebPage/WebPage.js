@@ -207,18 +207,15 @@
           });
         }
         if (pageCurrent) {
-          log('B');
           // Launch page exit.
           self.pageCurrent.exit(function () {
-            log('1');
             exited = true;
             callback();
           });
         }
         // No current page to quit.
         if (!replacement && !pageCurrent) {
-          log('C');
-          callback();
+          callback(s);
         }
       });
     },
