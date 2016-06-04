@@ -19,6 +19,16 @@ class Website extends Atom {
    * @var string
    */
   var $name = 'Wjs default website';
+  /**
+   * Define the environment key name used into htaccess.
+   * ex : SetEnv YOUR_SITE_ENV dev
+   */
+  var $envKey = 'WJS5_ENV';
+  /**
+   * Define the environment name.
+   */
+  var $env;
+  var $envDefault = FALSE;
   var $serverPathWebsiteRoot;
   var $serverPathWebsiteRootResolved;
   var $router = array();
@@ -37,7 +47,7 @@ class Website extends Atom {
   var $page;
   var $pageClassType = 'WebPage';
   var $pathAliasQuery = 'q';
-  var $globalLibraries = array();
+  var $libraries = array();
 
   function __construct($callerFile = '') {
     // Save the raw path to the website root (allow symlinks).
@@ -48,19 +58,33 @@ class Website extends Atom {
     // It may be replaced as an external library.
     $routerJson   = $this->serverPathWebsiteRootResolved . 'router.json';
     $this->router = file_exists($routerJson) ? json_decode(file_get_contents($routerJson), JSON_OBJECT_AS_ARRAY) : $this->router;
-    // Create default options.
-    $settings = array('w' => array());
+    // Env key found.
+    if ($this->envKey) {
+      // Load env.
+      $this->env = getenv($this->envKey);
+      if (!$this->env) {
+        $this->env = $this->envDefault;
+      }
+      if (!$this->env) {
+        print 'No env found for ' . $this->envKey;
+        exit;
+      }
+      // Load env options,
+      // it will override $options variable.
+      require $this->serverPathWebsiteRootResolved . 'settings/settings.' . $this->env . '.inc';
+    }
+    // Create default options for all wjs instances.
+    if (!isset($settings['w'])) {
+      $settings['w'] = array();
+    }
     // Init options.
     parent::__construct($settings);
     // Append options from environment settings.
-    if (is_array($this->optionGet('globalLibraries'))) {
-      // Contains list of global libraries.
-      $this->globalLibraries = array_merge($this->globalLibraries, $this->optionGet('globalLibraries'));
+    if (is_array($this->optionGet('libraries'))) {
+      $this->libraries = array_merge($this->libraries, $this->optionGet('libraries'));
     }
     // Create w instance.
     $this->w = $this->wInstance();
-    // TODO temp
-    $this->w->extensionPush('WjsLibrary', 'WjsDebug');
     $this->w->subversion = 'source';
   }
 
@@ -91,8 +115,16 @@ class Website extends Atom {
     $request = $w->optionGet('clientRequest');
     // Build a filename in case of aggregation is enabled.
     $w->optionSet('aggregationFileName', $this->urlToFilename($request ? $request : 'home') . '.js');
+    // Load global libraries.
+    $this->wLoadLibraries($w, $this->libraries);
     // Return instance.
     return $w;
+  }
+
+  function wLoadLibraries(\Wjs5\Wjs $w, $libraries) {
+    foreach ($libraries as $library) {
+      $w->extensionPush('WjsLibrary', $library);
+    }
   }
 
   /**
@@ -151,28 +183,12 @@ class Website extends Atom {
       // Or use the global w.
       $this->w->response($_GET);
     }
-//    // Test is a page is specified as as default
-//    // webcom arguments like WebPage=MyPage
-//    if (isset($_GET[$this->pageClassType])) {
-//      $webPageName = $_GET[$this->pageClassType];
-//    }
-//    // Create main page.
-//    $this->page = $this->pageInstance($webPageName);
-//    // Add extra libraries.
-//    $this->pagePreloadInit();
-//    $options = array_merge(array(
-//      // Define html body as preloaded.
-//      'html' => WJS_PUSH_WEBPAGE_PRELOADED
-//    ), $options);
-//    // Push into own w.
     // Page has appended itself to website.
     $this->w->extensionPush($this->pageClassType, $webPageName, array(
       // Define html body as preloaded.
       'html'      => WJS5_PUSH_WEBPAGE_PRELOADED,
       // The page will attach itself to this.
-      'website'   => $this,
-      // Add global libraries.
-      'libraries' => $this->globalLibraries
+      'website'   => $this
     ));
     // Render body before head.
     $body = $this->renderBody();
@@ -187,7 +203,6 @@ class Website extends Atom {
     // TODO Why ??
     return array();
   }
-
 
   function htmlFileGetContent($path) {
     // Get the site root path.

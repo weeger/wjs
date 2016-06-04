@@ -1,0 +1,10 @@
+SetEnv WJS5_ENV dev
+
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  # Redirect all paths to index.
+  # Use the $pathAliasQuery name.
+  RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]
+</IfModule>
