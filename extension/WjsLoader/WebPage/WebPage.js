@@ -20,7 +20,7 @@
       var params = this.w.urlQueryParse();
       // Search for requirement of default page.
       if (params[this.type]) {
-        // Page should be already preloaded.
+        // Page should be already preprocessed.
         delete params[this.type];
         // We don't need to let webcom to auto load it.
         this.w.urlQueryReplace(params);

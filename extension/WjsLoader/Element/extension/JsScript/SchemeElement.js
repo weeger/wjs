@@ -243,7 +243,7 @@
 
     /**
      * Add a plugin.
-     * Plugin should have been preloaded.
+     * Plugin should have been preprocessed.
      */
     pluginAdd: function (name, options, callback) {
       var w = this.w,

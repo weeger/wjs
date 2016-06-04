@@ -46,7 +46,7 @@
      * @require JsMethod > isDomNode
      */
     disable: function (name, value) {
-      // Dom node can be preloaded
+      // Dom node can be preprocessed
       // Parent node can be missing in case of
       // deletion of an unknown dom item.
       if (value.nodeType && value.parentNode) {

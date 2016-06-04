@@ -31,7 +31,7 @@
               // accessible with the back button),
               // replaceState for first loaded page, considered as
               // the real page path.
-              (options.html === 'WJS5_PUSH_WEBPAGE_PRELOADED' ? 'replace' : 'push'),
+              (options.html === 'WJS5_PUSH_WEBPAGE_PREPROCESSED' ? 'replace' : 'push'),
               // Root is not a path,
               // use full site path, to support pointing to root.
               value !== '[root]' ? value : '', undefined, {
@@ -111,14 +111,14 @@
       },
       dom: {
         define: function (com, value, options) {
-          var preloaded = options.html === 'WJS5_PUSH_WEBPAGE_PRELOADED', output;
-          if (preloaded) {
+          var preprocessed = options.html === 'WJS5_PUSH_WEBPAGE_PREPROCESSED', output;
+          if (preprocessed) {
             // Save as imported.
             options.domImported = true;
             // Force option apply.
             com.optionApply('domImported', options);
             // Find dom into document.
-            value = this.w.document.getElementById(com.type + '-preloaded');
+            value = this.w.document.getElementById(com.type + '-preprocessed');
             // Preloaded content is hidden by default.
             value.style.display = null;
           }
@@ -132,7 +132,7 @@
         define: function (com, value, options) {
           // Requires html && dom option.
           com.optionApply('dom', options);
-          if (value !== 'WJS5_PUSH_WEBPAGE_PRELOADED') {
+          if (value !== 'WJS5_PUSH_WEBPAGE_PREPROCESSED') {
             this.__super('define', [com, value, options]);
           }
           else {
@@ -142,7 +142,7 @@
           }
         },
         destroy: function (com, value) {
-          if (com.html !== 'WJS5_PUSH_WEBPAGE_PRELOADED') {
+          if (com.html !== 'WJS5_PUSH_WEBPAGE_PREPROCESSED') {
             this.__super('destroy', [com, value]);
           }
           else {

@@ -4,7 +4,7 @@ namespace Wjs5\Loader;
 
 require_once 'WebPage.class.inc';
 
-define('WJS5_PUSH_WEBPAGE_PRELOADED', 'WJS5_PUSH_WEBPAGE_PRELOADED');
+define('WJS5_PUSH_WEBPAGE_PREPROCESSED', 'WJS5_PUSH_WEBPAGE_PREPROCESSED');
 
 use \Wjs5\Loader;
 

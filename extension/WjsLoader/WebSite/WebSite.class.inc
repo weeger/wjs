@@ -84,7 +84,7 @@ class Website extends Atom {
       $this->libraries = array_merge($this->libraries, $this->optionGet('libraries'));
     }
     // Create w instance.
-    $this->w = $this->wInstance();
+    $this->w             = $this->wInstance();
     $this->w->subversion = 'source';
   }
 
@@ -185,18 +185,58 @@ class Website extends Atom {
     }
     // Page has appended itself to website.
     $this->w->extensionPush($this->pageClassType, $webPageName, array(
-      // Define html body as preloaded.
-      'html'      => WJS5_PUSH_WEBPAGE_PRELOADED,
+      // Define html body as preprocessed.
+      'html'    => WJS5_PUSH_WEBPAGE_PREPROCESSED,
       // The page will attach itself to this.
-      'website'   => $this
+      'website' => $this
     ));
     // Render body before head.
     $body = $this->renderBody();
-    // Return html content.
-    return $this->renderDoctype() . '<html>' .
-    $this->renderHead() .
-    $body .
-    '</html>';
+    /* @var \DOMDocument $domLayout */
+    $domLayout = $this->w->htmlLoad(file_get_contents(dirname(__FILE__) . '/WebSite.html'));
+    /* @var \DOMElement $domLayoutHead */
+    $domLayoutHead    = $domLayout->getElementsByTagName('head')->item(0);
+    $object           = new \ReflectionObject($this);
+    $customLayoutFile = dirname($object->getFileName()) . '/' . $object->getName() . '.html';
+    // Import custom tags.
+    if (is_file($customLayoutFile)) {
+      /* @var \DOMDocument $domLayoutCustom */
+      $domLayoutCustom = $this->w->htmlLoad(file_get_contents($customLayoutFile));
+      // Override default title tag.
+      $titleTagCustom = $domLayoutCustom->getElementsByTagName('head')
+        ->item(0)
+        ->getElementsByTagName('title')
+        ->item(0);
+      if ($titleTagCustom) {
+        $titleTag = $domLayoutHead->getElementsByTagName('title')
+          ->item(0);
+        $titleTag->parentNode->removeChild($titleTag);
+      }
+      $this->domMerge($domLayoutCustom, $domLayout, 'head');
+      $this->domMerge($domLayoutCustom, $domLayout, 'body');
+    }
+    // Import generated head.
+    $this->domImport($domLayoutHead, $this->page->websiteRenderHead());
+    // Import body.
+    $this->domImport($domLayout->getElementsByTagName('body')->item(0), $body);
+    // Save.
+    return $this->w->htmlSave($domLayout);
+  }
+
+  function domMerge(\DOMDocument $domFrom, \DOMDocument $domTo, $tagName) {
+    $tagTo = $domTo->getElementsByTagName($tagName)->item(0);
+    foreach ($domFrom->getElementsByTagName($tagName)
+               ->item(0)->childNodes as $node) {
+      $tagTo->appendChild($domTo->importNode($node, TRUE));
+    }
+  }
+
+  function domImport(\DOMNode $domTo, $html) {
+    $temp  = $this->w->htmlLoad($html);
+    $nodes = $temp->childNodes;
+    foreach ($nodes as $node) {
+      $domTo->appendChild($domTo->ownerDocument->importNode($node, TRUE));
+    }
   }
 
   function pageRenderParams() {
@@ -211,23 +251,11 @@ class Website extends Atom {
     return is_file($path) ? file_get_contents($path) : '';
   }
 
-  function renderDoctype() {
-    return '<!DOCTYPE html>';
-  }
-
-  function renderHead() {
-    return '<head>' .
-    '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' .
-    '<meta name="generator" content="WJS ' . WJS5_VERSION . '-' . $this->w->subversion . '" />' .
-    $this->page->websiteRenderHead() .
-    '</head>';
-  }
-
   function renderBody() {
     // Use global template.
     $template = $this->htmlFileGetContent('theme/page.html');
     $output   = '<body>';
-    $output .= '<div id="' . $this->page->extension->extensionName . '-preloaded" style="display:none">' .
+    $output .= '<div id="' . $this->page->extension->extensionName . '-preprocessed" style="display:none">' .
       '<div class="html">' . $this->page->render($this->pageRenderParams()) . '</div>' .
       $template .
       '</div>';
