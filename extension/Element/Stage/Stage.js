@@ -53,6 +53,7 @@
     refreshSize: function () {
       this.dom.style.width = this.w.window.innerWidth + 'px';
       this.dom.style.height = this.w.window.innerHeight + 'px';
+      this.trigger('refreshSize');
     },
 
     callbacks: {
