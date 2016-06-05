@@ -346,15 +346,6 @@
 
     protoParseCallbacks: function (proto, scheme, item) {
       this.methodsFlatten(proto, scheme, item, 2);
-      // Create entry if not exists.
-      if (!proto.domListeners) {
-        proto.domListeners = [];
-      }
-      // Quit if not more dom listeners.
-      if (scheme[item].domListen) {
-        // Add names of new listeners.
-        proto.domListeners = proto.domListeners.concat(Object.keys(scheme[item].domListen));
-      }
     },
 
     /**

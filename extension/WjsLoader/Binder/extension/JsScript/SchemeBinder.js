@@ -52,18 +52,24 @@
     },
 
     __construct: function (options) {
-      // Bind callbacks for dom.
-      if (this.domListeners) {
-        for (var i = 0, key, keys = this.domListeners; key = keys[i++];) {
-          key = this.methodName('callbacks.domListen.' + key);
-          // Bind.
-          this[key] = this[key].bind(this);
-        }
-      }
+      this.callbacksBind('domListeners', 'domListen');
+      this.callbacksBind('variableSetters', 'variableSet');
       // Base method.
       this.__super('__construct', arguments);
       // Inherit callbacks methods.
       this.w.inheritLinage(this, 'states');
+    },
+
+    callbacksBind: function (regName, name) {
+      var keys, key, i;
+      // Bind callbacks for dom.
+      if (this[regName]) {
+        for (i = 0, keys = this[regName]; key = keys[i++];) {
+          key = this.methodName('callbacks.' + name + '.' + key);
+          // Bind.
+          this[key] = this[key].bind(this);
+        }
+      }
     },
 
     callbackFind: function (callback, group) {
@@ -111,6 +117,8 @@
       if (value && value.formula) {
         this.formulaListenAll(value);
       }
+      var listener = this[this.methodName('callbacks.variableSet.' + name)];
+      listener && listener(value);
       // Use protected inheritance.
       this.__super('variableSet', arguments);
     },
