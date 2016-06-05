@@ -33,6 +33,8 @@ class Wjs extends Atom {
     'serverPathCache'     => FALSE,
     // Cache directory.
     'clientPathCache'     => '',
+    // Allow to force clear all caches.
+    'cacheFlush'          => FALSE,
     // Cache directory.
     'staticFilesEnabled'  => FALSE,
     // Name of aggregated w file.
@@ -114,6 +116,7 @@ class Wjs extends Atom {
    * @var array
    */
   var $settings = array();
+  var $cacheToken = FALSE;
 
   static $wjsInstancesCounter = 0;
 
@@ -207,6 +210,10 @@ class Wjs extends Atom {
     // when URL rewriting is used.
     if (!$this->optionGet('clientPathWjs')) {
       $this->optionSet('clientPathWjs', $this->clientPath(WJS5_ROOT));
+    }
+
+    if ($this->optionGet('cacheFlush')) {
+      $this->cacheToken = rand(0, 1000000);
     }
 
     // Create loader of loaders manually.
@@ -788,14 +795,28 @@ class Wjs extends Atom {
    * @return string
    */
   function renderJsInclude($path, $inline = '') {
-    return '<script type="text/javascript"' . ($path ? ' src="' . $path . '"' : '') . '>' . $inline . '</script>';
+    return '<script type="text/javascript"' . ($path ? ' src="' . $this->includeLink($path) . '"' : '') . '>' . $inline . '</script>';
   }
 
   /**
    * Render standard css sheet include.
    */
-  function renderCssInclude($file) {
-    return '<link rel="stylesheet" media="all" type="text/css" href="' . $file . '" />';
+  function renderCssInclude($path) {
+    return '<link rel="stylesheet" media="all" type="text/css" href="' . $this->includeLink($path) . '" />';
+  }
+
+  function includeLink($path) {
+    if ($this->optionGet('cacheFlush')) {
+      if (strpos($path, '?') === FALSE) {
+        $path .= '?';
+      }
+      else {
+        // TODO : Check url encoding on node import.
+        $path .= '&';
+      }
+      $path .= 'c=' . $this->cacheToken;
+    }
+    return $path;
   }
 
   /**
