@@ -68,7 +68,7 @@ class Extension extends \Wjs5\Extension {
     }
     $this->htmlFile = $this->extensionFileTypeExists('html');
     // Load sub extensions
-    $extension = $this->serverPath . '/extension/';
+    $extension = $this->serverPath . 'extension/';
     if (is_dir($extension)) {
       $this->w->scanFolderExtensions($extension);
     }
