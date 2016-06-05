@@ -190,7 +190,7 @@
         element.parent.elementRemove(element);
       }
       // Append dom if both have one.
-      if (this.dom && element.dom) {
+      if (this.dom && element.dom && !element.dom.parentNode) {
         this.dom.appendChild(element.dom);
       }
       // Add to children.
