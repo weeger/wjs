@@ -91,11 +91,6 @@
       this.trigger('domChildFill', [name, content]);
     },
 
-    domChildRemove: function (name) {
-      var dom = this.domChildGet(name);
-      dom.parentNode.removeChild(dom);
-    },
-
     domStyleGet: function (name) {
       return this.w.window.getComputedStyle(this.dom, null).getPropertyValue(name);
     },
@@ -278,13 +273,25 @@
       }
     },
 
+    /**
+     * @require JsMethod > isDomNode
+     */
     listen: function (target, eventName, callback) {
+      if (this.w.isDomNode(target)) {
+        return this.domListen.apply(this, arguments);
+      }
       callback = this.callbackFind(callback, 'listen');
       // Get callback function.
       return !!(target.listenerAdd(eventName, this, callback));
     },
 
+    /**
+     * @require JsMethod > isDomNode
+     */
     forget: function (target, eventName) {
+      if (this.w.isDomNode(target)) {
+        return this.domForget.apply(this, arguments);
+      }
       return !!(target.listenerRemove(eventName, this));
     },
 

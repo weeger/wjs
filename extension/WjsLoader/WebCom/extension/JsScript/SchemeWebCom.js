@@ -581,6 +581,12 @@
       return this.domChildGet(name);
     },
 
+    domChildRemove: function (name) {
+      var dom = this.domChildGet(name);
+      dom.parentNode.removeChild(dom);
+      delete this.domChildren[name];
+    },
+
     domChildGet: function (name) {
       return this.domChildren[name];
     },
