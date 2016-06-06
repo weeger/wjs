@@ -346,14 +346,40 @@
     domListen: function (domTarget, domEvent, callback) {
       // Handle if domTarget is a node list.
       if (!this.domNodeListMap('domListen', arguments)) {
-        domTarget.addEventListener(domEvent, typeof callback === 'function' ? callback : this[this.methodName('callbacks.domListen.' + callback)]);
+        var methodName;
+        // If callback is a function, register it.
+        if (typeof callback === 'function') {
+          methodName = this.methodName('callbacks.domListenCustom.' + domEvent);
+          // Single registration only allowed.
+          if (this[methodName]) {
+            this.w.err('Trying to listen already existing custom callback : ' + domEvent);
+          }
+          this[methodName] = callback;
+        }
+        else {
+          methodName = this.methodName('callbacks.domListen.' + callback);
+        }
+        domTarget.addEventListener(domEvent, this[methodName]);
       }
     },
 
     domForget: function (domTarget, domEvent, callback) {
       // Handle if domTarget is a node list.
       if (!this.domNodeListMap('domForget', arguments)) {
-        domTarget.removeEventListener(domEvent, typeof callback === 'function' ? callback : this[this.methodName('callbacks.domListen.' + callback)]);
+        // If callback is not defined, search into custom callbacks.
+        if (callback === undefined) {
+          var methodName = this.methodName('callbacks.domListenCustom.' + domEvent);
+          callback = this[methodName];
+          delete this[methodName];
+          // It should exist.
+          if (!callback) {
+            this.w.err('Trying to forget undefined callback : ' + domEvent);
+          }
+        }
+        else {
+          callback = this[this.methodName('callbacks.domListen.' + callback)]
+        }
+        domTarget.removeEventListener(domEvent, callback);
       }
     },
 
