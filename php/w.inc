@@ -287,10 +287,8 @@ class Wjs extends Atom {
    * Shorthand function name for extension add + push.
    */
   function import($extensionType, $extensionName, $value = NULL) {
-    if (!$this->extensionGet($extensionType, $extensionName)) {
-      // Some loaders supports null value.
-      $this->extensionAdd($extensionType, $extensionName, $value);
-    }
+    // Some loaders supports null value.
+    $this->extensionAdd($extensionType, $extensionName, $value);
     $this->extensionPush($extensionType, $extensionName);
   }
 

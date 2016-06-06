@@ -48,6 +48,7 @@ class Website extends Atom {
   var $pageClassType = 'WebPage';
   var $pathAliasQuery = 'q';
   var $libraries = array();
+  var $reflector;
 
   function __construct($callerFile = '') {
     // Save the raw path to the website root (allow symlinks).
@@ -56,8 +57,9 @@ class Website extends Atom {
     $this->serverPathWebsiteRootResolved = realpath($this->serverPathWebsiteRoot) . '/';
     // Search for a local router.
     // It may be replaced as an external library.
-    $routerJson   = $this->serverPathWebsiteRootResolved . 'router.json';
-    $this->router = file_exists($routerJson) ? json_decode(file_get_contents($routerJson), JSON_OBJECT_AS_ARRAY) : $this->router;
+    $routerJson      = $this->serverPathWebsiteRootResolved . 'router.json';
+    $this->router    = file_exists($routerJson) ? json_decode(file_get_contents($routerJson), JSON_OBJECT_AS_ARRAY) : $this->router;
+    $this->reflector = new \ReflectionObject($this);
     // Env key found.
     if ($this->envKey) {
       // Load env.
@@ -111,6 +113,10 @@ class Website extends Atom {
     // We have to use unresolved symlink
     // to build relative client paths.
     $w->scanFolderExtensions($w->optionGet('serverPathWebsite') . 'extension/', array(), $order);
+    $cssFile = dirname($this->reflector->getFileName()) . '/' . $this->reflector->getName() . '.css';
+    if (is_file($cssFile)) {
+      $w->import('CssLink', $w->clientPath($cssFile));
+    }
     // Get the requested page.
     $request = $w->optionGet('clientRequest');
     // Build a filename in case of aggregation is enabled.
@@ -196,8 +202,7 @@ class Website extends Atom {
     $domLayout = $this->w->htmlLoad(file_get_contents(dirname(__FILE__) . '/WebSite.html'));
     /* @var \DOMElement $domLayoutHead */
     $domLayoutHead    = $domLayout->getElementsByTagName('head')->item(0);
-    $object           = new \ReflectionObject($this);
-    $customLayoutFile = dirname($object->getFileName()) . '/' . $object->getName() . '.html';
+    $customLayoutFile = dirname($this->reflector->getFileName()) . '/' . $this->reflector->getName() . '.html';
     // Import custom tags.
     if (is_file($customLayoutFile)) {
       /* @var \DOMDocument $domLayoutCustom */
