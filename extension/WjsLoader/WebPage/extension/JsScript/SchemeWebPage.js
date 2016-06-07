@@ -158,8 +158,6 @@
       this.loader.pageCurrent = this;
       // Web com constructor.
       this.__super('__construct', arguments);
-      // Shorthand.
-      this.initWebPage();
       // Execute callbacks append before page load.
       this.w.callbacks(this.loader.pageReadyCallbacks);
       // Reset callback list.
@@ -169,16 +167,9 @@
     },
 
     __destruct: function () {
-      this.exitWebPage();
       // Reset variables.
       this.loader.pageCurrent = false;
       this.__super('__destruct', arguments);
-    },
-
-    // To override...
-    initWebPage: W._e,
-
-    // To override...
-    exitWebPage: W._e
+    }
   });
 }(W));

@@ -43,26 +43,6 @@
       }
     },
 
-    __construct: function () {
-      // Web com constructor.
-      this.__super('__construct', arguments);
-      // Shorthand.
-      this.initWebForm();
-    },
-
-    __destruct: function () {
-      // Shorthand.
-      this.exitWebForm();
-      // Base.
-      this.__super('__destruct', arguments);
-    },
-
-    // To override...
-    initWebForm: W._e,
-
-    // To override...
-    exitWebForm: W._e,
-
     formSubmit: function (e) {
       // Stop submission.
       e.preventDefault();

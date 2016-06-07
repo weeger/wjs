@@ -2,7 +2,8 @@
   'use strict';
   // Class object of page.
   W.register('WebPage', 'wjsDefault', {
-    initWebPage:function() {
+    init: function () {
+      this.__super('init', arguments);
       // This is an example code.
       if (window.console && window.console.info) {
         window.console.info('Welcome to the default wjs web page.');
