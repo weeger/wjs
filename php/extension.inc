@@ -64,12 +64,7 @@ class Extension extends ExtensionRequest {
     else {
       $this->loader->extensions[$this->extensionName] = $this;
     }
-    // TODO Finally, loader and extension may be merged : and we mays use an ExtensionInstance for instances.
     $this->add($settings);
-    /* TODO Usefull ? if (isset($this->info['require'])) {
-      $this->w->extensionAddRequireArray($this->extensionType, $extensionName, $this->info['require']);
-    } */
-
     // Build cache path.
     if ($this->cacheEnabled()) {
       // Get path for this specific type.
