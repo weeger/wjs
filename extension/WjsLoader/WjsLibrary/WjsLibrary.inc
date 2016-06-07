@@ -16,10 +16,24 @@ class WjsLibrary extends WebCom {
    * Register WebCom from a folder content.
    */
   function scanFolderItem($directory, $item, $globalData) {
+    $path          = realpath($directory) . '/' . $item;
+    $extensionName = $item;
     // Resolve path to support symlinks.
-    if (is_dir(realpath($directory) . '/' . $item)) {
-      $this->w->extensionAdd($this->type, $item, $directory . $item . '/');
+    if (is_dir($path)) {
+      $options = array(
+        'serverPath' => $path . '/'
+      );
     }
+    else {
+      // File name is the name of library.
+      $info          = pathinfo($path);
+      $extensionName = $info['filename'];
+      $options       = array(
+        'serverPath' => $path,
+        'infoFile'   => $path
+      );
+    }
+    $this->w->extensionAdd($this->type, $extensionName, $options);
   }
 }
 
@@ -37,7 +51,8 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       $this->classFile = $this->serverPath . $this->extensionName . '.inc';
       $this->className = '\\Wjs5\\Loader\\WjsLibrary\\' . $this->extensionName;
     }
-    $this->info = $this->w->infoFileLoad($this->serverPath . $this->extensionName . '.wex');
+    $infoFile = (isset($settings['infoFile'])) ? $settings['infoFile'] : $this->serverPath . $this->extensionName . '.wex';
+    $this->info = $this->w->infoFileLoad($infoFile);
     $this->infoLoadLinks('js');
     $this->infoLoadLinks('css');
   }

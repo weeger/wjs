@@ -369,7 +369,7 @@ class Wjs extends Atom {
     $className = class_exists($className) ? $className : '\\Wjs5\\Extension';
     // Build instance.
     /* @var Extension $extension */
-    $extension = new $className($this, $extensionType, $extensionName, $settings);
+    new $className($this, $extensionType, $extensionName, $settings);
     // Apply given requirements.
     $this->extensionAddRequireArray($extensionType, $extensionName, $requirements);
   }
@@ -861,7 +861,7 @@ class Wjs extends Atom {
         $queue[$extensionType]  = array();
         $scanExtensionDirectory = $directoryRealPath . '/' . $extensionType . '/';
         if (file_exists($scanExtensionDirectory)) {
-          $scanExtension = $this->scanFolderOrdered($scanExtensionDirectory, $orderBase);
+          $scanExtension = $this->scanFolderOrdered($scanExtensionDirectory, isset($extensionType[$extensionType]) ? $orderBase[$extensionType] : array());
           foreach ($scanExtension as $file) {
             if ($file{0} !== '.') {
               $info          = pathinfo($directory . $file);

@@ -1,0 +1,6 @@
+{
+  "folderName": "jspdf",
+  "client": {
+    "js": ["jspdf.js"]
+  }
+}
