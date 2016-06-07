@@ -193,7 +193,6 @@
           };
         // Load replacement page.
         if (replacement) {
-
           // Clear destroy timeout if exists.
           self.destroyTimeoutClear(replacement);
           // Launch loading, don't wait complete previous element
@@ -215,7 +214,7 @@
         }
         // No current page to quit.
         if (!replacement && !pageCurrent) {
-          callback(s);
+          callback();
         }
       });
     },

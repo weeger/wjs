@@ -359,7 +359,9 @@
       w.extendObject(optionsBase, options || {});
       // Prevent to create undefined instances.
       if (this.w.classMethods[protoName]) {
-        return new (w.classProto(protoName))(optionsBase);
+        var instance = new (w.classProto(protoName))(optionsBase);
+        instance.init();
+        return instance;
       }
       w.err('Trying to create undefined instance ' + protoName);
     },

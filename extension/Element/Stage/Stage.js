@@ -46,7 +46,8 @@
       autoPlay: true
     },
 
-    initElement: function () {
+    init: function () {
+      this.__super('init', arguments);
       this.refreshSize();
     },
 

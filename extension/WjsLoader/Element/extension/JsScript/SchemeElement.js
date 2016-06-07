@@ -128,25 +128,17 @@
       this.formulaChangeCallback = this.frameNextEnable.bind(this);
       // Base.
       this.__super('__construct', arguments);
-      // Custom init.
-      this.initElement(options);
+    },
+
+    init: function () {
+      this.__super('init', arguments);
       // Children should be created on construct complete.
       this.optionApply('children');
       // Render element.
       this.render();
     },
 
-    initElement: W._e,
-
-    exitElement: W._e,
-
     exit: function (callback) {
-      if (this.exitElement() !== false) {
-        this.exitElementComplete(callback);
-      }
-    },
-
-    exitElementComplete: function (callback) {
       var self = this,
         args = arguments;
       self.stop();
