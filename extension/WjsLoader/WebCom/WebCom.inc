@@ -24,7 +24,7 @@ class WebCom extends Loader {
   function urlHistoryLoad() {
     if (isset($_GET, $_GET[$this->type])) {
       foreach ($_GET[$this->type] as $item) {
-        $this->w->import($this->type, $item);
+        $this->w->extensionPush($this->type, $item);
       }
     }
   }
