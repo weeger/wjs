@@ -353,11 +353,9 @@ class Wjs extends Atom {
    * This will not push extension to output package.
    */
   function extensionAdd($extensionType, $extensionName, $settings, $requirements = array(), $infoFile = FALSE) {
-    if ($infoFile && is_file($infoFile)) {
-      $json = json_decode(file_get_contents($infoFile), JSON_OBJECT_AS_ARRAY);
-      if (isset($json['require'])) {
-        $requirements = array_merge_recursive($requirements, $json['require']);
-      }
+    $info = $this->infoFileLoad($infoFile);
+    if (isset($info['require'])) {
+      $requirements = array_merge_recursive($requirements, $info['require']);
     }
     foreach ($requirements as $requiredType => $requiredNames) {
       foreach ($requiredNames as $requiredName) {
@@ -374,6 +372,10 @@ class Wjs extends Atom {
     $extension = new $className($this, $extensionType, $extensionName, $settings);
     // Apply given requirements.
     $this->extensionAddRequireArray($extensionType, $extensionName, $requirements);
+  }
+
+  function infoFileLoad($filePath) {
+    return is_file($filePath) ? json_decode(file_get_contents($filePath), JSON_OBJECT_AS_ARRAY) : array();
   }
 
   /**

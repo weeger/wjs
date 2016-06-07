@@ -2,7 +2,7 @@
 
 namespace Wjs5\Loader\WjsLibrary;
 
-abstract class Library {
+class Library {
   /**
    * Each library is linked to one page instance.
    * @var \Wjs5\Loader\WebPage
