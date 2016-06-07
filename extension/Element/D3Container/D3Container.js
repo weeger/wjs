@@ -5,7 +5,7 @@
   'use strict';
   W.register('Element', 'D3Container', {
     classExtends: 'Element\\D3WebCom',
-    optionsDefault: {
+    default: {
       dom: true,
       // Containers are not sorted in z
       // this prevent to have all children placed

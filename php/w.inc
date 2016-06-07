@@ -29,7 +29,7 @@ class Wjs extends Atom {
    * Options can be defined by user.
    * @var array
    */
-  var $optionsDefault = array(
+  var $default = array(
     'serverPathCache'     => FALSE,
     // Cache directory.
     'clientPathCache'     => '',

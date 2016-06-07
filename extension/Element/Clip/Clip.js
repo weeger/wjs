@@ -39,7 +39,7 @@
       }
     },
 
-    optionsDefault: {
+    default: {
       html: ''
     },
 

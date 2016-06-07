@@ -35,7 +35,7 @@
       }
     },
 
-    optionsDefault: {
+    default: {
       // Use dom.
       dom: true,
       // Use body as default destination.

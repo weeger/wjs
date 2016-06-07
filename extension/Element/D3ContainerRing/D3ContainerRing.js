@@ -6,7 +6,7 @@
   W.register('Element', 'D3ContainerRing', {
     classExtends: 'Element\\D3Container',
 
-    optionsDefault: {
+    default: {
       dom: true
     },
 

@@ -129,7 +129,7 @@
       scheme = this.w.extendObject({
         variables: {},
         options: {},
-        optionsDefault: {}
+        default: {}
       }, scheme, true);
       // Scheme
       this.webCompSchemes[protoName] = scheme;
@@ -145,7 +145,7 @@
         // Create method name.
         method = 'protoParse' + this.w.upperCaseFirstLetter(item);
         // Use default if undefined.
-        method = this[method] ? method : 'protoParseDefault';
+        method = this[method] ? method : 'protoParseUndefined';
         // Parse.
         this[method](proto, scheme, item);
       }
@@ -239,7 +239,7 @@
       proto[item] = this.w.extend(true, base, scheme[item]);
     },
 
-    protoParseDefault: function (proto, scheme, item) {
+    protoParseUndefined: function (proto, scheme, item) {
       // Simply copy
       if (typeof scheme[item] !== 'object' || scheme[item] === null) {
         proto[item] = scheme[item];
@@ -306,7 +306,7 @@
       proto.variables[name] = option.defaults || proto.variables[name];
     },
 
-    protoParseOptionsDefault: function (proto, scheme, item) {
+    protoParseDefault: function (proto, scheme, item) {
       // Inherit options defaults variables.
       this.inheritObject(proto, scheme, item);
     },
@@ -325,7 +325,7 @@
       var methods = this.w.classProtos[name].prototype;
       this._mixinProtoItem(proto, methods, 'variables');
       this._mixinProtoItem(proto, methods, 'options');
-      this._mixinProtoItem(proto, methods, 'optionsDefault');
+      this._mixinProtoItem(proto, methods, 'default');
     },
 
     /**

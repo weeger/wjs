@@ -304,7 +304,7 @@
      * Used as shortcut by extended class to
      * fill values of options.optionName.defaults.
      */
-    optionsDefault: {},
+    default: {},
     optionsMerged: {},
 
     /**
@@ -326,7 +326,7 @@
         optionsDefault = {},
         option;
       // Create a local copy.
-      w.extendObject(optionsDefault, this.optionsDefault);
+      w.extendObject(optionsDefault, this.default);
       // Add user options.
       w.extendObject(optionsDefault, options || {});
       // Init variables after mixin which have added some news.

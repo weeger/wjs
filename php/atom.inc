@@ -15,7 +15,7 @@ class Atom {
   /**
    * @var string[] Default values.
    */
-  var $optionsDefault = array();
+  var $default = array();
   /**
    * @var string[] Save options internally.
    */
@@ -35,7 +35,7 @@ class Atom {
     // This is useful to not manage that in subclasses.
     $options = $options === NULL ? array() : $options;
     // Merge options with default values.
-    $options = array_merge($this->optionsDefault, $options);
+    $options = array_merge($this->default, $options);
     // Search for unfilled required options.
     foreach ($this->optionsRequired as $optionsRequired) {
       if (!isset($options[$optionsRequired])) {

@@ -1,7 +1,7 @@
 (function (W) {
   'use strict';
   W.register('Plugin', 'ClipPlugin', {
-    optionsDefault: {
+    default: {
       elementType: 'Clip'
     }
   });
