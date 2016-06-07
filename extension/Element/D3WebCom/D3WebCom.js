@@ -55,11 +55,7 @@
       this.object3d = new (this.w.classProto('ThreeObject3d'))(0, 1, 0);
       // Normal com construct.
       this.__super('__construct', arguments);
-      // Custom init.
-      this.init3D();
     },
-
-    init3D: W._e,
 
     /**
      * Create a binder, set this as parent.

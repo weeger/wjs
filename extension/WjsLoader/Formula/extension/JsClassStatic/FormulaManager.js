@@ -28,9 +28,12 @@
       this.w.classExtend(className, proto);
       // One instance by formula class.
       this.formulas[name] = new (this.w.classProto(className))();
+      // Init separately.
+      this.formulas[name].init();
     },
 
     remove: function () {
+      this.formulas[name].exit();
       // Remove proto.
       this.w.classProtoDestroy('Formula' + name);
       // Remove instance.

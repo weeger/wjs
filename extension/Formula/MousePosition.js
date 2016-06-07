@@ -6,11 +6,11 @@
   W.register('Formula', 'MousePosition', {
     eventTrigger: true,
 
-    initFormula: function () {
+    init: function () {
       this.w.window.addEventListener('MousePositionListenerChange', this.updateEventProxy);
     },
 
-    exitFormula: function () {
+    exit: function () {
       this.w.window.removeEventListener('MousePositionListenerChange', this.updateEventProxy);
     },
 

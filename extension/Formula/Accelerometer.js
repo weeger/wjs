@@ -6,11 +6,11 @@
   W.register('Formula', 'Accelerometer', {
     eventTrigger: true,
 
-    initFormula: function () {
+    init: function () {
       this.w.window.addEventListener('DeviceOrientationChange', this.updateEventProxy);
     },
 
-    exitFormula: function () {
+    exit: function () {
       this.w.window.removeEventListener('DeviceOrientationChange', this.updateEventProxy);
     },
 

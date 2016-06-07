@@ -10,16 +10,11 @@
         // Event name.
         this.eventNameUpdate = this.name + 'Update';
       }
-      this.initFormula();
     },
 
-    __destruct: function () {
-      this.exitFormula();
-    },
+    init: W._e,
 
-    initFormula: W._e,
-
-    exitFormula: W._e,
+    exit: W._e,
 
     updateEvent: function () {
       // Update a global event on change,

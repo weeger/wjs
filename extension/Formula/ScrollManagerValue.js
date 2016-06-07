@@ -6,11 +6,11 @@
   W.register('Formula', 'ScrollManagerValue', {
     eventTrigger: true,
 
-    initFormula: function () {
+    init: function () {
       this.w.window.addEventListener('ScrollManagerChange', this.updateEventProxy);
     },
 
-    exitFormula: function () {
+    exit: function () {
       this.w.window.removeEventListener('ScrollManagerChange', this.updateEventProxy);
     },
 
