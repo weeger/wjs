@@ -1,9 +1,8 @@
 {
-  "version": "1.0.0-trunk",
-  "folderName": "jspdf",
+  "version": "2.2.0",
   "client": {
     "js": [
-      "jspdf.js"
+      "require.min.js"
     ]
   }
 }

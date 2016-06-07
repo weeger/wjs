@@ -51,16 +51,22 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       $this->classFile = $this->serverPath . $this->extensionName . '.inc';
       $this->className = '\\Wjs5\\Loader\\WjsLibrary\\' . $this->extensionName;
     }
-    $infoFile = (isset($settings['infoFile'])) ? $settings['infoFile'] : $this->serverPath . $this->extensionName . '.wex';
+    $infoFile   = (isset($settings['infoFile'])) ? $settings['infoFile'] : $this->serverPath . $this->extensionName . '.wex';
     $this->info = $this->w->infoFileLoad($infoFile);
     $this->infoLoadLinks('js');
     $this->infoLoadLinks('css');
+    if (isset($this->info['require'])) {
+      $this->w->extensionAddRequireArray($this->extensionType, $this->extensionName, $this->info['require']);
+    }
   }
 
   function infoLoadLinks($type) {
     if (isset($this->info['client'][$type])) {
       $requireType = ucfirst($type) . 'Link';
-      $basePath    = $this->w->optionGet('serverWorkingDirectory') . 'lib/' . $this->info['folderName'] . "/";
+      $basePath    = $this->w->optionGet('serverWorkingDirectory') . 'lib/';
+      if (isset($this->info['folderName'])) {
+        $basePath .= $this->info['folderName'] . "/";
+      }
       foreach ($this->info['client'][$type] as $fileName) {
         // Add new extension.
         $this->w->import($requireType, $this->w->clientPath($basePath . $fileName));

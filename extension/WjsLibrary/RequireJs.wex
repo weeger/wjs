@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0-trunk",
+  "folderName": "jspdf",
+  "client": {
+    "js": [
+      "jspdf.js"
+    ]
+  },
+  "require": {
+    "WjsLibrary": [
+      "RequireJs"
+    ]
+  }
+}
