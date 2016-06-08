@@ -61,19 +61,37 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
   }
 
   function infoLoadLinks($type) {
-    if (isset($this->info['client'][$type])) {
+    if (!$this->infoLoadLinksFrom('npm', $type)) {
+      $this->infoLoadLinksFrom('lib', $type);
+    }
+  }
+
+  function infoLoadLinksFrom($locationName, $type) {
+    if (isset($this->info['location'][$locationName]['client'][$type])) {
+      $filesInfo   = $this->info['location'][$locationName];
+      $files       = $filesInfo['client'][$type];
       $requireType = ucfirst($type) . 'Link';
-      $basePath    = $this->w->optionGet('serverWorkingDirectory') . 'lib/';
-      if (isset($this->info['folderName'])) {
-        $basePath .= $this->info['folderName'] . "/";
+      $aliases     = array(
+        'npm' => 'node_modules',
+        'lib' => 'lib'
+      );
+      $basePath    = $this->w->optionGet('serverWorkingDirectory') . $aliases[$locationName] . '/';
+      // Folder may be specified.
+      if (isset($filesInfo['folderName'])) {
+        $basePath .= $filesInfo['folderName'] . "/";
       }
-      foreach ($this->info['client'][$type] as $fileName) {
-        // Add new extension.
-        $this->w->import($requireType, $this->w->clientPath($basePath . $fileName));
-        // Make requirement.
-        $this->w->extensionAddRequire($this->extensionType, $this->extensionName, $requireType, $this->w->clientPath($basePath . $fileName));
+      if (file_exists($basePath)) {
+        // Load all files.
+        foreach ($files as $fileName) {
+          // Add new extension.
+          $this->w->extensionAdd($requireType, $this->w->clientPath($basePath . $fileName), NULL);
+          // Make requirement.
+          $this->w->extensionAddRequire($this->extensionType, $this->extensionName, $requireType, $this->w->clientPath($basePath . $fileName));
+        }
+        return TRUE;
       }
     }
+    return FALSE;
   }
 
   function instance($options) {

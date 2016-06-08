@@ -1,10 +1,11 @@
 {
-  "version": "2.2.0",
+  "version": "1.3.1",
   "location": {
     "lib": {
+      "folderName": "filesaver",
       "client": {
         "js": [
-          "require.min.js"
+          "FileSaver.min.js"
         ]
       }
     }

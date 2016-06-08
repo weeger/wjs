@@ -1,8 +1,26 @@
 {
-  "version": "2.2.0",
-  "client": {
-    "js": [
-      "require.min.js"
+  "version": "^1.2.61",
+  "location": {
+    "npm": {
+      "folderName": "jspdf",
+      "client": {
+        "js": [
+          "dist/jspdf.min.js"
+        ]
+      }
+    },
+    "lib": {
+      "folderName": "jspdf",
+      "client": {
+        "js": [
+          "jspdf.js"
+        ]
+      }
+    }
+  },
+  "require": {
+    "WjsLibrary": [
+      "FileSaver"
     ]
   }
 }
