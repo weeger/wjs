@@ -55,14 +55,14 @@
     protoParseCallbacks: function (proto, scheme, item) {
       this.w.loaders.WebCom.protoParseCallbacks.apply(this, arguments);
       // Create entry if not exists.
-      proto.domListeners = !proto.domListeners || [];
+      proto.domListeners = proto.domListeners || [];
       // Quit if not more dom listeners.
       if (scheme[item].domListen) {
         // Add names of new listeners.
         proto.domListeners = proto.domListeners.concat(Object.keys(scheme[item].domListen));
       }
       // Create entry if not exists.
-      proto.variableSetters = !proto.variableSetters || [];
+      proto.variableSetters = proto.variableSetters || [];
       if (scheme[item].variableSet) {
         // Add names of new listeners.
         proto.variableSetters = proto.variableSetters.concat(Object.keys(scheme[item].variableSet));
