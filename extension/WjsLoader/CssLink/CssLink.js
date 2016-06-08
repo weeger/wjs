@@ -1,5 +1,6 @@
 (function (W) {
   'use strict';
+  var cacheToken = '&c=' + Math.round(Math.random() * 1000000);
   W.register('WjsLoader', 'CssLink', {
     processType: 'parse',
 
@@ -32,6 +33,13 @@
         domLink.setAttribute('rel', 'stylesheet');
         // Append to head.
         self.enable(name, domLink);
+        // Support flushing cached files.
+        if (self.w.settings.cacheFlush) {
+          if (value.indexOf('?') === -1) {
+            value += '?';
+          }
+          value += cacheToken;
+        }
         // Launch loading.
         domLink.setAttribute('href', value);
         // Stop parsing.

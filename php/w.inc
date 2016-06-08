@@ -591,6 +591,7 @@ class Wjs extends Atom {
       'pathRequestDirectory' => $this->optionGet('clientRequestDirectory'),
       'cachePath'            => $this->optionGet('clientPathCache'),
       'cacheToken'           => $this->optionGet('cacheToken'),
+      'cacheFlush'           => $this->optionGet('cacheFlush'),
     ));
     $outputJson = array();
     // Add settings.

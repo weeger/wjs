@@ -1,6 +1,7 @@
 (function (W) {
   'use strict';
   // <--]
+  var cacheToken = '&c=' + Math.round(Math.random() * 1000000);
   W.register('WjsLoader', 'JsLink', {
     processType: 'parse',
 
@@ -24,6 +25,13 @@
         });
         // Append to head.
         self.enable(name, domScript);
+        // Support flushing cached files.
+        if (self.w.settings.cacheFlush) {
+          if (value.indexOf('?') === -1) {
+            value += '?';
+          }
+          value += cacheToken;
+        }
         // We don't specify type as it is not required in HTML5.
         domScript.setAttribute('src', value);
         // Stop parsing.
