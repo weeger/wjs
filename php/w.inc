@@ -674,7 +674,6 @@ class Wjs extends Atom {
   /**
    * Return the .min.js file path of a given file
    * if exists and current w version is master.
-   * TODO Rename as minified ??
    */
   function jsFileVersioned($jsFile) {
     if ($this->subversion === 'master') {
