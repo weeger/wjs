@@ -12,7 +12,7 @@
       target: null
     },
 
-    initPlugin: function () {
+    init: function () {
       // Target is a position vector.
       this.target = new (this.w.classProto('MathVector3'))(0, 0, 0);
     },

@@ -43,8 +43,6 @@
       this.required = this.w.inheritObject(this, 'required', true);
       // Base construction.
       this.__super('__construct', arguments);
-      // User friendly init.
-      this.initPlugin(options);
     },
 
     __destruct: function () {
@@ -99,10 +97,10 @@
     elementExit: W._e,
 
     // To override.
-    initPlugin: W._e,
+    init: W._e,
 
     // To override.
-    exitPlugin: W._e,
+    exit: W._e,
 
     elementsCall: function (method, args) {
       this.elementsEach(args ? function (element) {
