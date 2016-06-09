@@ -113,10 +113,6 @@ class Website extends Atom {
     // We have to use unresolved symlink
     // to build relative client paths.
     $w->scanFolderExtensions($w->optionGet('serverPathWebsite') . 'extension/', array(), $order);
-    $cssFile = dirname($this->reflector->getFileName()) . '/' . $this->reflector->getName() . '.css';
-    if (is_file($cssFile)) {
-      $w->import('CssLink', $w->clientPath($cssFile));
-    }
     // Get the requested page.
     $request = $w->optionGet('clientRequest');
     // Build a filename in case of aggregation is enabled.
@@ -172,22 +168,14 @@ class Website extends Atom {
   function render($webPageName = 'wjsDefault') {
     // Define if we are on an AJAX page or not.
     $ajaxKey = $this->w->optionGet('paramInc');
-    $options = array();
     // Query come from an AJAX call.
     if (isset($_GET[$ajaxKey])) {
-      // Use page specific w.
-//      if (isset($_GET[$ajaxKey][$this->pageClassType])) {
-//        // Create page.
-//        $this->page = $this->pageInstance($_GET[$ajaxKey][$this->pageClassType]);
-//        // Push.
-//        $this->page->push($options);
-//        // Remove page from query.
-//        unset($_GET[$ajaxKey][$this->pageClassType]);
-//        // Use the page w.
-//        $this->page->w->response($_GET);
-//      }
       // Or use the global w.
       $this->w->response($_GET);
+    }
+    $cssFile = dirname($this->reflector->getFileName()) . '/' . $this->reflector->getName() . '.css';
+    if (is_file($cssFile)) {
+      $this->w->import('CssLink', $this->w->clientPath($cssFile));
     }
     // Page has appended itself to website.
     $this->w->extensionPush($this->pageClassType, $webPageName, array(
