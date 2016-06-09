@@ -81,13 +81,29 @@ class Website extends Atom {
     }
     // Init options.
     parent::__construct($settings);
+    $settingsLibraries = $this->optionGet('libraries');
     // Append options from environment settings.
-    if (is_array($this->optionGet('libraries'))) {
+    if (is_array($settingsLibraries)) {
       $this->libraries = array_merge($this->libraries, $this->optionGet('libraries'));
     }
     // Create w instance.
     $this->w             = $this->wInstance();
     $this->w->subversion = 'source';
+    // Load response specific libraries.
+    if (!$this->isAjaxResponse()) {
+      $settings = $this->optionGet('preprocess');
+      if (isset($settings['libraries'])) {
+        // Load global libraries.
+        $this->wLoadLibraries($this->w, $settings['libraries']);
+      }
+    }
+    else {
+      $settings = $this->optionGet('ajax');
+      if (isset($settings['libraries'])) {
+        // Load global libraries.
+        $this->wLoadLibraries($this->w, $settings['libraries']);
+      }
+    }
   }
 
   /**
@@ -117,8 +133,9 @@ class Website extends Atom {
     $request = $w->optionGet('clientRequest');
     // Build a filename in case of aggregation is enabled.
     $w->optionSet('aggregationFileName', $this->urlToFilename($request ? $request : 'home') . '.js');
+    $libraries = $this->libraries;
     // Load global libraries.
-    $this->wLoadLibraries($w, $this->libraries);
+    $this->wLoadLibraries($w, $libraries);
     // Return instance.
     return $w;
   }
@@ -165,11 +182,13 @@ class Website extends Atom {
     return $this->render($webPageName);
   }
 
+  function isAjaxResponse() {
+    // Query string exists.
+    return isset($_GET[$this->w->optionGet('paramInc')]);
+  }
+
   function render($webPageName = 'wjsDefault') {
-    // Define if we are on an AJAX page or not.
-    $ajaxKey = $this->w->optionGet('paramInc');
-    // Query come from an AJAX call.
-    if (isset($_GET[$ajaxKey])) {
+    if ($this->isAjaxResponse()) {
       // Or use the global w.
       $this->w->response($_GET);
     }
