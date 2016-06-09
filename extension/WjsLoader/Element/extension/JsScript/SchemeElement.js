@@ -224,12 +224,8 @@
       var i = 0, child, isFunction = typeof callback === 'function';
       // Call children, using original argument.
       while (child = this.children[i++]) {
-        if (isFunction) {
-          callback.apply(child, args);
-        }
-        else {
-          child[callback].apply(child, args);
-        }
+        // Callback can be a function or a method name.
+        (isFunction ? callback : child[callback]).apply(child, args);
       }
     },
 
