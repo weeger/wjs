@@ -252,7 +252,7 @@
         plugin = w.loaders.Plugin.instance(name, options);
       }
       // Init binder.
-      plugin.elementAdd(this);
+      plugin.elementAppend(this);
       // Save it.
       plugins[name] = plugins[name] || [];
       // Push plugin.

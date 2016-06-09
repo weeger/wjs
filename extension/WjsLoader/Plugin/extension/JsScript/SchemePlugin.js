@@ -7,7 +7,7 @@
     variables: {
       elementType: 'Element',
       dom: false,
-      elements: {},
+      element: {},
       backups: {
         variables: {},
         add: {}
@@ -18,9 +18,7 @@
       element: {
         defaults: null,
         define: function (com, value) {
-          if (value) {
-            this.elementAdd(value);
-          }
+          value && this.elementAppend(value);
           return value;
         }
       }
@@ -52,7 +50,7 @@
       this.__super('__destruct', arguments);
     },
 
-    elementAdd: function (element) {
+    elementAppend: function (element) {
       if (!element || !element.isA(this.elementType)) {
         this.error('element type ' + element.typeGlobal +
           ' not allowed for plugin ' + this.type +
@@ -78,45 +76,18 @@
         }
       }
       element.pluginAddMultiple(requiredFiltered, undefined, true);
-      this.elements[element.id] = element;
-      this.elementInit(element);
+      this.element = element;
     },
 
-    elementRemove: function (element) {
-      this.elementExit(element);
-      delete this.elements[element.id];
-      if (!Object.keys(this.elements).length) {
-        this.exit();
-      }
+    elementRemove: function () {
+      delete this.element;
+      this.exit();
     },
-
-    // To override.
-    elementInit: W._e,
-
-    // To override.
-    elementExit: W._e,
 
     // To override.
     init: W._e,
 
     // To override.
-    exit: W._e,
-
-    elementsCall: function (method, args) {
-      this.elementsEach(args ? function (element) {
-        // Apply args.
-        element.apply(method, args);
-      } : function (element) {
-        // Just call (faster).
-        element[method]();
-      });
-    },
-
-    elementsEach: function (callback) {
-      var i = 0, keys = Object.keys(this.elements), key;
-      while (key = keys[i++]) {
-        callback(this.elements[key]);
-      }
-    }
+    exit: W._e
   });
 }(W));
