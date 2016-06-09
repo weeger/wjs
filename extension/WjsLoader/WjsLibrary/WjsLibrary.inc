@@ -11,6 +11,47 @@ use \Wjs5\Loader;
  */
 class WjsLibrary extends WebCom {
   var $allowRequireJs = TRUE;
+  // Ordered by search priority.
+  var $librariesLocations = array(
+    'npm'   => array(
+      'folder' => 'node_modules',
+      'config' => 'package.json'
+    ),
+    'bower' => array(
+      'folder' => 'bower_components',
+      'config' => 'bower.json'
+    ),
+    'lib'   => array(
+      'folder' => 'lib',
+      'config' => FALSE
+    )
+  );
+
+  /**
+   * Missing libraries may exist into external packages managers folders.
+   *
+   * @param $extensionName
+   */
+  function extensionGetMissing($extensionName) {
+    // Asking for a file will add it.
+    foreach ($this->librariesLocations as $library => $info) {
+      $dir = ($this->libraryDir($library, $extensionName));
+      if (is_dir($dir)) {
+        $this->w->extensionAdd($this->type, $extensionName, array(
+          'serverPath' => $dir
+        ));
+        return;
+      }
+    }
+  }
+
+  function libraryDir($name) {
+    return $this->w->optionGet('serverWorkingDirectory') . $this->librariesLocations[$name]['folder'] . '/';
+  }
+
+  function libraryConfig($name, $extensionName) {
+    return $this->libraryDir($name) . $extensionName . '/' . $this->librariesLocations[$name]['config'];
+  }
 
   /**
    * Register WebCom from a folder content.
@@ -43,6 +84,10 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
   var $classFile;
   var $className = '\\Wjs5\\Loader\\WjsLibrary\\Library';
   var $info;
+  /**
+   * @var \Wjs5\Loader\WjsLibrary $loader
+   */
+  var $loader;
 
   function add($settings) {
     parent::add($settings);
@@ -61,12 +106,12 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
   }
 
   function infoLoadLinks($type) {
-    $locations = array('npm', 'bower', 'lib');
-    do {
-      if ($this->infoLoadLinksFrom(array_shift($locations), $type)) {
+    $locations = $this->loader->librariesLocations;
+    foreach ($locations as $name => $data) {
+      if ($this->infoLoadLinksFrom($name, $type)) {
         return;
       }
-    } while (count($locations));
+    }
   }
 
   function infoLoadLinksFrom($locationName, $type) {
@@ -74,14 +119,11 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       $filesInfo   = $this->info['location'][$locationName];
       $files       = $filesInfo['client'][$type];
       $requireType = ucfirst($type) . 'Link';
-      $basePath    = $this->w->optionGet('serverWorkingDirectory');
+      $basePath    = $this->loader->libraryDir($locationName);
       switch ($locationName) {
-        case 'npm':
-          $basePath .= 'node_modules/';
-          break;
         case 'bower':
           $basePath .= 'bower_components/';
-          $bowerJson = $basePath . $filesInfo['folderName'] . '/bower.json';
+          $bowerJson = $this->loader->libraryConfig($locationName, $this->extensionName);
           // Folder may be specified.
           if (is_file($bowerJson)) {
             $json = json_decode(file_get_contents($bowerJson), JSON_OBJECT_AS_ARRAY);
@@ -92,9 +134,6 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
               }
             }
           }
-          break;
-        case 'lib':
-          $basePath .= 'lib/';
           break;
       }
       // Folder may be specified.
@@ -120,5 +159,9 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       require_once $this->classFile;
     }
     return new $this->className($options);
+  }
+
+  function output($data = NULL) {
+    return parent::output(TRUE);
   }
 }

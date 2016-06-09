@@ -103,12 +103,12 @@ class Extension extends \Wjs5\Extension {
     return array(
       'clientPath' => $this->clientPath,
       // Replacement of include tags is made during page rendering.
-      'html' => isset($options['html']) ? $options['html'] : $this->html
+      'html'       => isset($options['html']) ? $options['html'] : $this->html
     );
   }
 
   function output($data = NULL) {
-    return parent::output(current($this->instances));
+    return parent::output($data !== NULL ? $data : current($this->instances));
   }
 
   function htmlLoad($name) {
