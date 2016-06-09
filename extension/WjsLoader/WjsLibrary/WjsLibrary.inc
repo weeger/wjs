@@ -61,9 +61,12 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
   }
 
   function infoLoadLinks($type) {
-    if (!$this->infoLoadLinksFrom('npm', $type)) {
-      $this->infoLoadLinksFrom('lib', $type);
-    }
+    $locations = array('npm', 'bower', 'lib');
+    do {
+      if ($this->infoLoadLinksFrom(array_shift($locations), $type)) {
+        return;
+      }
+    } while (count($locations));
   }
 
   function infoLoadLinksFrom($locationName, $type) {
@@ -71,11 +74,29 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       $filesInfo   = $this->info['location'][$locationName];
       $files       = $filesInfo['client'][$type];
       $requireType = ucfirst($type) . 'Link';
-      $aliases     = array(
-        'npm' => 'node_modules',
-        'lib' => 'lib'
-      );
-      $basePath    = $this->w->optionGet('serverWorkingDirectory') . $aliases[$locationName] . '/';
+      $basePath    = $this->w->optionGet('serverWorkingDirectory');
+      switch ($locationName) {
+        case 'npm':
+          $basePath .= 'node_modules/';
+          break;
+        case 'bower':
+          $basePath .= 'bower_components/';
+          $bowerJson = $basePath . $filesInfo['folderName'] . '/bower.json';
+          // Folder may be specified.
+          if (is_file($bowerJson)) {
+            $json = json_decode(file_get_contents($bowerJson), JSON_OBJECT_AS_ARRAY);
+            if (isset($json['dependencies'])) {
+              // Every dependency must have been saved as WjsLibrary.
+              foreach ($json['dependencies'] as $libraryName => $version) {
+                $this->w->extensionAddRequire($this->extensionType, $this->extensionName, 'WjsLibrary', $libraryName);
+              }
+            }
+          }
+          break;
+        case 'lib':
+          $basePath .= 'lib/';
+          break;
+      }
       // Folder may be specified.
       if (isset($filesInfo['folderName'])) {
         $basePath .= $filesInfo['folderName'] . "/";

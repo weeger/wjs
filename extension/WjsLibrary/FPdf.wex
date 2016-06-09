@@ -1,0 +1,13 @@
+{
+  "version": "0.0.0",
+  "location": {
+    "bower": {
+      "folderName": "fpdf",
+      "client": {
+        "js": [
+          "dist/fpdf.min.js"
+        ]
+      }
+    }
+  }
+}
