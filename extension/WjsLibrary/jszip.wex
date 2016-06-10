@@ -1,0 +1,13 @@
+{
+  "version": "3.0.0",
+  "location": {
+    "npm": {
+      "folderName": "jszip",
+      "client": {
+        "js": [
+          "dist/jszip.min.js"
+        ]
+      }
+    }
+  }
+}
