@@ -107,7 +107,7 @@
          */
         define: function (com, value, options) {
           // If true, or not specified but html is present.
-          value = (value === true || (typeof value !== 'object' && typeof options.html === 'string')) ? 'div' : value;
+          value = (value === true || (value === false && typeof options.html === 'string')) ? 'div' : value;
           if (value) {
             // Need CSS classes to exists.
             com.optionApply('cssSheets', options);
