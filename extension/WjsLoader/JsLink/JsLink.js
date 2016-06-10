@@ -25,7 +25,6 @@
         });
         // Append to head.
         self.enable(name, domScript);
-        console.log(name + ' > ' + value);
         // Support flushing cached files.
         if (self.w.settings.cacheFlush) {
           if (value.indexOf('?') === -1) {
