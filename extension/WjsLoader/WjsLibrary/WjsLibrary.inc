@@ -35,7 +35,7 @@ class WjsLibrary extends WebCom {
   function extensionGetMissing($extensionName) {
     // Asking for a file will add it.
     foreach ($this->librariesLocations as $library => $info) {
-      $dir = ($this->libraryDir($library, $extensionName));
+      $dir = ($this->libraryDir($library) . $extensionName . '/');
       if (is_dir($dir)) {
         $this->w->extensionAdd($this->type, $extensionName, array(
           'serverPath' => $dir
