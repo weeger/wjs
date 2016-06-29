@@ -196,6 +196,15 @@ class Website extends Atom {
     if (is_file($cssFile)) {
       $this->w->import('CssLink', $this->w->clientPath($cssFile));
     }
+    // Push requirements.
+    $info = $this->w->infoFileLoad(dirname($this->reflector->getFileName()) . '/' . $this->reflector->getName() . '.wex');
+    if (isset($info['require'])) {
+      foreach ($info['require'] as $type => $names) {
+        foreach ($names as $name) {
+          $this->w->extensionPush($type, $name);
+        }
+      }
+    }
     // Page has appended itself to website.
     $this->w->extensionPush($this->pageClassType, $webPageName, array(
       // Define html body as preprocessed.
@@ -266,7 +275,7 @@ class Website extends Atom {
   function renderBody() {
     // Use global template.
     $template = $this->htmlFileGetContent('theme/page.html');
-    $output   = '<body>';
+    $output   = '<body id="' . $this->reflector->getName() . '">';
     $output .= '<div id="' . $this->page->extension->extensionName . '-preprocessed" style="display:none">' .
       '<div class="html">' . $this->page->render($this->pageRenderParams()) . '</div>' .
       $template .

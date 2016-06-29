@@ -11,6 +11,8 @@
 
     __construct: function () {
       this.mouseMoveBind = this.mouseMove.bind(this);
+      this.clientX = this.w.window.screen.width / 2;
+      this.clientY = this.w.window.screen.height / 2;
       this.w.window.addEventListener('mousemove', this.mouseMoveBind);
     },
 
