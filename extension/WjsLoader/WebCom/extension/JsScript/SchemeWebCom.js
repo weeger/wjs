@@ -194,7 +194,7 @@
           if (typeof value === 'string') {
             // Requires dom option.
             com.optionApply('dom', options);
-            var dom = com.domChildAdd('html', 'div', value);
+            com.dom.innerHTML = value;
           }
         }
       },
