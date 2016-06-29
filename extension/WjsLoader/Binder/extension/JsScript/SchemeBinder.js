@@ -54,6 +54,7 @@
     __construct: function (options) {
       this.callbacksBind('domListeners', 'domListen');
       this.callbacksBind('variableSetters', 'variableSet');
+      this.formulaListenProxy = this.formulaListen.bind(this);
       // Base method.
       this.__super('__construct', arguments);
       // Inherit callbacks methods.
@@ -127,8 +128,12 @@
       return value;
     },
 
+    /**
+     * @require JsMethod > objectInspect
+     */
     formulaListenAll: function (formula, toggle) {
-      this.objectInspect(formula, this.formulaListen.bind(this), toggle);
+      // Iterate over formula
+      this.w.objectInspect(formula, this.formulaListenProxy, toggle);
     },
 
     formulaListen: function (item, toggle) {
@@ -160,24 +165,6 @@
             counter[formulaName]++;
           }
         }
-      }
-    },
-
-// TODO this.w FOR THIS METHOD
-    objectInspect: function (object, callback, args, level) {
-      level = level || 0;
-      if (typeof object === 'object') {
-        var result = callback(object, args, level);
-        // Recursive if not null.
-        if (result !== null) {
-          for (var keys = Object.keys(object), i = 0, key; key = keys[i++];) {
-            // Continue if no false;
-            if (this.objectInspect(object[key], callback, args, level + 1) === false) {
-              return;
-            }
-          }
-        }
-        return result;
       }
     },
 
