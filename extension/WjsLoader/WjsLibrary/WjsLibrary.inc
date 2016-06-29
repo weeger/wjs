@@ -122,8 +122,7 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       $basePath    = $this->loader->libraryDir($locationName);
       switch ($locationName) {
         case 'bower':
-          $basePath .= 'bower_components/';
-          $bowerJson = $this->loader->libraryConfig($locationName, $this->extensionName);
+          $bowerJson = $this->loader->libraryConfig($locationName, isset($filesInfo['folderName']) ? $filesInfo['folderName'] : $this->extensionName);
           // Folder may be specified.
           if (is_file($bowerJson)) {
             $json = json_decode(file_get_contents($bowerJson), JSON_OBJECT_AS_ARRAY);
