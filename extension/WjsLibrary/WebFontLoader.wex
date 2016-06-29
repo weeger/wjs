@@ -1,0 +1,13 @@
+{
+  "version": "1.6.6",
+  "location": {
+    "bower": {
+      "folderName": "bower-webfontloader",
+      "client": {
+        "js": [
+          "webfont.js"
+        ]
+      }
+    }
+  }
+}

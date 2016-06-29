@@ -1,0 +1,10 @@
+{
+  "require": {
+    "WjsLoader": [
+      "WjsLibrary"
+    ],
+    "WjsLibrary": [
+      "WebFontLoader"
+    ]
+  }
+}
