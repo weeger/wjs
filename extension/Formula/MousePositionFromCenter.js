@@ -40,6 +40,11 @@
       Y: 'height'
     },
 
+    init: function () {
+      // We need to listen for mouse position update.
+      this.w.window.addEventListener('MousePositionUpdate', this.updateEventProxy);
+    },
+
     presetAlter: function (merged, formula) {
       // Set mouse direction.
       merged.values[0].direction = formula.direction;
