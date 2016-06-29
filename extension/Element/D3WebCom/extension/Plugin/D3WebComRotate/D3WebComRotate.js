@@ -13,16 +13,16 @@
       }
     },
 
-    renderDom: function (element) {
-      var Math = this.w.Math, object3d = element.object3d,
-        frameNumber = element.playPlayer.playFrameCurrent;
+    renderDom: function () {
+      var Math = this.w.Math, object3d = this.element.object3d,
+        frameNumber = this.element.playPlayer.playFrameCurrent;
       object3d.rotateX(Math.degToRad((frameNumber * this.speedH) % 360));
       object3d.rotateY(Math.degToRad((frameNumber * this.speedP) % 360));
       object3d.rotateZ(Math.degToRad((frameNumber * this.speedB) % 360));
       object3d.updateMatrix();
       object3d.updateMatrixWorld();
       // Infinite animation.
-      element.frameNextEnable();
+      this.element.frameNextEnable();
     }
   });
 }(W));

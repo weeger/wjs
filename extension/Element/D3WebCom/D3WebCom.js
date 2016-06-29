@@ -29,10 +29,10 @@
         }
       },
       D3World: {
-        define: function (com, value) {
+        define: function (com, value, options) {
           if (!value) {
             if (!this.w.D3WorldGlobal) {
-              this.w.D3WorldGlobal = new (this.w.classProto('D3World'))();
+              this.w.D3WorldGlobal = new (this.w.classProto('D3World'))(undefined, undefined, options.perspective);
             }
             value = this.w.D3WorldGlobal;
           }
@@ -104,7 +104,7 @@
 
     matrixToCss: function (matrix) {
       // Transform Array32 to Array then join.
-      return  'matrix3d(' + Array.prototype.slice.call(matrix.elements).join(',') + ')';
+      return 'matrix3d(' + Array.prototype.slice.call(matrix.elements).join(',') + ')';
     }
   });
 }(W));
