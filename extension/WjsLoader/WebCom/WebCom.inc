@@ -17,7 +17,7 @@ class WebCom extends Loader {
     if (is_dir($directory . $item)) {
       $directory .= $item . '/';
       // Append global data.
-      return $this->w->extensionAdd($this->type, $item, $directory, array(), $directory . '.wex');
+      return $this->w->extensionAdd($this->type, $item, $directory, array(), $directory . $item . '.wex');
     }
   }
 
