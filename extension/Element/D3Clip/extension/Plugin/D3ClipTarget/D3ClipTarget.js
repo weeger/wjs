@@ -17,20 +17,20 @@
       this.target = new (this.w.classProto('MathVector3'))(0, 0, 0);
     },
 
-    elementInit: function (element) {
+    elementInit: function () {
       // One stage allowed
-      this.D3World = element.D3World;
+      this.D3World = this.element.D3World;
     },
 
-    renderDom: function (element) {
-      element.object3d.updateMatrix();
-      element.object3d.updateMatrixWorld();
+    renderDom: function () {
+      this.element.object3d.updateMatrix();
+      this.element.object3d.updateMatrixWorld();
       var target = new (this.w.classProto('MathVector3'))(
         this.variableGet('targetX'),
         this.variableGet('targetY'),
         this.variableGet('targetZ')
       );
-      element.object3d.lookAt(element.object3d.worldToLocal(target));
+      this.element.object3d.lookAt(this.element.object3d.worldToLocal(target));
     }
   });
 }(W));
