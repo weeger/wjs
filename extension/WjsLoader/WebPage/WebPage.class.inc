@@ -175,7 +175,7 @@ class Page extends ExtensionClass {
   }
 
   function websiteRenderHead() {
-    return $this->renderHeadTitle() . $this->renderHead() .
+    return $this->renderHead() .
     $this->website->htmlFileGetContent('theme/head.html');
   }
 
@@ -192,10 +192,6 @@ class Page extends ExtensionClass {
   function render($params = array()) {
     // Find template name.
     return $this->extension->html;
-  }
-
-  function renderHeadTitle() {
-    return '<title>' . $this->website->optionGet('pageTitle') . $this->title . '</title>';
   }
 
   function renderJsInclude($path, $inline = '') {

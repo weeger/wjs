@@ -253,10 +253,10 @@ class Website extends Atom {
   }
 
   function domImport(\DOMNode $domTo, $html) {
-    $temp  = $this->w->htmlLoad($html);
-    $nodes = $temp->childNodes;
-    foreach ($nodes as $node) {
-      $domTo->appendChild($domTo->ownerDocument->importNode($node, TRUE));
+    foreach ($this->w->htmlLoad($html)->childNodes as $div) {
+      foreach ($div->childNodes as $node2) {
+        $domTo->appendChild($domTo->ownerDocument->importNode($node2, TRUE));
+      }
     }
   }
 
