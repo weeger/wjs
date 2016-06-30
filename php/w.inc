@@ -64,10 +64,6 @@ class Wjs extends Atom {
    */
   var $loaders = array();
   /**
-   * Contain data to transmit to w javascript object.
-   */
-  var $outputPackage = array();
-  /**
    * Contain extension to transmit to w javascript object.
    * @var Extension[]
    */
@@ -320,7 +316,7 @@ class Wjs extends Atom {
       $this->extensionPushRequest($requests);
     }
     header('Content-Type: application/json');
-    print $this->responsePackage();
+    print $this->responsePackageEncoded();
     exit;
   }
 
@@ -554,20 +550,27 @@ class Wjs extends Atom {
 
   /**
    * Return json encoded response.
-   * @return string
+   *
+   * @param bool $refresh
+   *
+   * @return array
    */
-  function responsePackage() {
-    $output = array();
-    foreach ($this->extensionsPushed as $extensionType => $extensions) {
-      foreach ($extensions as $extensionName => $extension) {
-        if (!$extension->outputHidden) {
-          $output[$extensionType][$extensionName] = $extension->output();
-          // TODO TEMP
-          unset($this->outputPackage[$extensionType][$extensionName]);
+  function responsePackage($refresh = FALSE) {
+    static $output = array();
+    if ($refresh || empty($output)) {
+      foreach ($this->extensionsPushed as $extensionType => $extensions) {
+        foreach ($extensions as $extensionName => $extension) {
+          if (!$extension->outputHidden) {
+            $output[$extensionType][$extensionName] = $extension->output();
+          }
         }
       }
     }
-    $output = array_merge_recursive($this->outputPackage, $output); // TODO TEMP REMOVE THIS LINE
+    return $output;
+  }
+
+  function responsePackageEncoded() {
+    $output = $this->responsePackage();
     return (!empty($output)) ? json_encode($output) : '{}';
   }
 
@@ -610,7 +613,7 @@ class Wjs extends Atom {
     // it prevent w to fail when retrieving undefined loaders.
     $outputJson[] = '"loadersExtra":' . json_encode(array_keys($this->loaderGet('WjsLoader')->extensions));
     // Load functions and class called in server side for this page.
-    $jsPackage = $this->responsePackage();
+    $jsPackage = $this->responsePackageEncoded();
     if ($jsPackage !== NULL) {
       $outputJson[] = '"packageDefault":' . $jsPackage;
     }
@@ -750,9 +753,12 @@ class Wjs extends Atom {
     // it allow to parse startup package completely.
     // It is not placed progressively during push,
     // to avoid to mix behavior with response package.
-    foreach ($this->outputPackage as $type => $items) {
+    $package = $this->responsePackage();
+    foreach ($package as $type => $items) {
       $this->extensionPush('WjsLoader', $type);
     }
+    // Reload response package with newly added loaders.
+    $this->responsePackage(TRUE);
     // In case of cache we aggregate files in one.
     if ($this->optionGet('aggregationEnabled')) {
       $aggregationFileName = $this->optionGet('aggregationFileName');
