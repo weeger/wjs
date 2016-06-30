@@ -38,11 +38,12 @@ class Page extends ExtensionClass {
       $this->website       = isset($options['website']) ? $options['website'] : FALSE;
       $this->website->page = $this;
     }
-//    // Search for page alias.
-//    $aliases = array_flip($this->website->router);
-//    if (isset($aliases[$name])) {
-//      $this->urlAlias = $aliases[$name];
-//    }
+    if (isset($options['title'])) {
+      $this->title = $options['title'];
+    }
+    if (isset($this->extension->info['title'])) {
+      $this->title = $this->extension->info['title'];
+    }
     // Init w as normal library.
     $this->libraryLoad('Wjs', array('w' => $this->w));
     // Load required libraries.
@@ -168,18 +169,9 @@ class Page extends ExtensionClass {
     $this->librariesHookCurrent = $hookPrevious;
   }
 
-  function push($options = array()) {
-    // Send freshly created page instance.
-    $options['instance'] = $this;
-    if (!isset($options['html'])) {
-      $options['html'] = $this->render();
-    }
-    if ($this->urlAlias) {
-      $options['urlAlias'] = $this->urlAlias;
-    }
+  function output($options = array()) {
     $options['title'] = $this->title;
-    // Rendering is made during push.
-    $this->w->extensionPush($this->extensionType, $this->extensionName, $options);
+    return $options;
   }
 
   function websiteRenderHead() {

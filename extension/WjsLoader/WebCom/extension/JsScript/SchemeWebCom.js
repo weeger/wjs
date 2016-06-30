@@ -593,15 +593,13 @@
 
     /**
      * @require JsMethod > wjsHrefInit
+     * @require JsMethod > stringReplaceVariables
      */
     domChildFill: function (name, content) {
-      var dom = this.domChildGet(name), result;
+      var dom = this.domChildGet(name);
       // Content can be already defined.
       if (content) {
-        while (result = regHtmlVariable.exec(content)) {
-          content = content.substring(0, result.index) + this[result[1]] + content.substring(result.index + result[0].length);
-        }
-        dom.innerHTML = content;
+        dom.innerHTML = this.w.stringReplaceVariables(content, this);
       }
       // Parse all node to search for w links.
       this.w.wjsHrefInit(dom);

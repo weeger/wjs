@@ -55,8 +55,9 @@ class Extension extends ExtensionRequest {
   var $pathCacheServer;
   var $pathCacheServerDir;
 
-  function __construct(Wjs $w, $extensionType, $extensionName, $settings = NULL) {
+  function __construct(Wjs $w, $extensionType, $extensionName, $settings = NULL, $info = NULL) {
     parent::__construct($w, $extensionType, $extensionName);
+    $this->info = $info;
     // Only ony type of extension data is allowed
     if (isset($this->loader->extensions[$this->extensionName])) {
       $this->w->error('Trying to add extension twice : ' . $this->extensionType . ' > ' . $this->extensionName);

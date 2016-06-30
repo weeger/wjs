@@ -49,10 +49,11 @@
       },
       title: {
         define: function (com, value) {
-          var websitePageTitle = com.w.get('JsObject', 'WebsiteInfo').pageTitle;
-          // Prepend website global title
-          // defined into settings php file.
-          com.w.window.document.title = (websitePageTitle || '') + value;
+          // Empty string if not defined.
+          value = value || '';
+          // Replace title pattern.
+          com.w.window.document.title = this.w.stringReplaceVariables(com.w.window.document.title, {title: value});
+          // Save.
           return value;
         }
       },

@@ -69,7 +69,7 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
       $className = '\\Wjs5\\Loader\\WebPage\\Page';
     }
     $this->className = $className;
-    return parent::push();
+    parent::push();
   }
 
   /**
@@ -79,9 +79,18 @@ class Extension extends \Wjs5\Loader\WebCom\Extension {
   function instance($options) {
     /* @var $pageInstance \Wjs5\Loader\WebPage\Page */
     $pageInstance = new $this->className($this, $options);
-    $this->html  = $pageInstance->renderBody();
+    $this->html   = $pageInstance->renderBody();
     // Create page class.
     $this->pageInstances[] = $pageInstance;
     return parent::instance($options);
+  }
+
+  function output($data = NULL) {
+    // Normal output.
+    $data = parent::output($data);
+    // Append page title (no multiple page supported now).
+    $data['#data']['title'] = current($this->pageInstances)->title;
+    // Return for response.
+    return $data;
   }
 }

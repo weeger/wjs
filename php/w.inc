@@ -369,7 +369,7 @@ class Wjs extends Atom {
     $className = class_exists($className) ? $className : '\\Wjs5\\Extension';
     // Build instance.
     /* @var Extension $extension */
-    new $className($this, $extensionType, $extensionName, $settings);
+    new $className($this, $extensionType, $extensionName, $settings, $info);
     // Apply given requirements.
     $this->extensionAddRequireArray($extensionType, $extensionName, $requirements);
   }
@@ -992,30 +992,11 @@ class Wjs extends Atom {
     // Convert to text.
     $html = $dom->saveHTML();
     // Remove the temporary wrapper.
-    return trim(preg_replace('!^<div>([\s\S]*?)</div>$!i', '$1', $html));
+    return trim(preg_replace('!(.*)<div>([\s\S]*?)</div>$!i', '$2', $html));
   }
 
   function htmlRebase($html, $basePath) {
-    // Parse with native PHP dom parser.
-    $dom = new \DOMDocument;
-    // Remove errors like parsing non encoded question marks in urls.
-    libxml_use_internal_errors(TRUE);
-    // We need to add main wrappers around our document content.
-    $wrapped = '<div>' . $html . '</div>';
-    $domSave = NULL;
-    // Load depending of PHP version.
-    if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-      $dom->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-    }
-    // Version under PHP 5.4 do not support second argument in loadHTML,
-    // so we have to remove manually
-    else {
-      $dom->loadHTML($wrapped);
-      // Remove doctype.
-      $dom->removeChild($dom->doctype);
-      // Search for our div through html / body tags.
-      $dom->replaceChild($dom->firstChild->firstChild->firstChild, $dom->firstChild);
-    }
+    $dom = $this->htmlLoad($html);
     // Replace images src.
     $images = $dom->getElementsByTagName('img');
     /** @var \DOMElement $image */
