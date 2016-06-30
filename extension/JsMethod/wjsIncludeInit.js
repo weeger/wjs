@@ -10,6 +10,8 @@
       item, split, request = {}, destinations = [];
     while (item = includes[i++]) {
       if (item.getAttribute('data-wjsInclude') && !item.getAttribute('data-wjsIncludeLoaded')) {
+        // Hide item, it will be displayed back after init.
+        item.style.display = 'none';
         item.setAttribute('data-wjsIncludeLoaded', '1');
         split = item.getAttribute('data-wjsInclude').split(':');
         request[split[0]] = request[split[0]] || [];

@@ -120,8 +120,6 @@
             com.optionApply('domImported', options);
             // Find dom into document.
             value = this.w.document.getElementById(com.type + '-preprocessed');
-            // Preloaded content is hidden by default.
-            value.style.display = null;
           }
           output = this.__super('define', [com, value, options]);
           // Search for links.
@@ -171,6 +169,15 @@
       // Reset variables.
       this.loader.pageCurrent = false;
       this.__super('__destruct', arguments);
+    },
+
+    /**
+     * Ran when item and sub items (requirements, children)
+     * are loaded.
+     */
+    readyComplete: function () {
+      // Preloaded content is hidden by default.
+      this.dom.style.display = null;
     }
   });
 }(W));

@@ -129,6 +129,7 @@
                 dom.classList.add(item);
               }
             }
+            dom.style.display = 'none';
             // Appending element to a dom parent is managed externally.
             return dom;
           }
@@ -466,9 +467,14 @@
       return output;
     },
 
-    init: W._e,
+    init: function (callback) {
+      this.dom && (this.dom.style.display = null);
+      // Allow callbacks.
+      callback && callback();
+    },
 
     exit: function (callback) {
+      // Allow callbacks.
       this.__destruct(callback);
     },
 
@@ -607,12 +613,13 @@
       this.domParseInclude();
     },
 
-    domParseInclude: function (options) {
+    domParseInclude: function (options, complete) {
       options = options || {};
       // Define destination (no parent allowed for simple web com)
       options.domDestination = options.domDestination || this.dom;
+      var includes = this.w.wjsIncludeInit(this.dom, options, complete);
       // Search for <div data-wjsInclude="..."> tags.
-      this.domIncludes = this.domIncludes.concat(this.w.wjsIncludeInit(this.dom, options));
+      this.domIncludes = this.domIncludes.concat(includes);
     },
 
     /**

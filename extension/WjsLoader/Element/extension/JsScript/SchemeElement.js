@@ -21,7 +21,9 @@
       frameNextEnabled: false,
       playFrameStamp: 0,
       animations: [],
-      domBoundingClientRect: false
+      domBoundingClientRect: false,
+      readyRan: false,
+      readyCallbacks: []
     },
 
     options: {
@@ -53,7 +55,9 @@
         defaults: false,
         define: function (com, value) {
           if (value) {
-            com.play();
+            com.ready(function () {
+              com.play();
+            });
           }
         },
         dump: true
@@ -130,12 +134,31 @@
       this.__super('__construct', arguments);
     },
 
+    ready: function (callback) {
+      !this.readyRan ? this.readyCallbacks.push(callback) : callback();
+    },
+
+    readyComplete: function () {
+      if (!this.readyRan) {
+        this.parent && this.parent.readyComplete();
+        // Execute all callbacks.
+        this.w.callbacks(this.readyCallbacks, undefined, this);
+        // Empty array
+        this.readyCallbacks = [];
+        // Prevent further executions.
+        this.readyRan = true;
+      }
+    },
+
     init: function () {
+      // Display dom.
       this.__super('init', arguments);
       // Children should be created on construct complete.
       this.optionApply('children');
       // Render element.
       this.render();
+      // Launch callbacks.
+      this.readyComplete();
     },
 
     exit: function (callback) {

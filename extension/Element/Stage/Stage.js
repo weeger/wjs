@@ -47,8 +47,11 @@
     },
 
     init: function () {
-      this.__super('init', arguments);
+      // We first set size, it allows children
+      // to start with good coordinates.
       this.refreshSize();
+      // Then initialize.
+      this.__super('init', arguments);
     },
 
     refreshSize: function () {

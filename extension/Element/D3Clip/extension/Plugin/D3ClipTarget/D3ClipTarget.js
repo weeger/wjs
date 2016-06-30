@@ -13,6 +13,7 @@
     },
 
     init: function () {
+      this.__super('init', arguments);
       // Target is a position vector.
       this.target = new (this.w.classProto('MathVector3'))(0, 0, 0);
     },
