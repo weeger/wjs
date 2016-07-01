@@ -27,8 +27,8 @@ if (!function_exists('d')) {
 }
 
 if (!function_exists('trace')) {
-  function trace() {
-    d(debug_backtrace());
+  function trace($args = FALSE) {
+    d(debug_backtrace($args ? DEBUG_BACKTRACE_PROVIDE_OBJECT : DEBUG_BACKTRACE_IGNORE_ARGS));
   }
 }
 
