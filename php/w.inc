@@ -113,6 +113,7 @@ class Wjs extends Atom {
    */
   var $settings = array();
   var $cacheToken = FALSE;
+  var $ajaxRequest = FALSE;
 
   static $wjsInstancesCounter = 0;
 
@@ -324,6 +325,7 @@ class Wjs extends Atom {
    * Run response only if ajax query is detected.
    */
   function ajax() {
+    $this->ajaxRequest = TRUE;
     if (isset($_GET) && isset($_GET[$this->optionGet('paramInc')])) {
       $this->response($_GET);
     }

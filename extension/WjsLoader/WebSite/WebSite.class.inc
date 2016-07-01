@@ -192,7 +192,7 @@ class Website extends Atom {
       // Or use the global w.
       $this->w->response($_GET);
     }
-    $cssFile = dirname($this->reflector->getFileName()) . '/' . $this->reflector->getName() . '.css';
+    $cssFile = realpath(dirname($this->reflector->getFileName()) . '/' . $this->reflector->getName() . '.css');
     if (is_file($cssFile)) {
       $this->w->import('CssLink', $this->w->clientPath($cssFile));
     }

@@ -18,16 +18,9 @@ class JsLink extends Loader {
    */
   function headerFilesExtension($type, &$files, $side, $render = FALSE, $name) {
     if ($type === 'js') {
-      // Remove pushed data on render.
-      if ($render) {
-        // Remove internally.
-        $this->extensionsPushed[$name]['#data'] =
-          // Remove into w registry.
-        $this->w->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_JSLINK_INCLUDED;
-      }
+      $sidePath = $side . 'Path';
       // Avoid duplicates, it can occur when
       // loader have parent or dependencies.
-      $sidePath = $side . 'Path';
       if (!in_array($this->extensions[$name]->$sidePath, $files)) {
         // Return always server path.
         $files[] = $this->extensions[$name]->$sidePath;
@@ -88,6 +81,7 @@ class Extension extends \Wjs5\Extension {
   }
 
   function output($data = NULL) {
-    return parent::output($this->clientPath ? $this->clientPath : TRUE);
+    $output = !$this->w->ajaxRequest ? WJS5_PUSH_JSLINK_INCLUDED : $this->clientPath;
+    return parent::output($output ? $output : TRUE);
   }
 }

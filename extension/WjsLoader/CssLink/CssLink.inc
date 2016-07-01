@@ -18,15 +18,13 @@ class CssLink extends Loader {
    */
   function headerFilesExtension($type, &$files, $side, $render = FALSE, $name) {
     if ($type === 'css') {
-      // Remove pushed data on render.
-      if ($render) {
-        // Remove internally.
-        $this->extensionsPushed[$name]['#data'] =
-          // Remove into w registry.
-        $this->w->outputPackage[$this->type][$name]['#data'] = WJS5_PUSH_CSSLINK_INCLUDED;
+      $sidePath = $side . 'Path';
+      // Avoid duplicates, it can occur when
+      // loader have parent or dependencies.
+      if (!in_array($this->extensions[$name]->$sidePath, $files)) {
+        // Return path according asked side.
+        return $this->extensions[$name]->$sidePath;
       }
-      // Return always server path.
-      return $this->extensions[$name][$side];
     }
     return '';
   }
@@ -45,7 +43,9 @@ class Extension extends \Wjs5\Extension {
    * Append object to the output array.
    */
   function output($data = NULL) {
-    // There is no value for css link, value = name = url.
+    // TODO Unexpected behaviors when enabled
+    // $output = !$this->w->ajaxRequest ? WJS5_PUSH_CSSLINK_INCLUDED : $this->clientPath;
+    // There may be no value for css link, value = name = url.
     return parent::output($this->clientPath);
   }
 }

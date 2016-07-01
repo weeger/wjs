@@ -126,7 +126,7 @@ abstract class Loader {
    */
   function headerFiles($type, &$files = array(), $side = 'client', $render = FALSE) {
     // Give pushed extensions.
-    foreach ($this->extensionsPushed as $extensionName => $pushedData) {
+    foreach ($this->w->extensionsPushed[$this->type] as $extensionName => $pushedData) {
       // Load js from dependencies,
       // duplication is managed into files addition.
       $dependencies = $this->extensionGetRequire($extensionName, $this->w->extensionExclude);
