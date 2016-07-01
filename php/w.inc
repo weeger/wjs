@@ -295,6 +295,7 @@ class Wjs extends Atom {
    * @param null $get
    */
   function response($get = NULL) {
+    $this->ajaxRequest = TRUE;
     if ($get !== NULL) {
       // Parse get request.
       $requests = $this->queryExplode($get[$this->optionGet('paramInc')]);
@@ -325,7 +326,6 @@ class Wjs extends Atom {
    * Run response only if ajax query is detected.
    */
   function ajax() {
-    $this->ajaxRequest = TRUE;
     if (isset($_GET) && isset($_GET[$this->optionGet('paramInc')])) {
       $this->response($_GET);
     }
@@ -483,6 +483,12 @@ class Wjs extends Atom {
     $instance               = $extension->instance($options);
     $extension->instances[] = $instance;
     return $instance;
+  }
+
+  function extensionPushOnce($extensionType, $extensionName, $options = array()) {
+    if (!$this->extensionIsPushed($extensionType, $extensionName)) {
+      return $this->extensionPush($extensionType, $extensionName, $options);
+    }
   }
 
   /**
@@ -757,7 +763,7 @@ class Wjs extends Atom {
     // to avoid to mix behavior with response package.
     $package = $this->responsePackage();
     foreach ($package as $type => $items) {
-      $this->extensionPush('WjsLoader', $type);
+      $this->extensionPushOnce('WjsLoader', $type);
     }
     // Reload response package with newly added loaders.
     $this->responsePackage(TRUE);

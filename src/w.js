@@ -821,4 +821,4 @@
       new W();
     }
   }, context);
-}(this));
+}(this || window));

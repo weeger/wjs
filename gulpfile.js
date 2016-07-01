@@ -11,7 +11,13 @@ var git = require('gulp-git');
 var sync = require('gulp-sync')(gulp);
 
 gulp.task('buildCoreJs', () => {
-  return gulp.src('src/*.js')
+  return gulp.src([
+      'src/w.js',
+      'src/loader.js',
+      'src/process.js',
+      'extension/WjsLoader/JsLink/JsLink.js',
+      'extension/WjsLoader/WjsLoader/WjsLoader.js'
+    ])
     .pipe(sourcemaps.init())
     .pipe(babel({
       presets: ['es2015']
@@ -29,7 +35,7 @@ gulp.task('watch', () => {
 
 // Define extra actions to perform on commit only.
 gulp.task('gitCommit', () => {
-  return gulp.src(['w.min.js','w.min.js.map'])
+  return gulp.src(['w.min.js', 'w.min.js.map'])
     .pipe(git.add());
 });
 

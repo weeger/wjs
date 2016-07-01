@@ -88,7 +88,6 @@ class Website extends Atom {
     }
     // Create w instance.
     $this->w             = $this->wInstance();
-    $this->w->subversion = 'source';
     // Load response specific libraries.
     if (!$this->isAjaxResponse()) {
       $settings = $this->optionGet('preprocess');
