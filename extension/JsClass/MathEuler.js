@@ -3,7 +3,7 @@
   /**
    * Imported from ThreeJS
    * https://github.com/mrdoob/three.js/
-   * @require JsClassStatic > Math
+   * @require JsSingleton > Math
    */
   W.register('JsClass', 'MathEuler', {
     __construct: function (x, y, z) {

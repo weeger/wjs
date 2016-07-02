@@ -1,7 +1,7 @@
 (function (W) {
   'use strict';
   /**
-   * @require JsClassStatic > MousePositionListener
+   * @require JsSingleton > MousePositionListener
    */
   W.register('Formula', 'MousePosition', {
     eventTrigger: true,

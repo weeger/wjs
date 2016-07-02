@@ -2,9 +2,9 @@
   'use strict';
   /**
    * Simulate scroll for interactive management.
-   * @require JsClassStatic > MousePositionListener
+   * @require JsSingleton > MousePositionListener
    */
-  W.register('JsClassStatic', 'ScrollManager', {
+  W.register('JsSingleton', 'ScrollManager', {
     scrollX: null,
     scrollY: null,
     scrollSpeedX: false,

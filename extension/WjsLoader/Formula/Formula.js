@@ -1,7 +1,7 @@
 /**
  * @require WjsLoader > JsClass
- * @require WjsLoader > JsClassStatic
- * @require JsClassStatic > FormulaManager
+ * @require WjsLoader > JsSingleton
+ * @require JsSingleton > FormulaManager
  */
 (function (W) {
   'use strict';
@@ -13,7 +13,7 @@
       // Call super method.
       this.w.loaders.JsClass.__destruct.call(this);
       // Remove manager.
-      this.w.destroy('JsClassStatic', 'FormulaManager', true);
+      this.w.destroy('JsSingleton', 'FormulaManager', true);
     },
 
     register: function (type, name, process, value) {

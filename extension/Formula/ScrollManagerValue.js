@@ -1,7 +1,7 @@
 (function (W) {
   'use strict';
   /**
-   * @require JsClassStatic > ScrollManager
+   * @require JsSingleton > ScrollManager
    */
   W.register('Formula', 'ScrollManagerValue', {
     eventTrigger: true,

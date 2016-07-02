@@ -3,7 +3,7 @@
   /**
    * Disable ctrl+s on hole page.
    */
-  W.register('JsClassStatic', 'DisableCtrlS', {
+  W.register('JsSingleton', 'DisableCtrlS', {
     __construct: function () {
       this.w.document.onkeydown = function (event) {
         // The property to obtain a keycode depends on browsers you are using.

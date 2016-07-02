@@ -1,6 +1,6 @@
 (function (W) {
   'use strict';
-  W.register('JsClassStatic', 'Math', {
+  W.register('JsSingleton', 'Math', {
     __construct: function () {
       this.degreeToRadiansFactor = Math.PI / 180;
       this.radianToDegreesFactor = Math.PI / 180;

@@ -3,7 +3,7 @@
   /**
    *
    */
-  W.register('JsClassStatic', 'webPageKeyboardChange', {
+  W.register('JsSingleton', 'webPageKeyboardChange', {
     __construct: function () {
       // Key press handler.
       this.w.window.addEventListener('keydown', this.eventKeydown.bind(this));

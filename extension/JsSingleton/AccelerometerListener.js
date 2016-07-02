@@ -1,6 +1,6 @@
 (function (W) {
   'use strict';
-  W.register('JsClassStatic', 'AccelerometerListener', {
+  W.register('JsSingleton', 'AccelerometerListener', {
     alpha: undefined,
     beta: undefined,
     gamma: undefined,

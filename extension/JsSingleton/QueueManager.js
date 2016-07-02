@@ -3,7 +3,7 @@
   /**
    * Simple callbacks queue management.
    */
-  W.register('JsClassStatic', 'QueueManager', {
+  W.register('JsSingleton', 'QueueManager', {
     __construct: function () {
       this.queues = {};
       this.queuesStarted = {};

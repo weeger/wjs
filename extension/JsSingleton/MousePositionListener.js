@@ -5,7 +5,7 @@
    * Allow to get mouse position at any time
    * without to create a dedicated event.
    */
-  W.register('JsClassStatic', 'MousePositionListener', {
+  W.register('JsSingleton', 'MousePositionListener', {
     clientX: undefined,
     clientY: undefined,
 

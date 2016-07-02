@@ -1,7 +1,5 @@
 <?php
 
-// TODO Rename to JsSingleton
-
 namespace Wjs5\Loader;
 
 use \Wjs5\Loader\JsClass;
@@ -9,11 +7,11 @@ use \Wjs5\Loader\JsClass;
 /**
  * Transmit a javascript singleton class.
  */
-class JsClassStatic extends JsClass {
+class JsSingleton extends JsClass {
   var $allowRequireJs = TRUE;
 }
 
-namespace Wjs5\Loader\JsClassStatic;
+namespace Wjs5\Loader\JsSingleton;
 
 class Extension extends \Wjs5\Loader\JsClass\Extension {
 

@@ -3,7 +3,7 @@
   /**
    * @require JsClass > Formula
    */
-  W.register('JsClassStatic', 'FormulaManager', {
+  W.register('JsSingleton', 'FormulaManager', {
     __construct: function () {
       this.formulas = {};
       this.w.formula = this;

@@ -1,6 +1,6 @@
 /**
  * @require JsScript > SchemeWebPage
- * @require JsClassStatic > QueueManager
+ * @require JsSingleton > QueueManager
  */
 (function (W) {
   'use strict';

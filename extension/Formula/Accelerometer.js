@@ -1,7 +1,7 @@
 (function (W) {
   'use strict';
   /**
-   * @require JsClassStatic > AccelerometerListener
+   * @require JsSingleton > AccelerometerListener
    */
   W.register('Formula', 'Accelerometer', {
     eventTrigger: true,

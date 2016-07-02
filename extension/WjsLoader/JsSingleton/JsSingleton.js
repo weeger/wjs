@@ -1,9 +1,6 @@
 (function (W) {
   'use strict';
-  /**
-   * TODO Rename to Singleton
-   */
-  W.register('WjsLoader', 'JsClassStatic', {
+  W.register('WjsLoader', 'JsSingleton', {
     loaderExtends: 'JsClass',
     wjsShortcuts: true,
 
