@@ -1,7 +1,18 @@
-.idea
-
 # NodeJS modules
 node_modules
+
+# Bower
+bower_components
+
+# InteliJ project folder
+.idea
+
+# =========================
+# Operating System Files
+# =========================
+
+# Windows
+# =========================
 
 # Windows image file caches
 Thumbs.db
@@ -19,10 +30,6 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
-# =========================
-# Operating System Files
-# =========================
-
 # OSX
 # =========================
 
@@ -32,7 +39,6 @@ $RECYCLE.BIN/
 
 # Icon must end with two \r
 Icon
-
 
 # Thumbnails
 ._*
