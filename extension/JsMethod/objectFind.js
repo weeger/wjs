@@ -10,8 +10,8 @@
    * @returns {*}
    */
   WjsProto.register('JsMethod', 'objectFind', function (path, object, result, value) {
-    var base = object, item,
-    // We use "arguments" variable to allow to defined false values.
+    let base = object, item,
+      // We use "arguments" variable to allow to defined false values.
       valueExists = (arguments.length === 4);
     path = path.split('.');
     while (path.length) {
@@ -30,15 +30,23 @@
         }
         base = base[item];
       }
-      // If we reach the last position, but it is not filled,
-      // we put the defined value, it let use this method
-      // to add values on an empty object.
-      else if (valueExists && path.length === 0) {
-        base[item] = value;
-        return base[item];
+      // We have a value to set.
+      else if (valueExists) {
+        // There is still a sub item in path,
+        // but at this point, parent location is
+        // already missing.
+        if (path.length > 0) {
+          // Create a parent container.
+          base[item] = {};
+          // Continue iteration.
+          base = base[item];
+        }
+        // If we reach the last position
+        // we put the defined value.
+        else if (path.length === 0) {
+          base[item] = value;
+          return base[item];
+        }
       }
-    }
-    // No value defined, and no value found.
-    return false;
   });
 }(WjsProto));
